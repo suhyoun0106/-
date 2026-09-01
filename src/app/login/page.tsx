@@ -25,11 +25,11 @@ export default function LoginPage() {
       result = await signup(formData)
     }
 
-    if (result?.error) {
-      setError(result.error)
+    if ((result as any)?.error) {
+      setError((result as any).error)
       setIsLoading(false)
-    } else if (result?.success) {
-      setSuccess(result.success)
+    } else if ((result as any)?.success) {
+      setSuccess((result as any).success)
       setIsLoading(false)
       // 회원가입 성공 시 폼 초기화를 위해 이메일/비밀번호/유저명은 비우는 게 좋지만 일단 여기서는 메시지만 표시
     }
