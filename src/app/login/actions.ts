@@ -31,6 +31,7 @@ export async function signup(formData: FormData) {
     options: {
       data: {
         username: formData.get('username') as string,
+        instagram_id: formData.get('instagram_id') as string,
       }
     }
   }

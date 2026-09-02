@@ -49,10 +49,16 @@ export default function LoginPage() {
         <form action={onSubmit}>
           <CardContent className="grid gap-4">
             {!isLogin && (
-              <div className="grid gap-2">
-                <Label htmlFor="username">사용자 이름</Label>
-                <Input id="username" name="username" type="text" required />
-              </div>
+              <>
+                <div className="grid gap-2">
+                  <Label htmlFor="username">@fan ID (사용할 새로운 아이디)</Label>
+                  <Input id="username" name="username" type="text" required />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="instagram_id">Instagram ID (기존 후원 연결용, 없으면 빈칸)</Label>
+                  <Input id="instagram_id" name="instagram_id" type="text" />
+                </div>
+              </>
             )}
             <div className="grid gap-2">
               <Label htmlFor="email">이메일</Label>

@@ -21,9 +21,11 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
     .from('posts')
     .select(`
       *,
-      profiles (id, username, avatar_url),
+      profiles!posts_user_id_fkey (id, username, avatar_url, instagram_id, is_instagram_public),
       post_images (id, image_url, position),
-      likes (id, user_id)
+      likes (id, user_id),
+      shares (id, user_id),
+      comments (id)
     `)
     .eq('id', postId)
     .single()
@@ -33,19 +35,23 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-8 px-4 grid grid-cols-1 md:grid-cols-[1.5fr_1fr] gap-8">
-      {/* 왼쪽: 게시물 본문 (피드 포스트 재사용) */}
-      <div className="w-full">
-        <FeedPost post={post} currentUserId={user?.id} />
-      </div>
+    <div className="max-w-4xl mx-auto py-8 px-4">
+      <div className="flex flex-col md:flex-row gap-8 items-start">
+        {/* 왼쪽: 게시물 본문 (피드 포스트 재사용) */}
+        <div className="w-full md:w-[60%] shrink-0">
+          <FeedPost post={post} currentUserId={user?.id} showBackButton={true} />
+        </div>
 
       {/* 오른쪽 (또는 아래): 댓글 섹션 */}
-      <div className="w-full h-full min-h-[500px] border rounded-lg bg-card overflow-hidden flex flex-col">
-        <div className="p-4 border-b font-bold">
+      <div className="w-full md:w-[40%] md:sticky md:top-24 flex flex-col border rounded-lg bg-card overflow-hidden h-[500px] md:h-[calc(100vh-120px)]">
+        <div className="p-4 border-b font-bold shrink-0">
           댓글
         </div>
-        <CommentsSection postId={postId} currentUserId={user?.id} postOwnerId={post.user_id} />
+        <div className="flex-1 overflow-hidden relative min-h-0">
+          <CommentsSection postId={postId} currentUserId={user?.id} postOwnerId={post.user_id} />
+        </div>
       </div>
+    </div>
     </div>
   )
 }

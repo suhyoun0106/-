@@ -6,7 +6,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Search, Send, UserPlus, LogOut } from 'lucide-react'
+import { LogOut, Send, UserPlus, ArrowLeft } from 'lucide-react'
+import { Message, MessageContent } from '@/components/ui/message'
+import { Bubble, BubbleContent } from '@/components/ui/bubble'
+import { Attachment, AttachmentMedia, AttachmentContent, AttachmentTitle, AttachmentDescription, AttachmentActions, AttachmentAction } from '@/components/ui/attachment'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { usePresence } from '@/components/presence-provider'
@@ -177,7 +180,7 @@ export default function ChatUI({ currentUser }: { currentUser: any }) {
   return (
     <div className="flex w-full h-full border rounded-lg overflow-hidden bg-background">
       {/* Sidebar */}
-      <div className="w-80 border-r flex flex-col bg-card">
+      <div className={`w-full md:w-80 border-r flex-col bg-card ${selectedFriend ? 'hidden md:flex' : 'flex'}`}>
         <div className="p-4 border-b flex items-center justify-between">
           <h2 className="font-bold text-xl">{currentUser?.username}</h2>
           <Button variant="ghost" size="icon" onClick={handleLogout}>
@@ -229,10 +232,13 @@ export default function ChatUI({ currentUser }: { currentUser: any }) {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col bg-background">
+      <div className={`flex-1 flex-col bg-background ${!selectedFriend ? 'hidden md:flex' : 'flex'}`}>
         {selectedFriend ? (
           <>
             <div className="p-4 border-b flex items-center gap-3 bg-card">
+              <Button variant="ghost" size="icon" className="md:hidden shrink-0" onClick={() => setSelectedFriend(null)}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
               <Avatar className="h-10 w-10">
                 <AvatarFallback>{selectedFriend.username.charAt(0).toUpperCase()}</AvatarFallback>
               </Avatar>
@@ -240,19 +246,19 @@ export default function ChatUI({ currentUser }: { currentUser: any }) {
             </div>
             
             <ScrollArea className="flex-1 p-4">
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-6 py-4">
                 {messages.map((msg, idx) => {
                   const isMe = msg.sender_id === currentUser.id
                   return (
-                    <div key={msg.id || idx} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                      <div
-                        className={`max-w-[70%] px-4 py-2 rounded-2xl ${
-                          isMe ? 'bg-primary text-primary-foreground rounded-br-sm' : 'bg-secondary text-secondary-foreground rounded-bl-sm'
-                        }`}
-                      >
-                        {msg.content}
-                      </div>
-                    </div>
+                    <Message key={msg.id || idx} align={isMe ? 'end' : 'start'}>
+                      <MessageContent>
+                        <Bubble variant={isMe ? 'default' : 'secondary'}>
+                          <BubbleContent>
+                            {msg.content}
+                          </BubbleContent>
+                        </Bubble>
+                      </MessageContent>
+                    </Message>
                   )
                 })}
                 <div ref={messagesEndRef} />

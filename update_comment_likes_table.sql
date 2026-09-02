@@ -1,0 +1,1 @@
+ALTER TABLE public.comment_likes ADD COLUMN IF NOT EXISTS is_dislike BOOLEAN DEFAULT FALSE;
