@@ -13,7 +13,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
 import { toast } from 'sonner'
-import { ThumbsUp, ThumbsDown, MoreVertical, ChevronDown, ChevronUp, Menu } from 'lucide-react'
+import { ThumbsUp, ThumbsDown, MoreVertical, ChevronDown, ChevronUp, Menu, Image as ImageIcon, MonitorPlay, Type } from 'lucide-react'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { formatTimeAgo } from '@/lib/format-time'
 
 export default function CommentsSection({ 
@@ -29,6 +30,8 @@ export default function CommentsSection({
   const [newComment, setNewComment] = useState('')
   const [replyTo, setReplyTo] = useState<{ id: string, username: string, targetUserId: string } | null>(null)
   const [expandedReplies, setExpandedReplies] = useState<Record<string, boolean>>({})
+  const [isInputExpanded, setIsInputExpanded] = useState(false)
+  const [sortType, setSortType] = useState<'top' | 'newest'>('top')
   
   const handleReplyClick = (parentId: string, targetUsername: string, targetUserId: string) => {
     setReplyTo({ id: parentId, username: targetUsername, targetUserId })
@@ -172,6 +175,11 @@ export default function CommentsSection({
       }
     }
 
+    // sortType이 newest면 무조건 최신순
+    if (sortType === 'newest') {
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    }
+
     // 2. 좋아요 점수 (순수 좋아요 수 = 좋아요 - 싫어요)
     const aLikes = a.comment_likes?.filter((l: any) => !l.is_dislike).length || 0
     const aDislikes = a.comment_likes?.filter((l: any) => l.is_dislike).length || 0
@@ -192,49 +200,92 @@ export default function CommentsSection({
   return (
     <div className="flex flex-col w-full text-foreground bg-background">
       
-      {/* 1. 상단: 댓글 개수 및 정렬 */}
-      <div className="flex items-center gap-6 mb-6">
-        <h2 className="text-xl font-bold">{comments.length} Comments</h2>
-        <button className="flex items-center gap-2 text-sm font-semibold hover:bg-secondary/50 px-2 py-1 rounded-lg transition-colors">
-          <Menu className="w-5 h-5" />
-          Sort by
-        </button>
-      </div>
-
-      {/* 2. 댓글 입력창 */}
-      <div className="flex gap-4 mb-8">
-        {/* 현재 사용자 아바타 (임시) */}
-        <Avatar className="h-10 w-10 shrink-0">
-          <AvatarImage src="" />
-          <AvatarFallback className="bg-blue-500 text-white font-bold">ME</AvatarFallback>
-        </Avatar>
-        
-        <div className="flex-1">
-          {replyTo && (
-            <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground mb-2">
-              <span>@{replyTo.username} 님에게 답글 작성 중...</span>
-              <button onClick={() => setReplyTo(null)} className="hover:text-foreground">✕</button>
-            </div>
-          )}
-          <form onSubmit={submitComment} className="flex flex-col gap-2">
-            <input 
-              placeholder="Add a comment..." 
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              className="w-full pb-1 bg-transparent border-b border-border/50 focus:border-foreground focus:outline-none transition-colors text-sm"
-            />
-            {newComment.trim() && (
-              <div className="flex justify-end gap-2 mt-2">
-                <Button type="button" variant="ghost" size="sm" onClick={() => {setNewComment(''); setReplyTo(null);}} className="rounded-full hover:bg-secondary font-semibold">
-                  Cancel
+      {/* 2. 댓글 입력창 (클릭 시 확장되는 구조) */}
+      <div className="mb-8">
+        {replyTo && (
+          <div className="flex items-center justify-between bg-secondary/40 p-2 px-4 rounded-t-xl text-xs font-semibold mb-1">
+            <span>@{replyTo.username} 님에게 답글 작성 중...</span>
+            <button onClick={() => {setReplyTo(null); setIsInputExpanded(false)}} className="text-muted-foreground hover:text-foreground">✕ 취소</button>
+          </div>
+        )}
+        <form 
+          onSubmit={(e) => {
+            submitComment(e);
+            setIsInputExpanded(false);
+          }}
+          className={`flex flex-col border transition-all duration-200 ${isInputExpanded ? 'rounded-2xl border-foreground/50 bg-background shadow-sm' : 'rounded-full border-border bg-background hover:bg-secondary/20'} ${replyTo ? 'rounded-tl-none rounded-tr-none' : ''}`}
+        >
+          <textarea
+            rows={isInputExpanded ? 3 : 1}
+            placeholder="대화에 참여해보세요"
+            value={newComment}
+            onFocus={() => setIsInputExpanded(true)}
+            onChange={(e) => setNewComment(e.target.value)}
+            className={`w-full bg-transparent focus:outline-none resize-none px-4 ${isInputExpanded ? 'py-3' : 'py-3 line-clamp-1'}`}
+            style={{ minHeight: isInputExpanded ? '80px' : '44px' }}
+          />
+          
+          {isInputExpanded && (
+            <div className="flex items-center justify-between px-3 pb-3 pt-1">
+              <div className="flex items-center gap-1 text-[#FF4500]">
+                <button type="button" className="p-1.5 hover:bg-secondary rounded-full"><ImageIcon className="w-5 h-5" /></button>
+                <button type="button" className="p-1.5 hover:bg-secondary rounded-full"><MonitorPlay className="w-5 h-5" /></button>
+                <button type="button" className="p-1.5 hover:bg-secondary rounded-full text-sm font-bold px-2">GIF</button>
+                <button type="button" className="p-1.5 hover:bg-secondary rounded-full"><Type className="w-5 h-5" /></button>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => {
+                    setNewComment('');
+                    setReplyTo(null);
+                    setIsInputExpanded(false);
+                  }} 
+                  className="rounded-full bg-secondary/50 hover:bg-secondary font-bold text-[#FF4500]"
+                >
+                  취소
                 </Button>
-                <Button type="submit" size="sm" className="rounded-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4">
-                  Comment
+                <Button 
+                  type="submit" 
+                  size="sm" 
+                  disabled={!newComment.trim()}
+                  className="rounded-full bg-[#8B2C10] hover:bg-[#6e220c] text-white font-bold px-5 disabled:opacity-50"
+                >
+                  댓글
                 </Button>
               </div>
-            )}
-          </form>
-        </div>
+            </div>
+          )}
+        </form>
+      </div>
+
+      {/* 1. 상단: 댓글 개수 및 정렬 (유튜브 스타일 Dropdown) */}
+      <div className="flex items-center gap-6 mb-6">
+        <h2 className="text-xl font-bold">{comments.length} Comments</h2>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="flex items-center gap-2 text-sm font-bold hover:bg-secondary/50 px-3 py-1.5 rounded-lg transition-colors outline-none">
+            <Menu className="w-5 h-5" />
+            Sort by
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-[300px] bg-[#212121] text-white border-none rounded-xl shadow-xl p-0 py-2">
+            <DropdownMenuItem 
+              onClick={() => setSortType('top')}
+              className={`flex flex-col items-start px-4 py-3 cursor-pointer ${sortType === 'top' ? 'bg-[#3d3d3d]' : 'hover:bg-[#3d3d3d]'}`}
+            >
+              <div className="font-semibold text-[15px] mb-1">Top</div>
+              <div className="text-zinc-400 text-[13px]">Show featured comments</div>
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => setSortType('newest')}
+              className={`flex flex-col items-start px-4 py-3 cursor-pointer ${sortType === 'newest' ? 'bg-[#3d3d3d]' : 'hover:bg-[#3d3d3d]'}`}
+            >
+              <div className="font-semibold text-[15px] mb-1">Newest</div>
+              <div className="text-zinc-400 text-[13px]">Show recent comments, including potential spam</div>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* 3. 댓글 목록 */}
