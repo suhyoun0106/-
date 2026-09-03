@@ -77,8 +77,8 @@ export default function SearchPage() {
       setIsSearching(true)
       const { data } = await supabase
         .from('profiles')
-        .select('id, username, avatar_url, is_claimed, total_donations')
-        .ilike('username', `%${q}%`)
+        .select('id, username, avatar_url, is_claimed, total_donations, instagram_id')
+        .or(`username.ilike.%${q}%,instagram_id.ilike.%${q}%`)
         .order('total_donations', { ascending: false, nullsFirst: false })
         .limit(5)
       

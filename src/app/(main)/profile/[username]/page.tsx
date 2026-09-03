@@ -200,6 +200,13 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
       
       if (error) throw error
       
+      if (editInstagramId) {
+        await supabase.rpc('merge_shadow_profile', {
+          real_profile_id: profile.id,
+          insta_id: editInstagramId
+        })
+      }
+      
       toast.success('프로필이 성공적으로 업데이트되었습니다.')
       setIsEditProfileOpen(false)
       loadProfileAndData()
