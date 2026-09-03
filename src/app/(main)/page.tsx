@@ -94,52 +94,114 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
       comments (id)
     `)
 
+  // The IDs the current user sponsors (directly)
+  const sponsoredIds = sponsoredCommunities.map(c => c.id)
+  // Primary feed IDs: myself + sponsored creators
+  const primaryIds = user ? [user.id, ...sponsoredIds] : []
+
   if (communityId) {
+    // Specific community view: no tag logic
     query = query.eq('community_id', communityId)
   } else if (user) {
-    // 전체 보기일 때는 내가 후원한 커뮤니티 + 내 자신의 커뮤니티 글만 보이도록 필터링
-    const allowedIds = [user.id, ...sponsoredCommunities.map(c => c.id)]
-    query = query.in('community_id', allowedIds)
+    query = query.in('community_id', primaryIds)
   }
   
   if (searchQuery) {
-    // PostgREST 문법에서 쉼표(,) 충돌을 피하기 위해 검색어를 ""로 감싸줍니다.
     const safeQuery = searchQuery.replace(/"/g, '""')
     query = query.or(`title.ilike."%${safeQuery}%",content.ilike."%${safeQuery}%"`)
   }
 
   const { data: rawPosts, error } = await query.order('created_at', { ascending: false })
 
-  // Hacker News (Gravity) 알고리즘을 이용한 피드 랭킹 적용
-  let posts = rawPosts || [];
-  if (posts.length > 0) {
-    const gravity = 1.8; // Gravity 상수 (조절 가능)
-    
-    posts = posts.map(post => {
-      // 행동별 가중치 적용
-      const views = post.view_count || 0; // 아직 view_count 컬럼이 없다면 0으로 처리
-      const likes = post.likes ? post.likes.length : 0;
-      const comments = post.comments ? post.comments.length : 0;
-      const shares = post.shares ? post.shares.length : 0;
-      
-      const points = (views * 1) + (likes * 5) + (comments * 10) + (shares * 20);
-      
-      // 게시된 이후 흐른 시간 (시간 단위)
-      const hoursSince = (Date.now() - new Date(post.created_at).getTime()) / (1000 * 60 * 60);
-      
-      // 점수 = (추천수 - 1) / (게시된 이후 흐른 시간 + 2)^Gravity
-      const score = (points - 1) / Math.pow((hoursSince + 2), gravity);
-      
-      return { ...post, score };
-    });
+  // ── 7:3 Tag-based related content (no communityId, logged in, has sponsored creators) ──
+  let relatedPosts: any[] = []
+  if (!communityId && user && sponsoredIds.length > 0 && !searchQuery) {
+    // 1. Gather tags from all sponsored creators
+    const { data: tagRows } = await supabase
+      .from('creator_tags')
+      .select('tag, profile_id')
+      .in('profile_id', sponsoredIds)
 
-    // 점수 순으로 내림차순 정렬
-    posts.sort((a, b) => b.score - a.score);
+    if (tagRows && tagRows.length > 0) {
+      const myTags = [...new Set(tagRows.map(r => r.tag))]
+
+      // 2. Find OTHER creators with overlapping tags (not already in primaryIds)
+      const { data: relatedTagRows } = await supabase
+        .from('creator_tags')
+        .select('profile_id')
+        .in('tag', myTags)
+        .not('profile_id', 'in', `(${primaryIds.join(',')})`)
+
+      if (relatedTagRows && relatedTagRows.length > 0) {
+        const relatedCreatorIds = [...new Set(relatedTagRows.map(r => r.profile_id))]
+
+        // 3. Fetch their posts
+        const { data: relatedRaw } = await supabase
+          .from('posts')
+          .select(`
+            *,
+            profiles!posts_user_id_fkey (id, username, avatar_url, instagram_id, is_instagram_public),
+            post_images (id, image_url, position),
+            likes (id, user_id),
+            shares (id, user_id),
+            comments (id)
+          `)
+          .in('community_id', relatedCreatorIds)
+          .order('created_at', { ascending: false })
+          .limit(30)
+
+        if (relatedRaw) relatedPosts = relatedRaw
+      }
+    }
+  }
+
+  // Ranking helper
+  const rankPosts = (arr: any[]) => {
+    const gravity = 1.8
+    return arr.map(post => {
+      const likes = post.likes?.length || 0
+      const comments = post.comments?.length || 0
+      const shares = post.shares?.length || 0
+      const views = post.view_count || 0
+      const points = views * 1 + likes * 5 + comments * 10 + shares * 20
+      const hoursSince = (Date.now() - new Date(post.created_at).getTime()) / (1000 * 60 * 60)
+      const score = (points - 1) / Math.pow(hoursSince + 2, gravity)
+      return { ...post, score }
+    }).sort((a, b) => b.score - a.score)
+  }
+
+  // Hacker News (Gravity) 알고리즘을 이용한 피드 랭킹 적용
+  let primaryPosts = rankPosts(rawPosts || [])
+  let relatedRanked = rankPosts(relatedPosts)
+
+  // 7:3 interleaving: for every 10 posts, 7 primary + 3 related
+  let posts: any[] = []
+  if (relatedRanked.length > 0) {
+    const primaryDeduped = primaryPosts
+    const relatedDeduped = relatedRanked.filter(r => !primaryDeduped.find(p => p.id === r.id))
+    
+    const totalSlots = Math.max(primaryDeduped.length + Math.ceil(primaryDeduped.length * 3 / 7), 1)
+    let pi = 0, ri = 0
+    for (let i = 0; i < totalSlots; i++) {
+      // Every 10 slots: positions 0-6 → primary, 7-9 → related
+      const slotInGroup = i % 10
+      if (slotInGroup < 7) {
+        if (pi < primaryDeduped.length) posts.push(primaryDeduped[pi++])
+      } else {
+        if (ri < relatedDeduped.length) posts.push(relatedDeduped[ri++])
+        else if (pi < primaryDeduped.length) posts.push(primaryDeduped[pi++])
+      }
+    }
+    // Append any remaining primary posts
+    while (pi < primaryDeduped.length) posts.push(primaryDeduped[pi++])
+  } else {
+    posts = primaryPosts
   }
 
   if (error) {
     console.error('게시물 불러오기 에러:', error)
   }
+
 
   return (
     <div className="max-w-2xl mx-auto py-8 px-4 flex flex-col gap-8">

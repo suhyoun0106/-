@@ -42,6 +42,13 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
   
   const [currentMonthTotal, setCurrentMonthTotal] = useState(0)
   const [currentMonthBackers, setCurrentMonthBackers] = useState(0)
+
+  // Tag system state
+  const [tags, setTags] = useState<any[]>([])
+  const [newTagInput, setNewTagInput] = useState('')
+  const [isAddingTag, setIsAddingTag] = useState(false)
+  const [editingTagId, setEditingTagId] = useState<string | null>(null)
+  const [editingTagValue, setEditingTagValue] = useState('')
   
   const supabase = createClient()
   const router = useRouter()
@@ -54,6 +61,15 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
       }
     })
   }, [username])
+
+  async function loadTags(profileId: string) {
+    const { data } = await supabase
+      .from('creator_tags')
+      .select('*')
+      .eq('profile_id', profileId)
+      .order('created_at', { ascending: true })
+    if (data) setTags(data)
+  }
 
   async function loadProfileAndData() {
     let { data: p } = await supabase.from('profiles').select('*').eq('username', username).single()
@@ -75,6 +91,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
     }
     
     setProfile(p)
+    loadTags(p.id)
 
     // Load posts if any
     const { data: postData, error: postError } = await supabase
@@ -250,10 +267,51 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
     toast.success(`${profile.username}님과 메시지를 시작합니다!`)
   }
 
+  async function handleAddTag() {
+    const trimmed = newTagInput.trim()
+    if (!trimmed || !profile) return
+    if (tags.length >= 5) { toast.error('태그는 최대 5개까지 추가할 수 있습니다.'); return }
+    const { error } = await supabase.from('creator_tags').insert({
+      profile_id: profile.id,
+      tag: trimmed,
+      created_by: currentUser?.id || null
+    })
+    if (error) {
+      if (error.code === '23505') toast.error('이미 존재하는 태그입니다.')
+      else toast.error('태그 추가 실패: ' + error.message)
+    } else {
+      setNewTagInput('')
+      setIsAddingTag(false)
+      loadTags(profile.id)
+    }
+  }
+
+  async function handleDeleteTag(tagId: string) {
+    const { error } = await supabase.from('creator_tags').delete().eq('id', tagId)
+    if (error) toast.error('태그 삭제 실패')
+    else loadTags(profile.id)
+  }
+
+  async function handleEditTag(tagId: string) {
+    const trimmed = editingTagValue.trim()
+    if (!trimmed) return
+    // delete old and insert new
+    await supabase.from('creator_tags').delete().eq('id', tagId)
+    const { error } = await supabase.from('creator_tags').insert({
+      profile_id: profile.id,
+      tag: trimmed,
+      created_by: currentUser?.id || null
+    })
+    if (error) toast.error('태그 수정 실패')
+    else { setEditingTagId(null); loadTags(profile.id) }
+  }
+
   if (!profile) return <div className="p-8 text-center">Loading profile...</div>
 
   const isUnclaimed = profile.is_claimed === false
   const isMe = currentUser?.id === profile.id
+  // Tags can be edited: unclaimed profiles = anyone logged in; claimed profiles = owner only
+  const canEditTags = !!currentUser && (isUnclaimed || isMe)
 
   return (
     <div className="w-full max-w-5xl mx-auto min-h-screen bg-[#fcfcfd] md:p-8">
@@ -523,6 +581,73 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Tag / Category Section */}
+      <div className="bg-white border-x border-b rounded-b-2xl px-8 py-5 shadow-sm">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider mr-1">카테고리</span>
+          
+          {tags.map(t => (
+            <div key={t.id} className="group flex items-center">
+              {editingTagId === t.id ? (
+                <div className="flex items-center gap-1">
+                  <input
+                    autoFocus
+                    value={editingTagValue}
+                    onChange={e => setEditingTagValue(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') handleEditTag(t.id); if (e.key === 'Escape') setEditingTagId(null) }}
+                    className="border border-primary rounded-full px-3 py-0.5 text-sm font-medium outline-none w-28"
+                  />
+                  <button onClick={() => handleEditTag(t.id)} className="text-xs text-primary font-bold">✓</button>
+                  <button onClick={() => setEditingTagId(null)} className="text-xs text-muted-foreground">✕</button>
+                </div>
+              ) : (
+                <span
+                  className={`inline-flex items-center gap-1.5 bg-secondary/60 hover:bg-secondary text-foreground text-sm font-semibold px-3 py-1 rounded-full transition-colors ${canEditTags ? 'cursor-pointer' : ''}`}
+                  onClick={() => { if (canEditTags) { setEditingTagId(t.id); setEditingTagValue(t.tag) } }}
+                >
+                  #{t.tag}
+                  {canEditTags && (
+                    <button
+                      className="ml-0.5 text-muted-foreground hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 text-xs leading-none"
+                      onClick={e => { e.stopPropagation(); handleDeleteTag(t.id) }}
+                    >✕</button>
+                  )}
+                </span>
+              )}
+            </div>
+          ))}
+
+          {/* Add tag button or input */}
+          {canEditTags && tags.length < 5 && (
+            isAddingTag ? (
+              <div className="flex items-center gap-1">
+                <input
+                  autoFocus
+                  value={newTagInput}
+                  onChange={e => setNewTagInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') handleAddTag(); if (e.key === 'Escape') { setIsAddingTag(false); setNewTagInput('') } }}
+                  placeholder="태그 입력..."
+                  className="border border-primary rounded-full px-3 py-0.5 text-sm font-medium outline-none w-28"
+                />
+                <button onClick={handleAddTag} className="text-xs text-primary font-bold">✓</button>
+                <button onClick={() => { setIsAddingTag(false); setNewTagInput('') }} className="text-xs text-muted-foreground">✕</button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setIsAddingTag(true)}
+                className="inline-flex items-center gap-1 text-xs font-bold text-primary border border-primary/30 hover:border-primary hover:bg-primary/5 px-3 py-1 rounded-full transition-colors"
+              >
+                + 카테고리
+              </button>
+            )
+          )}
+
+          {tags.length === 0 && !canEditTags && (
+            <span className="text-xs text-muted-foreground">아직 카테고리가 없습니다.</span>
+          )}
+        </div>
+      </div>
 
       {/* Content Area */}
       <div className="grid md:grid-cols-3 gap-8 mt-8">

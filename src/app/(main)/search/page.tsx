@@ -13,6 +13,7 @@ export default function SearchPage() {
   const [leaderboard, setLeaderboard] = useState<any[]>([])
   const [liveStream, setLiveStream] = useState<any[]>([])
   const [subscribedIds, setSubscribedIds] = useState<string[]>([])
+  const [hotTrend, setHotTrend] = useState<any[]>([])
   
   const router = useRouter()
   const supabase = createClient()
@@ -32,6 +33,7 @@ export default function SearchPage() {
           const ids = Array.from(new Set(data.map(d => d.receiver_id)))
           setSubscribedIds(ids)
           fetchLiveStream(ids)
+          fetchHotTrend(ids, user.id)
         } else {
           fetchLiveStream([])
         }
@@ -89,6 +91,42 @@ export default function SearchPage() {
     if (data) {
       setLiveStream(data)
     }
+  }
+
+  async function fetchHotTrend(subscribedCreatorIds: string[], currentUserId: string) {
+    if (subscribedCreatorIds.length === 0) return
+
+    // 1. Collect tags from my subscribed creators
+    const { data: tagRows } = await supabase
+      .from('creator_tags')
+      .select('tag')
+      .in('profile_id', subscribedCreatorIds)
+
+    if (!tagRows || tagRows.length === 0) return
+
+    const myTags = [...new Set(tagRows.map(r => r.tag))]
+
+    // 2. Find creators with matching tags (exclude myself and already-subscribed)
+    const excludeIds = [currentUserId, ...subscribedCreatorIds]
+    const { data: relatedTagRows } = await supabase
+      .from('creator_tags')
+      .select('profile_id')
+      .in('tag', myTags)
+      .not('profile_id', 'in', `(${excludeIds.join(',')})`)
+
+    if (!relatedTagRows || relatedTagRows.length === 0) return
+
+    const relatedIds = [...new Set(relatedTagRows.map(r => r.profile_id))]
+
+    // 3. Fetch those profiles sorted by total_donations desc
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, username, avatar_url, total_donations, is_claimed')
+      .in('id', relatedIds)
+      .order('total_donations', { ascending: false })
+      .limit(5)
+
+    if (profiles) setHotTrend(profiles)
   }
 
   const handleSearch = (e: React.FormEvent) => {
@@ -208,6 +246,46 @@ export default function SearchPage() {
           </ScrollArea>
         </div>
       </div>
+
+      {/* Hot Trend Section */}
+      {hotTrend.length > 0 && (
+        <div className="bg-card rounded-2xl p-6 shadow-sm border mt-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="bg-orange-500/10 p-2 rounded-lg">
+              <span className="text-orange-500 text-xl">🔥</span>
+            </div>
+            <div>
+              <h2 className="text-xl font-bold">Hot Trend</h2>
+              <p className="text-sm text-muted-foreground">내가 후원한 크리에이터와 비슷한 태그를 가진 인기 크리에이터</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            {hotTrend.map((creator, idx) => (
+              <div
+                key={creator.id}
+                className="flex flex-col items-center gap-2 cursor-pointer group p-3 rounded-xl hover:bg-secondary/30 transition-colors"
+                onClick={() => router.push(`/profile/${creator.username}`)}
+              >
+                <div className="relative">
+                  <Avatar className="h-16 w-16 border-2 border-border group-hover:border-primary transition-colors">
+                    <AvatarImage src={creator.avatar_url || ''} />
+                    <AvatarFallback className="text-lg font-bold bg-secondary">
+                      {creator.username.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  {idx === 0 && (
+                    <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">HOT</span>
+                  )}
+                </div>
+                <div className="text-center">
+                  <div className="font-bold text-sm truncate max-w-[90px]">{creator.username}</div>
+                  <div className="text-xs text-muted-foreground">{creator.total_donations ? creator.total_donations.toLocaleString() : 0} ₩</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
