@@ -206,6 +206,45 @@ export default function SearchPage() {
         )}
       </form>
 
+      {/* Hot Trend Section */}
+      {hotTrend.length > 0 && (
+        <div className="bg-card rounded-2xl p-6 shadow-sm border mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="bg-orange-500/10 p-2 rounded-lg">
+              <span className="text-orange-500 text-xl">🔥</span>
+            </div>
+            <div>
+              <h2 className="text-xl font-bold">Hot Trend</h2>
+              <p className="text-sm text-muted-foreground">내가 후원한 크리에이터와 비슷한 태그를 가진 인기 크리에이터</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            {hotTrend.map((creator, idx) => (
+              <div
+                key={creator.id}
+                className="flex flex-col items-center gap-2 cursor-pointer group p-3 rounded-xl hover:bg-secondary/30 transition-colors"
+                onClick={() => router.push(`/profile/${creator.username}`)}
+              >
+                <div className="relative">
+                  <Avatar className="h-16 w-16 border-2 border-border group-hover:border-primary transition-colors">
+                    <AvatarImage src={creator.avatar_url || ''} />
+                    <AvatarFallback className="text-lg font-bold bg-secondary">
+                      {creator.username.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  {idx === 0 && (
+                    <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">HOT</span>
+                  )}
+                </div>
+                <div className="text-center">
+                  <div className="font-bold text-sm truncate max-w-[90px]">{creator.username}</div>
+                  <div className="text-xs text-muted-foreground">{creator.total_donations ? creator.total_donations.toLocaleString() : 0} ₩</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="grid md:grid-cols-2 gap-8 flex-1 min-h-0">
         {/* Leaderboard */}
         <div className="bg-card rounded-2xl p-6 shadow-sm border flex flex-col">
@@ -304,45 +343,6 @@ export default function SearchPage() {
         </div>
       </div>
 
-      {/* Hot Trend Section */}
-      {hotTrend.length > 0 && (
-        <div className="bg-card rounded-2xl p-6 shadow-sm border mt-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="bg-orange-500/10 p-2 rounded-lg">
-              <span className="text-orange-500 text-xl">🔥</span>
-            </div>
-            <div>
-              <h2 className="text-xl font-bold">Hot Trend</h2>
-              <p className="text-sm text-muted-foreground">내가 후원한 크리에이터와 비슷한 태그를 가진 인기 크리에이터</p>
-            </div>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-            {hotTrend.map((creator, idx) => (
-              <div
-                key={creator.id}
-                className="flex flex-col items-center gap-2 cursor-pointer group p-3 rounded-xl hover:bg-secondary/30 transition-colors"
-                onClick={() => router.push(`/profile/${creator.username}`)}
-              >
-                <div className="relative">
-                  <Avatar className="h-16 w-16 border-2 border-border group-hover:border-primary transition-colors">
-                    <AvatarImage src={creator.avatar_url || ''} />
-                    <AvatarFallback className="text-lg font-bold bg-secondary">
-                      {creator.username.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  {idx === 0 && (
-                    <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">HOT</span>
-                  )}
-                </div>
-                <div className="text-center">
-                  <div className="font-bold text-sm truncate max-w-[90px]">{creator.username}</div>
-                  <div className="text-xs text-muted-foreground">{creator.total_donations ? creator.total_donations.toLocaleString() : 0} ₩</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
   )
 }
