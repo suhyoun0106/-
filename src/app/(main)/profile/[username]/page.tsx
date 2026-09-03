@@ -451,7 +451,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
             </div>
 
             {/* Tag / Category Section - Moved above buttons */}
-            <div className="flex flex-wrap items-center gap-2 mb-6">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
               {tags.map(t => (
                 <div key={t.id} className="group flex items-center">
                   {editingTagId === t.id ? (
@@ -515,7 +515,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
               )}
             </div>
 
-<div className="flex flex-nowrap gap-2 md:gap-3 items-center mt-2 w-full overflow-x-auto pb-2 scrollbar-hide">
+<div className="flex flex-nowrap gap-2 md:gap-3 items-center w-full overflow-x-auto pb-2 scrollbar-hide">
               {isMe ? (
                 <>
                   <Button className="shrink-0 bg-primary hover:opacity-90 text-primary-foreground font-bold rounded-full h-11 px-5" onClick={() => {
@@ -729,7 +729,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
       {/* Content Area */}
       <div className="grid md:grid-cols-3 gap-8 mt-8">
         <div className={currentMonthTotal > 0 ? "md:col-span-2" : "col-span-1 md:col-span-3"}>
-          <div className="flex items-center gap-2 mb-6 border-b pb-4 overflow-x-auto scrollbar-hide">
+          <div className="flex items-center gap-2 mb-2 border-b pb-4 overflow-x-auto scrollbar-hide">
             <button 
               onClick={() => setActiveTab('posts')}
               className={`shrink-0 px-4 py-2 rounded-full font-bold text-sm transition-colors ${activeTab === 'posts' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/50'}`}
