@@ -415,9 +415,11 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
     <div className="w-full max-w-4xl mx-auto min-h-screen bg-background pb-8">
       {/* Banner / Header */}
       <div className="p-6 md:p-8">
-        <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start">
-          <div className="relative group shrink-0 self-center md:self-start">
-            <Avatar className="h-28 w-28 md:h-36 md:w-36 border border-border shadow-sm">
+        <div className="grid grid-cols-[auto_1fr] gap-x-5 md:gap-x-10 gap-y-4 md:gap-y-6">
+          
+          {/* Avatar (Col 1, Row 1 on mobile / Row 1-2 on desktop) */}
+          <div className="relative group shrink-0 self-start md:row-span-2">
+            <Avatar className="h-20 w-20 md:h-36 md:w-36 border border-border shadow-sm">
               <AvatarImage src={profile.avatar_url || ''} />
               <AvatarFallback>{profile.username.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
@@ -438,10 +440,11 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
             )}
           </div>
           
-          <div className="flex-1 w-full flex flex-col gap-4 mt-2 md:mt-0">
+          {/* Username & Stats (Col 2, Row 1) */}
+          <div className="flex flex-col gap-2 md:gap-4 justify-center md:justify-start pt-1 md:pt-0">
             {/* Top Row: Username and Secondary Name */}
             <div className="flex flex-col gap-1">
-              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">{profile.username}</h1>
+              <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight">{profile.username}</h1>
               <div className="flex items-center gap-2">
                 {profile.instagram_id && profile.is_instagram_public ? (
                   <span className="text-muted-foreground font-medium text-sm md:text-base">@{profile.instagram_id}</span>
@@ -456,6 +459,10 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
               </div>
             </div>
 
+            </div>
+
+          {/* Bio, Tags, Buttons (Col 1-2 on mobile, Col 2 on desktop) */}
+          <div className="col-span-2 md:col-span-1 flex flex-col w-full">
             {/* Bio Row */}
             <div className="text-sm md:text-base max-w-lg whitespace-pre-wrap mb-2">
               {profile.bio ? (
