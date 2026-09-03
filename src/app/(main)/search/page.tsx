@@ -214,6 +214,9 @@ export default function SearchPage() {
                       <div className="flex items-center gap-1 font-bold text-sm">
                         {user.username}
                         {user.is_claimed && <span className="text-blue-500 text-xs">✓</span>}
+                        {user.instagram_id && user.instagram_id !== user.username && (
+                          <span className="text-xs text-muted-foreground font-normal ml-1">@{user.instagram_id}</span>
+                        )}
                       </div>
                     </div>
                     </div>
