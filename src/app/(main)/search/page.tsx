@@ -75,10 +75,28 @@ export default function SearchPage() {
 
     const delayDebounceFn = setTimeout(async () => {
       setIsSearching(true)
-      const { data } = await supabase
+      
+      // 1. Fetch tags matching the query
+      const tagQ = q.replace(/\s+/g, '').toLowerCase()
+      const { data: tagData } = await supabase
+        .from('creator_tags')
+        .select('profile_id')
+        .ilike('tag', `%${tagQ}%`)
+        
+      const tagProfileIds = tagData ? tagData.map(t => t.profile_id) : []
+      const uniqueTagIds = Array.from(new Set(tagProfileIds))
+      
+      let query = supabase
         .from('profiles')
         .select('id, username, avatar_url, is_claimed, total_donations, instagram_id')
-        .or(`username.ilike.%${q}%,instagram_id.ilike.%${q}%,bio.ilike.%${q}%`)
+        
+      if (uniqueTagIds.length > 0) {
+        query = query.or(`id.in.(${uniqueTagIds.join(',')}),username.ilike.%${q}%,instagram_id.ilike.%${q}%,bio.ilike.%${q}%`)
+      } else {
+        query = query.or(`username.ilike.%${q}%,instagram_id.ilike.%${q}%,bio.ilike.%${q}%`)
+      }
+        
+      const { data } = await query
         .order('total_donations', { ascending: false, nullsFirst: false })
         .limit(5)
       
@@ -186,7 +204,7 @@ export default function SearchPage() {
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
         <Input 
           className="w-full pl-12 py-6 text-lg rounded-xl bg-secondary/50 border-none focus-visible:ring-1 focus-visible:ring-ring"
-          placeholder="Search ID, Instagram, or Bio..."
+          placeholder="Search ID, Instagram, Bio, or Tags..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onKeyDown={handleKeyDown}
