@@ -680,20 +680,52 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
       {/* Content Area */}
       <div className="grid md:grid-cols-3 gap-8 mt-8">
         <div className={currentMonthTotal > 0 ? "md:col-span-2" : "col-span-1 md:col-span-3"}>
-          <div className="border-b mb-6">
-            <div className="border-b-2 border-foreground inline-block pb-2 font-bold px-2">게시물</div>
+          <div className="flex items-center gap-2 mb-6 border-b pb-4 overflow-x-auto scrollbar-hide">
+            <button 
+              onClick={() => setActiveTab('posts')}
+              className={`shrink-0 px-4 py-2 rounded-full font-bold text-sm transition-colors ${activeTab === 'posts' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/50'}`}
+            >
+              게시물
+            </button>
+            {isMe && (
+              <button 
+                onClick={() => {
+                  setActiveTab('liked')
+                  if (!hasFetchedLiked) fetchLikedPosts()
+                }}
+                className={`shrink-0 px-4 py-2 rounded-full font-bold text-sm transition-colors ${activeTab === 'liked' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/50'}`}
+              >
+                좋아요 누른 게시물
+              </button>
+            )}
           </div>
           
-          {posts.length === 0 ? (
-            <div className="bg-white rounded-2xl border p-12 text-center text-muted-foreground">
-              작성된 게시물이 없습니다.
-            </div>
-          ) : (
-            <div className="flex flex-col gap-8 w-full max-w-2xl mx-auto">
-              {posts.map(post => (
-                <FeedPost key={post.id} post={post} currentUserId={currentUser?.id} />
-              ))}
-            </div>
+          {activeTab === 'posts' && (
+            posts.length === 0 ? (
+              <div className="bg-white rounded-2xl border p-12 text-center text-muted-foreground">
+                작성된 게시물이 없습니다.
+              </div>
+            ) : (
+              <div className="flex flex-col gap-8 w-full max-w-2xl mx-auto">
+                {posts.map(post => (
+                  <FeedPost key={post.id} post={post} currentUserId={currentUser?.id} />
+                ))}
+              </div>
+            )
+          )}
+          
+          {activeTab === 'liked' && isMe && (
+            likedPosts.length === 0 ? (
+              <div className="bg-white rounded-2xl border p-12 text-center text-muted-foreground">
+                좋아요를 누른 게시물이 없습니다.
+              </div>
+            ) : (
+              <div className="flex flex-col gap-8 w-full max-w-2xl mx-auto">
+                {likedPosts.map(post => (
+                  <FeedPost key={post.id} post={post} currentUserId={currentUser?.id} />
+                ))}
+              </div>
+            )
           )}
         </div>
 
