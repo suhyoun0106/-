@@ -51,8 +51,9 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
     if (!profile) return
     const { data: likedData } = await supabase
       .from('likes')
-      .select('post_id')
+      .select('post_id, created_at')
       .eq('user_id', profile.id)
+      .order('created_at', { ascending: false })
     
     if (likedData && likedData.length > 0) {
       const postIds = likedData.map(l => l.post_id)
@@ -67,8 +68,14 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
           comments (id)
         `)
         .in('id', postIds)
-        .order('created_at', { ascending: false })
-      setLikedPosts(pData || [])
+      
+      if (pData) {
+        // Sort posts in memory based on the order of likedData (most recently liked first)
+        const sortedPosts = postIds.map(id => pData.find(p => p.id === id)).filter(Boolean)
+        setLikedPosts(sortedPosts)
+      } else {
+        setLikedPosts([])
+      }
     } else {
       setLikedPosts([])
     }
