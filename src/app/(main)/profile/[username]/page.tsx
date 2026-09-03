@@ -429,6 +429,19 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                 </span>
               )}
             </div>
+
+            {(isMe || profile.is_stats_public !== false) && (
+              <div className="flex items-center gap-2 mb-4 text-sm font-semibold text-muted-foreground">
+                <span className="text-foreground tracking-tight">{currentMonthTotal.toLocaleString()}₩</span>
+                <span className="text-xs">/ month</span>
+                <span className="text-border mx-1">|</span>
+                <span className="text-foreground tracking-tight">{currentMonthBackers}</span>
+                <span className="text-xs">backers</span>
+                {isMe && profile.is_stats_public === false && (
+                  <span className="text-xs text-red-500 ml-2 font-bold">(비공개 상태)</span>
+                )}
+              </div>
+            )}
             
             <div className="mt-2 mb-4 max-w-lg">
               {profile.bio ? (
@@ -439,6 +452,8 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                     setEditInstagramId(profile.instagram_id || '')
                     setEditIsInstagramPublic(profile.is_instagram_public || false)
                     setEditIsDonationEnabled(profile.is_donation_enabled !== false)
+                    setEditIsStatsPublic(profile.is_stats_public !== false)
+                    setEditIsStatsPublic(profile.is_stats_public !== false)
                   setIsEditProfileOpen(true)
                 }}>
                   소개글을 작성해주세요.
@@ -689,6 +704,19 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                 <Label htmlFor="instagram-public" className="flex-1 cursor-pointer flex flex-col gap-1">
                   <div className="font-bold text-sm">인스타그램 ID 공개</div>
                   <div className="text-xs text-muted-foreground font-normal">프로필과 게시물에서 인스타그램 ID가 공개됩니다.</div>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-4 border p-4 rounded-lg">
+                <input 
+                  type="checkbox" 
+                  id="stats-public"
+                  checked={editIsStatsPublic}
+                  onChange={(e) => setEditIsStatsPublic(e.target.checked)}
+                  className="w-5 h-5 accent-primary cursor-pointer"
+                />
+                <Label htmlFor="stats-public" className="flex-1 cursor-pointer flex flex-col gap-1">
+                  <div className="font-bold text-sm">후원 통계 공개</div>
+                  <div className="text-xs text-muted-foreground font-normal">이번 달 후원금액과 후원자 수를 프로필에 공개합니다.</div>
                 </Label>
               </div>
               <div className="flex items-center space-x-4 border p-4 rounded-lg bg-secondary/30">
