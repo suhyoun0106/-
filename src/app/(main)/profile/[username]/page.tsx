@@ -31,8 +31,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
   const [editBio, setEditBio] = useState('')
   const [editInstagramId, setEditInstagramId] = useState('')
   const [editIsDonationEnabled, setEditIsDonationEnabled] = useState(true)
-  const [editIsStatsPublic, setEditIsStatsPublic] = useState(true)
-  const [editIsInstagramPublic, setEditIsInstagramPublic] = useState(false)
+    const [editIsInstagramPublic, setEditIsInstagramPublic] = useState(false)
   const [cropSrc, setCropSrc] = useState<string | null>(null)
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
@@ -432,29 +431,6 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
               </div>
             </div>
 
-            {/* Stats Row */}
-            <div className="flex items-center gap-5 md:gap-6 text-sm md:text-base mb-1">
-              <div>
-                <span className="text-muted-foreground mr-1.5">게시물</span>
-                <span className="font-bold">{posts.length}</span>
-              </div>
-              {(isMe || profile.is_stats_public !== false) && (
-                <>
-                  <div>
-                    <span className="text-muted-foreground mr-1.5">후원금액</span>
-                    <span className="font-bold">{currentMonthTotal.toLocaleString()}₩</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground mr-1.5">후원자</span>
-                    <span className="font-bold">{currentMonthBackers}</span>
-                    {isMe && profile.is_stats_public === false && (
-                      <span className="text-xs text-red-500 ml-1 font-bold">(비공개)</span>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-            
             {/* Bio Row */}
             <div className="text-sm md:text-base max-w-lg whitespace-pre-wrap mb-2">
               {profile.bio ? (
@@ -465,8 +441,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                   setEditInstagramId(profile.instagram_id || '')
                   setEditIsInstagramPublic(profile.is_instagram_public || false)
                   setEditIsDonationEnabled(profile.is_donation_enabled !== false)
-                  setEditIsStatsPublic(profile.is_stats_public !== false)
-                  setIsEditProfileOpen(true)
+                                    setIsEditProfileOpen(true)
                 }}>
                   소개글을 작성해주세요.
                 </p>
@@ -714,19 +689,6 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                 <Label htmlFor="instagram-public" className="flex-1 cursor-pointer flex flex-col gap-1">
                   <div className="font-bold text-sm">인스타그램 ID 공개</div>
                   <div className="text-xs text-muted-foreground font-normal">프로필과 게시물에서 인스타그램 ID가 공개됩니다.</div>
-                </Label>
-              </div>
-              <div className="flex items-center space-x-4 border p-4 rounded-lg">
-                <input 
-                  type="checkbox" 
-                  id="stats-public"
-                  checked={editIsStatsPublic}
-                  onChange={(e) => setEditIsStatsPublic(e.target.checked)}
-                  className="w-5 h-5 accent-primary cursor-pointer"
-                />
-                <Label htmlFor="stats-public" className="flex-1 cursor-pointer flex flex-col gap-1">
-                  <div className="font-bold text-sm">후원 통계 공개</div>
-                  <div className="text-xs text-muted-foreground font-normal">이번 달 후원금액과 후원자 수를 프로필에 공개합니다.</div>
                 </Label>
               </div>
               <div className="flex items-center space-x-4 border p-4 rounded-lg bg-secondary/30">
