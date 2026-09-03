@@ -11,6 +11,7 @@ import { Home, MessageCircle, Bell, User, PlusSquare, Search, Settings, LogOut }
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { useRouter } from 'next/navigation'
+import ScrollHideUI from '@/components/scroll-hide-ui'
 import { createClient } from '@/utils/supabase/client'
 import {
   DropdownMenu,
@@ -39,7 +40,7 @@ export default function Sidebar({ unreadCount }: { unreadCount: number }) {
   ]
 
   return (
-    <div className="w-full h-16 md:w-[80px] md:h-screen border-t md:border-t-0 md:border-r bg-background fixed bottom-0 md:relative md:flex md:flex-col z-50 shrink-0">
+    <ScrollHideUI direction="bottom" className="w-full h-16 md:w-[80px] md:h-screen border-t md:border-t-0 md:border-r bg-background fixed bottom-0 md:relative md:flex md:flex-col z-50 shrink-0">
       <div className="hidden md:flex p-4 justify-center">
         <Link href="/">
           <img src="/logo.png" alt="@fan logo" className="h-[40px] md:h-[48px] object-contain" />
@@ -103,6 +104,7 @@ export default function Sidebar({ unreadCount }: { unreadCount: number }) {
           </DropdownMenu>
         </div>
       </nav>
-    </div>
+    </ScrollHideUI>
+
   )
 }

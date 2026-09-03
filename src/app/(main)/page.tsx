@@ -4,6 +4,7 @@ import Link from 'next/link'
 
 
 import CommunityDropdown from '@/components/community-dropdown'
+import ScrollHideUI from '@/components/scroll-hide-ui'
 import TopDonorMessage from '@/components/top-donor-message'
 import FeedSearchBar from '@/components/feed-search-bar'
 
@@ -143,24 +144,26 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
   return (
     <div className="max-w-2xl mx-auto py-8 px-4 flex flex-col gap-8">
       
-      {/* 상단 필터 및 검색 바 */}
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-row items-stretch gap-3">
-          {user && sponsoredCommunities.length > 0 && (
-            <CommunityDropdown communities={sponsoredCommunities} currentCommunityId={communityId} />
+      {/* 상단 필터 및 검색 바 (스크롤 반응형) */}
+      <ScrollHideUI direction="top" className="sticky top-0 z-30 pt-4 pb-2 -mt-4 mb-2">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-row items-stretch gap-3">
+            {user && sponsoredCommunities.length > 0 && (
+              <CommunityDropdown communities={sponsoredCommunities} currentCommunityId={communityId} />
+            )}
+            <FeedSearchBar />
+          </div>
+          
+          {communityId && (
+            <TopDonorMessage 
+              communityId={communityId} 
+              currentUserId={user?.id}
+              isTopDonor={isTopDonor}
+              initialMessage={initialTopDonorMessage}
+            />
           )}
-          <FeedSearchBar />
         </div>
-        
-        {communityId && (
-          <TopDonorMessage 
-            communityId={communityId} 
-            currentUserId={user?.id}
-            isTopDonor={isTopDonor}
-            initialMessage={initialTopDonorMessage}
-          />
-        )}
-      </div>
+      </ScrollHideUI>
 
       {posts?.length === 0 ? (
         <div className="text-center text-muted-foreground py-20">
