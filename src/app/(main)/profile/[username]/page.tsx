@@ -14,6 +14,28 @@ import FeedPost from '@/components/feed-post'
 import Cropper from 'react-easy-crop'
 import { getCroppedImg } from '@/utils/cropImage'
 
+
+function DonationMessage({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false)
+  if (!text) return null;
+  
+  if (text.length <= 50) {
+    return <div className="text-sm text-muted-foreground mt-2 bg-secondary/30 p-3 rounded-lg">{text}</div>
+  }
+  
+  return (
+    <div 
+      className="text-sm text-muted-foreground mt-2 bg-secondary/30 p-3 rounded-lg cursor-pointer hover:bg-secondary/50 transition-colors"
+      onClick={() => setExpanded(!expanded)}
+    >
+      {expanded ? text : text.substring(0, 50) + '...'}
+      <span className="text-primary font-bold ml-1 text-xs">
+        {expanded ? '접기' : '더보기'}
+      </span>
+    </div>
+  )
+}
+
 export default function UserProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const unwrappedParams = use(params)
   const username = decodeURIComponent(unwrappedParams.username)
@@ -161,7 +183,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
 
     const { data: donorData } = await supabase
       .from('donations')
-      .select('donor:donor_id(id, username, avatar_url), amount, created_at')
+      .select('donor:donor_id(id, username, avatar_url), amount, created_at, message')
       .eq('receiver_id', p.id)
       .gte('created_at', startOfMonthStr)
       .order('amount', { ascending: false })
@@ -175,11 +197,14 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
         if (!d.donor) return // anonymous
         const donor = Array.isArray(d.donor) ? d.donor[0] : d.donor;
         if (!donor) return;
-        const existing = donorMap.get(donor.id) || { ...donor, total: 0 }
+        const existing = donorMap.get(donor.id) || { ...donor, total: 0, message: null }
         existing.total += d.amount
+        if (!existing.message && d.message) {
+          existing.message = d.message
+        }
         donorMap.set(donor.id, existing)
       })
-      const sorted = Array.from(donorMap.values()).sort((a, b) => b.total - a.total).slice(0, 10)
+      const sorted = Array.from(donorMap.values()).sort((a, b) => b.total - a.total)
       setTopDonors(sorted)
       setCurrentMonthTotal(total)
       setCurrentMonthBackers(donorMap.size)
@@ -804,20 +829,29 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                   아직 후원자가 없습니다.
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className="space-y-6 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-secondary">
                   {topDonors.map((donor, idx) => (
-                    <div key={donor.id} className="flex items-center justify-between p-2 hover:bg-secondary/20 rounded-xl transition-colors">
-                      <div className="flex items-center gap-4 cursor-pointer hover:underline" onClick={() => router.push(`/profile/${donor.username}`)}>
-                        <div className="relative">
-                          <Avatar className="h-12 w-12 border">
-                            <AvatarImage src={donor.avatar_url || ''} />
-                            <AvatarFallback>{donor.username.charAt(0).toUpperCase()}</AvatarFallback>
-                          </Avatar>
-                          {idx === 0 && <Crown className="w-5 h-5 text-yellow-500 absolute -top-2 -right-1" />}
+                    <div key={donor.id} className="flex flex-col p-3 hover:bg-secondary/10 rounded-xl transition-colors border border-transparent hover:border-border">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4 cursor-pointer hover:underline" onClick={() => router.push(`/profile/${donor.username}`)}>
+                          <div className="relative">
+                            <Avatar className="h-12 w-12 border">
+                              <AvatarImage src={donor.avatar_url || ''} />
+                              <AvatarFallback>{donor.username.charAt(0).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            {idx === 0 && <Crown className="w-5 h-5 text-yellow-500 absolute -top-2 -right-1" />}
+                            {idx === 1 && <Crown className="w-5 h-5 text-gray-400 absolute -top-2 -right-1" />}
+                            {idx === 2 && <Crown className="w-5 h-5 text-amber-600 absolute -top-2 -right-1" />}
+                          </div>
+                          <span className="font-bold text-base">@{donor.username}</span>
                         </div>
-                        <span className="font-bold text-base">@{donor.username}</span>
+                        <span className="font-bold text-primary text-lg">{donor.total.toLocaleString()}₩</span>
                       </div>
-                      <span className="font-bold text-primary text-lg">{donor.total.toLocaleString()}₩</span>
+                      {donor.message && (
+                        <div className="ml-16">
+                          <DonationMessage text={donor.message} />
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
