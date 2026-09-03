@@ -78,7 +78,7 @@ export default function SearchPage() {
       const { data } = await supabase
         .from('profiles')
         .select('id, username, avatar_url, is_claimed, total_donations, instagram_id')
-        .or(`username.ilike.%${q}%,instagram_id.ilike.%${q}%`)
+        .or(`username.ilike.%${q}%,instagram_id.ilike.%${q}%,bio.ilike.%${q}%`)
         .order('total_donations', { ascending: false, nullsFirst: false })
         .limit(5)
       
@@ -186,7 +186,7 @@ export default function SearchPage() {
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
         <Input 
           className="w-full pl-12 py-6 text-lg rounded-xl bg-secondary/50 border-none focus-visible:ring-1 focus-visible:ring-ring"
-          placeholder="Search Instagram ID (e.g. @chulsoo_art)..."
+          placeholder="Search ID, Instagram, or Bio..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onKeyDown={handleKeyDown}
