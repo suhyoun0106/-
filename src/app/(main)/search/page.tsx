@@ -90,7 +90,7 @@ export default function SearchPage() {
               <Trophy className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">Creator Leaderboard</h2>
+              <h2 className="text-xl font-bold">Top Creators</h2>
               <p className="text-sm text-muted-foreground">Real-time list of most virtually sponsored creators</p>
             </div>
           </div>
