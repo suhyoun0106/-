@@ -43,7 +43,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
   const [currentMonthTotal, setCurrentMonthTotal] = useState(0)
   const [currentMonthBackers, setCurrentMonthBackers] = useState(0)
   
-  const [activeTab, setActiveTab] = useState<'posts' | 'liked'>('posts')
+  const [activeTab, setActiveTab] = useState<'posts' | 'liked' | 'donors'>('posts')
   const [likedPosts, setLikedPosts] = useState<any[]>([])
   const [hasFetchedLiked, setHasFetchedLiked] = useState(false)
 
@@ -727,8 +727,8 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
       
 
       {/* Content Area */}
-      <div className="grid md:grid-cols-3 gap-8 mt-8">
-        <div className={currentMonthTotal > 0 ? "md:col-span-2" : "col-span-1 md:col-span-3"}>
+      <div className="w-full max-w-3xl mx-auto mt-8">
+        <div>
           <div className="flex items-center gap-2 mb-2 border-b pb-4 overflow-x-auto scrollbar-hide">
             <button 
               onClick={() => setActiveTab('posts')}
@@ -745,6 +745,14 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                 className={`shrink-0 px-4 py-2 rounded-full font-bold text-sm transition-colors ${activeTab === 'liked' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/50'}`}
               >
                 좋아요 누른 게시물
+              </button>
+            )}
+            {(currentMonthTotal > 0 || isMe) && (
+              <button 
+                onClick={() => setActiveTab('donors')}
+                className={`shrink-0 px-4 py-2 rounded-full font-bold text-sm transition-colors ${activeTab === 'donors' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/50'}`}
+              >
+                Donors
               </button>
             )}
           </div>
@@ -776,42 +784,50 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
               </div>
             )
           )}
+
+          {activeTab === 'donors' && (
+            <div className="bg-white rounded-2xl border p-8 shadow-sm">
+              <div className="flex items-end justify-between mb-1">
+                <h3 className="text-2xl font-bold">이번 달 Top Donors</h3>
+                {currentMonthTotal > 0 && (
+                  <div className="text-sm font-medium text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full flex items-center gap-2">
+                    <span>총 <span className="font-bold text-foreground">{currentMonthTotal.toLocaleString()}₩</span></span>
+                    <span className="text-border">|</span>
+                    <span><span className="font-bold text-foreground">{currentMonthBackers}</span>명</span>
+                  </div>
+                )}
+              </div>
+              <p className="text-muted-foreground mb-8">Top backers supporting this creator this month</p>
+              
+              {topDonors.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  아직 이번 달 후원자가 없습니다.
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {topDonors.map((donor, idx) => (
+                    <div key={donor.id} className="flex items-center justify-between p-2 hover:bg-secondary/20 rounded-xl transition-colors">
+                      <div className="flex items-center gap-4 cursor-pointer hover:underline" onClick={() => router.push(`/profile/${donor.username}`)}>
+                        <div className="relative">
+                          <Avatar className="h-12 w-12 border">
+                            <AvatarImage src={donor.avatar_url || ''} />
+                            <AvatarFallback>{donor.username.charAt(0).toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                          {idx === 0 && <Crown className="w-5 h-5 text-yellow-500 absolute -top-2 -right-1" />}
+                        </div>
+                        <span className="font-bold text-base">@{donor.username}</span>
+                      </div>
+                      <span className="font-bold text-primary text-lg">{donor.total.toLocaleString()}₩</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
         </div>
 
-        {currentMonthTotal > 0 && (
-          <div>
-            <div className="bg-white rounded-2xl border p-6 shadow-sm">
-              <div className="flex items-end justify-between mb-1">
-                <h3 className="text-xl font-bold">이번 달 Top Donors</h3>
-                <div className="text-xs font-medium text-muted-foreground bg-secondary/50 px-2.5 py-1 rounded-full flex items-center gap-1.5">
-                  <span>총 <span className="font-bold text-foreground">{currentMonthTotal.toLocaleString()}₩</span></span>
-                  <span className="text-border">|</span>
-                  <span><span className="font-bold text-foreground">{currentMonthBackers}</span>명</span>
-                </div>
               </div>
-              <p className="text-sm text-muted-foreground mb-6">Top backers supporting this creator this month</p>
-              
-              <div className="space-y-4">
-                {topDonors.map((donor, idx) => (
-                  <div key={donor.id} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 cursor-pointer hover:underline" onClick={() => router.push(`/profile/${donor.username}`)}>
-                      <div className="relative">
-                        <Avatar className="h-10 w-10 border">
-                          <AvatarImage src={donor.avatar_url || ''} />
-                          <AvatarFallback>{donor.username.charAt(0).toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                        {idx === 0 && <Crown className="w-4 h-4 text-yellow-500 absolute -top-2 -right-1" />}
-                      </div>
-                      <span className="font-bold text-sm">@{donor.username}</span>
-                    </div>
-                    <span className="font-bold text-primary">{donor.total.toLocaleString()}₩</span>
-                  </div>
-              ))}
-            </div>
-          </div>
-        </div>
-        )}
-      </div>
 
       {/* Donate Modal */}
       <Dialog open={isDonateOpen} onOpenChange={setIsDonateOpen}>
