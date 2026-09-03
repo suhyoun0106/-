@@ -268,9 +268,11 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
   }
 
   async function handleAddTag() {
-    const trimmed = newTagInput.trim()
-    if (!trimmed || !profile) return
-    if (trimmed.length > 10) { toast.error('태그는 최대 10자까지만 가능합니다.'); return }
+    const rawTrimmed = newTagInput.trim()
+    if (!rawTrimmed || !profile) return
+    if (rawTrimmed.length > 10) { toast.error('태그는 최대 10자까지만 가능합니다.'); return }
+    
+    const trimmed = rawTrimmed.replace(/\s+/g, '').toLowerCase()
     
     // 중복 연타 방지: 이미 존재하는 태그면 조용히 닫기
     if (tags.some(t => t.tag === trimmed)) {
@@ -311,9 +313,11 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
   }
 
   async function handleEditTag(tagId: string) {
-    const trimmed = editingTagValue.trim()
-    if (!trimmed) return
-    if (trimmed.length > 10) { toast.error('태그는 최대 10자까지만 가능합니다.'); return }
+    const rawTrimmed = editingTagValue.trim()
+    if (!rawTrimmed) return
+    if (rawTrimmed.length > 10) { toast.error('태그는 최대 10자까지만 가능합니다.'); return }
+    
+    const trimmed = rawTrimmed.replace(/\s+/g, '').toLowerCase()
     // delete old and insert new
     await supabase.from('creator_tags').delete().eq('id', tagId)
     const { error } = await supabase.from('creator_tags').insert({
