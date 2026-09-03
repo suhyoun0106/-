@@ -379,9 +379,11 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
           <div className="flex-1 mt-4 md:mt-0">
             <h1 className="text-4xl font-extrabold tracking-tight mb-2">{profile.username}</h1>
             <div className="flex items-center gap-2 mb-4">
-              {profile.instagram_id && profile.is_instagram_public && (
+              {profile.instagram_id && profile.is_instagram_public ? (
                 <span className="text-muted-foreground font-medium">@{profile.instagram_id}</span>
-              )}
+              ) : isUnclaimed ? (
+                <span className="text-muted-foreground font-medium">@{profile.username}</span>
+              ) : null}
               {isUnclaimed && (
                 <span className="bg-secondary text-secondary-foreground text-xs px-3 py-1 rounded-full font-bold">
                   UNCLAIMED ACCOUNT
@@ -458,6 +460,10 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                       {profile.instagram_id && profile.is_instagram_public ? (
                         <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={() => window.open(`https://instagram.com/${profile.instagram_id}`, '_blank')}>
                           Instagram: @{profile.instagram_id}
+                        </Button>
+                      ) : isUnclaimed ? (
+                        <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={() => window.open(`https://instagram.com/${profile.username}`, '_blank')}>
+                          Instagram: @{profile.username}
                         </Button>
                       ) : null}
                     </>
