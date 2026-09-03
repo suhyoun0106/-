@@ -708,7 +708,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                   <div className="font-bold text-sm">가상 후원받기</div>
                   <div className="text-xs text-muted-foreground font-normal">체크 시 가상 후원을 받을 수 있습니다.</div>
                   {!editIsDonationEnabled && (
-                    <div className="text-xs text-red-500 font-bold">* 체크를 하지 않으면 후원을 받지 못합니다</div>
+                    <div className="text-xs text-red-500 font-bold">* 인스타그램 ID를 공개해야 가상 후원이 가능합니다</div>
                   )}
                 </Label>
               </div>
