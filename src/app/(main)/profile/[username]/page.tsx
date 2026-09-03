@@ -180,7 +180,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
         existing.total += d.amount
         donorMap.set(donor.id, existing)
       })
-      const sorted = Array.from(donorMap.values()).sort((a, b) => b.total - a.total).slice(0, 5)
+      const sorted = Array.from(donorMap.values()).sort((a, b) => b.total - a.total).slice(0, 10)
       setTopDonors(sorted)
       setCurrentMonthTotal(total)
       setCurrentMonthBackers(donorMap.size)
