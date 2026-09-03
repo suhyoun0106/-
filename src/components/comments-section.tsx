@@ -6,7 +6,7 @@
  * - 답글 달기 버튼을 통해 대댓글 기능 지원
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -30,12 +30,15 @@ export default function CommentsSection({
   const [newComment, setNewComment] = useState('')
   const [replyTo, setReplyTo] = useState<{ id: string, username: string, targetUserId: string } | null>(null)
   const [expandedReplies, setExpandedReplies] = useState<Record<string, boolean>>({})
-  const [isInputExpanded, setIsInputExpanded] = useState(false)
-  const [sortType, setSortType] = useState<'top' | 'newest'>('top')
+    const [sortType, setSortType] = useState<'top' | 'newest'>('top')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   
   const handleReplyClick = (parentId: string, targetUsername: string, targetUserId: string) => {
     setReplyTo({ id: parentId, username: targetUsername, targetUserId })
     setNewComment(`@${targetUsername} `)
+    setTimeout(() => {
+      textareaRef.current?.focus()
+    }, 10)
   }
   
   const supabase = createClient()
@@ -200,64 +203,57 @@ export default function CommentsSection({
   return (
     <div className="flex flex-col w-full text-foreground bg-background">
       
-      {/* 2. 댓글 입력창 (클릭 시 확장되는 구조) */}
+      {/* 2. 댓글 입력창 (항상 확장된 상태) */}
       <div className="mb-8">
         {replyTo && (
           <div className="flex items-center justify-between bg-secondary/40 p-2 px-4 rounded-t-xl text-xs font-semibold mb-1">
             <span>@{replyTo.username} 님에게 답글 작성 중...</span>
-            <button onClick={() => {setReplyTo(null); setIsInputExpanded(false)}} className="text-muted-foreground hover:text-foreground">✕ 취소</button>
+            <button onClick={() => setReplyTo(null)} className="text-muted-foreground hover:text-foreground">✕ 취소</button>
           </div>
         )}
         <form 
-          onSubmit={(e) => {
-            submitComment(e);
-            setIsInputExpanded(false);
-          }}
-          className={`flex flex-col border transition-all duration-200 ${isInputExpanded ? 'rounded-2xl border-foreground/50 bg-background shadow-sm' : 'rounded-full border-border bg-background hover:bg-secondary/20'} ${replyTo ? 'rounded-tl-none rounded-tr-none' : ''}`}
+          onSubmit={submitComment}
+          className={`flex flex-col border transition-all duration-200 rounded-2xl border-foreground/30 bg-background shadow-sm ${replyTo ? 'rounded-tl-none rounded-tr-none' : ''}`}
         >
           <textarea
-            rows={isInputExpanded ? 3 : 1}
+            ref={textareaRef}
+            rows={3}
             placeholder="대화에 참여해보세요"
             value={newComment}
-            onFocus={() => setIsInputExpanded(true)}
             onChange={(e) => setNewComment(e.target.value)}
-            className={`w-full bg-transparent focus:outline-none resize-none px-4 ${isInputExpanded ? 'py-3' : 'py-3 line-clamp-1'}`}
-            style={{ minHeight: isInputExpanded ? '80px' : '44px' }}
+            className="w-full bg-transparent focus:outline-none resize-none px-4 py-3 min-h-[80px]"
           />
           
-          {isInputExpanded && (
-            <div className="flex items-center justify-between px-3 pb-3 pt-1">
-              <div className="flex items-center gap-1 text-[#FF4500]">
-                <button type="button" className="p-1.5 hover:bg-secondary rounded-full"><ImageIcon className="w-5 h-5" /></button>
-                <button type="button" className="p-1.5 hover:bg-secondary rounded-full"><MonitorPlay className="w-5 h-5" /></button>
-                <button type="button" className="p-1.5 hover:bg-secondary rounded-full text-sm font-bold px-2">GIF</button>
-                <button type="button" className="p-1.5 hover:bg-secondary rounded-full"><Type className="w-5 h-5" /></button>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => {
-                    setNewComment('');
-                    setReplyTo(null);
-                    setIsInputExpanded(false);
-                  }} 
-                  className="rounded-full bg-secondary/50 hover:bg-secondary font-bold text-[#FF4500]"
-                >
-                  취소
-                </Button>
-                <Button 
-                  type="submit" 
-                  size="sm" 
-                  disabled={!newComment.trim()}
-                  className="rounded-full bg-[#8B2C10] hover:bg-[#6e220c] text-white font-bold px-5 disabled:opacity-50"
-                >
-                  댓글
-                </Button>
-              </div>
+          <div className="flex items-center justify-between px-3 pb-3 pt-1 border-t border-border/30">
+            <div className="flex items-center gap-1 text-[#FF4500]">
+              <button type="button" className="p-1.5 hover:bg-secondary rounded-full"><ImageIcon className="w-5 h-5" /></button>
+              <button type="button" className="p-1.5 hover:bg-secondary rounded-full"><MonitorPlay className="w-5 h-5" /></button>
+              <button type="button" className="p-1.5 hover:bg-secondary rounded-full text-sm font-bold px-2">GIF</button>
+              <button type="button" className="p-1.5 hover:bg-secondary rounded-full"><Type className="w-5 h-5" /></button>
             </div>
-          )}
+            <div className="flex items-center gap-2">
+              <Button 
+                type="button" 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => {
+                  setNewComment('');
+                  setReplyTo(null);
+                }} 
+                className="rounded-full bg-secondary/50 hover:bg-secondary font-bold text-[#FF4500]"
+              >
+                취소
+              </Button>
+              <Button 
+                type="submit" 
+                size="sm" 
+                disabled={!newComment.trim()}
+                className="rounded-full bg-[#8B2C10] hover:bg-[#6e220c] text-white font-bold px-5 disabled:opacity-50"
+              >
+                댓글
+              </Button>
+            </div>
+          </div>
         </form>
       </div>
 
@@ -269,20 +265,18 @@ export default function CommentsSection({
             <Menu className="w-5 h-5" />
             Sort by
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-[300px] bg-[#212121] text-white border-none rounded-xl shadow-xl p-0 py-2">
+          <DropdownMenuContent align="start" className="w-[160px] bg-background text-foreground border border-border rounded-xl shadow-lg p-1">
             <DropdownMenuItem 
               onClick={() => setSortType('top')}
-              className={`flex flex-col items-start px-4 py-3 cursor-pointer ${sortType === 'top' ? 'bg-[#3d3d3d]' : 'hover:bg-[#3d3d3d]'}`}
+              className={`flex items-center px-4 py-2.5 cursor-pointer rounded-lg font-bold text-sm ${sortType === 'top' ? 'bg-secondary' : 'hover:bg-secondary/70'}`}
             >
-              <div className="font-semibold text-[15px] mb-1">Top</div>
-              <div className="text-zinc-400 text-[13px]">Show featured comments</div>
+              Top
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => setSortType('newest')}
-              className={`flex flex-col items-start px-4 py-3 cursor-pointer ${sortType === 'newest' ? 'bg-[#3d3d3d]' : 'hover:bg-[#3d3d3d]'}`}
+              className={`flex items-center px-4 py-2.5 cursor-pointer rounded-lg font-bold text-sm ${sortType === 'newest' ? 'bg-secondary' : 'hover:bg-secondary/70'}`}
             >
-              <div className="font-semibold text-[15px] mb-1">Newest</div>
-              <div className="text-zinc-400 text-[13px]">Show recent comments, including potential spam</div>
+              Newest
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
