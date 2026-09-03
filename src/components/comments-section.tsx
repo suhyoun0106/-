@@ -158,10 +158,18 @@ export default function CommentsSection({
 
   // 내가 쓴 댓글을 최상단으로, 그 다음엔 좋아요 순으로 정렬
   const sortByReactionScore = (a: any, b: any) => {
-    // 1. 내가 쓴 댓글인지 확인
+    // 1. 내가 쓴 댓글인지 확인 (나한테만 최상단 노출)
     if (currentUserId) {
-      if (a.user_id === currentUserId && b.user_id !== currentUserId) return -1
-      if (b.user_id === currentUserId && a.user_id !== currentUserId) return 1
+      const aIsMine = a.user_id === currentUserId;
+      const bIsMine = b.user_id === currentUserId;
+      
+      if (aIsMine && !bIsMine) return -1;
+      if (!aIsMine && bIsMine) return 1;
+      
+      // 내가 쓴 댓글이 여러 개라면 내 댓글끼리는 '최신순'으로 나열
+      if (aIsMine && bIsMine) {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
     }
 
     // 2. 좋아요 점수 (순수 좋아요 수 = 좋아요 - 싫어요)
