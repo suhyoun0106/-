@@ -27,19 +27,17 @@ export default function CommentsSection({
   postOwnerId: string
 }) {
   const [comments, setComments] = useState<any[]>([])
-  const [newComment, setNewComment] = useState('')
-  const [replyTo, setReplyTo] = useState<{ id: string, username: string, targetUserId: string } | null>(null)
-  const [expandedReplies, setExpandedReplies] = useState<Record<string, boolean>>({})
-    const [sortType, setSortType] = useState<'top' | 'newest'>('top')
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
   
-  const handleReplyClick = (parentId: string, targetUsername: string, targetUserId: string) => {
-    setReplyTo({ id: parentId, username: targetUsername, targetUserId })
-    setNewComment(`@${targetUsername} `)
-    setTimeout(() => {
-      textareaRef.current?.focus()
-    }, 10)
-  }
+  // 상태 분리: 탑레벨 댓글 vs 인라인 대댓글
+  const [topLevelComment, setTopLevelComment] = useState('')
+  const [inlineReplyText, setInlineReplyText] = useState('')
+  
+  // replyTo: id는 현재 답글을 달 대상 댓글의 ID, rootParentId는 최상위 부모 ID
+  const [replyTo, setReplyTo] = useState<{ id: string, username: string, targetUserId: string, rootParentId: string } | null>(null)
+  
+  const [expandedReplies, setExpandedReplies] = useState<Record<string, boolean>>({})
+  const [sortType, setSortType] = useState<'top' | 'newest'>('top')
+  const textareaRef = useRef<HTMLInputElement>(null)
   
   const supabase = createClient()
 
@@ -53,37 +51,35 @@ export default function CommentsSection({
       .select(`
         *,
         profiles (id, username, avatar_url),
-        comment_likes (id, user_id, is_dislike)
+        comment_likes (user_id, is_dislike)
       `)
       .eq('post_id', postId)
-      .order('created_at', { ascending: true })
-
-    if (data) {
+      
+    if (!error && data) {
       setComments(data)
     }
   }
 
-  // 댓글 전송 핸들러
-  async function submitComment(e: React.FormEvent) {
+  const handleReplyClick = (commentId: string, targetUsername: string, targetUserId: string, rootParentId: string) => {
+    setReplyTo({ id: commentId, username: targetUsername, targetUserId, rootParentId })
+    setInlineReplyText('')
+    setTimeout(() => {
+      textareaRef.current?.focus()
+    }, 10)
+  }
+
+  async function submitTopLevelComment(e: React.FormEvent) {
     e.preventDefault()
-    if (!newComment.trim() || !currentUserId) return
+    if (!topLevelComment.trim() || !currentUserId) return
 
     const commentData = {
       post_id: postId,
       user_id: currentUserId,
-      content: newComment,
-      parent_id: replyTo ? replyTo.id : null
+      content: topLevelComment.trim(),
+      parent_id: null
     }
 
-    if (replyTo) {
-      setExpandedReplies(prev => ({ ...prev, [replyTo.id]: true }))
-    }
-
-    const currentTargetUserId = replyTo ? replyTo.targetUserId : postOwnerId
-
-    // 로컬 상태 초기화
-    setNewComment('')
-    setReplyTo(null)
+    setTopLevelComment('')
 
     const { data: insertedComment, error } = await supabase
       .from('comments')
@@ -94,10 +90,36 @@ export default function CommentsSection({
     if (error) {
       toast.error('댓글 작성 실패')
     } else {
-      // 목록 다시 불러오기
       fetchComments()
+    }
+  }
 
-      // 알림(Notification) 전송 로직
+  async function submitInlineReply(e: React.FormEvent) {
+    e.preventDefault()
+    if (!inlineReplyText.trim() || !currentUserId || !replyTo) return
+
+    const commentData = {
+      post_id: postId,
+      user_id: currentUserId,
+      content: `@${replyTo.username} ${inlineReplyText.trim()}`,
+      parent_id: replyTo.rootParentId
+    }
+
+    const currentTargetUserId = replyTo.targetUserId
+    setReplyTo(null)
+    setInlineReplyText('')
+
+    const { data: insertedComment, error } = await supabase
+      .from('comments')
+      .insert(commentData)
+      .select()
+      .single()
+
+    if (error) {
+      toast.error('답글 작성 실패')
+    } else {
+      fetchComments()
+      // 알림 전송
       if (currentTargetUserId && currentTargetUserId !== currentUserId) {
         await supabase.from('notifications').insert({
           user_id: currentTargetUserId,
@@ -112,7 +134,6 @@ export default function CommentsSection({
   async function toggleReaction(commentId: string, type: 'like' | 'dislike') {
     if (!currentUserId) return
     
-    // 현재 유저의 기존 리액션 상태 확인
     const comment = comments.find(c => c.id === commentId)
     if (!comment) return
     
@@ -121,50 +142,25 @@ export default function CommentsSection({
     const isCurrentlyLiked = userLike && !userLike.is_dislike
     const isCurrentlyDisliked = userLike && userLike.is_dislike
 
-    // 낙관적 업데이트
-    setComments(prev => prev.map(c => {
-      if (c.id === commentId) {
-        const likes = c.comment_likes || []
-        const filtered = likes.filter((l: any) => l.user_id !== currentUserId) // 내 리액션 제거
-
-        if (type === 'like') {
-          if (isCurrentlyLiked) return { ...c, comment_likes: filtered } // 취소
-          return { ...c, comment_likes: [...filtered, { id: 'temp', user_id: currentUserId, is_dislike: false }] } // 좋아요 추가
-        } else {
-          if (isCurrentlyDisliked) return { ...c, comment_likes: filtered } // 취소
-          return { ...c, comment_likes: [...filtered, { id: 'temp', user_id: currentUserId, is_dislike: true }] } // 싫어요 추가
-        }
-      }
-      return c
-    }))
-
-    // DB 업데이트
     if (type === 'like') {
       if (isCurrentlyLiked) {
-        await supabase.from('comment_likes').delete().eq('comment_id', commentId).eq('user_id', currentUserId)
+        await supabase.from('comment_likes').delete().match({ comment_id: commentId, user_id: currentUserId })
       } else {
-        if (isCurrentlyDisliked) {
-          await supabase.from('comment_likes').update({ is_dislike: false }).eq('comment_id', commentId).eq('user_id', currentUserId)
-        } else {
-          await supabase.from('comment_likes').insert({ comment_id: commentId, user_id: currentUserId, is_dislike: false })
-        }
+        if (isCurrentlyDisliked) await supabase.from('comment_likes').delete().match({ comment_id: commentId, user_id: currentUserId })
+        await supabase.from('comment_likes').insert({ comment_id: commentId, user_id: currentUserId, is_dislike: false })
       }
     } else {
       if (isCurrentlyDisliked) {
-        await supabase.from('comment_likes').delete().eq('comment_id', commentId).eq('user_id', currentUserId)
+        await supabase.from('comment_likes').delete().match({ comment_id: commentId, user_id: currentUserId })
       } else {
-        if (isCurrentlyLiked) {
-          await supabase.from('comment_likes').update({ is_dislike: true }).eq('comment_id', commentId).eq('user_id', currentUserId)
-        } else {
-          await supabase.from('comment_likes').insert({ comment_id: commentId, user_id: currentUserId, is_dislike: true })
-        }
+        if (isCurrentlyLiked) await supabase.from('comment_likes').delete().match({ comment_id: commentId, user_id: currentUserId })
+        await supabase.from('comment_likes').insert({ comment_id: commentId, user_id: currentUserId, is_dislike: true })
       }
     }
+    fetchComments()
   }
 
-  // 내가 쓴 댓글을 최상단으로, 그 다음엔 좋아요 순으로 정렬
   const sortByReactionScore = (a: any, b: any) => {
-    // 1. 내가 쓴 댓글인지 확인 (나한테만 최상단 노출)
     if (currentUserId) {
       const aIsMine = a.user_id === currentUserId;
       const bIsMine = b.user_id === currentUserId;
@@ -172,18 +168,15 @@ export default function CommentsSection({
       if (aIsMine && !bIsMine) return -1;
       if (!aIsMine && bIsMine) return 1;
       
-      // 내가 쓴 댓글이 여러 개라면 내 댓글끼리는 '최신순'으로 나열
       if (aIsMine && bIsMine) {
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
     }
 
-    // sortType이 newest면 무조건 최신순
     if (sortType === 'newest') {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     }
 
-    // 2. 좋아요 점수 (순수 좋아요 수 = 좋아요 - 싫어요)
     const aLikes = a.comment_likes?.filter((l: any) => !l.is_dislike).length || 0
     const aDislikes = a.comment_likes?.filter((l: any) => l.is_dislike).length || 0
     const aScore = aLikes - aDislikes
@@ -193,71 +186,70 @@ export default function CommentsSection({
     const bScore = bLikes - bDislikes
 
     if (bScore !== aScore) return bScore - aScore
-    
-    // 3. 점수가 같으면 오래된 순
     return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
   }
 
   const parentComments = comments.filter(c => !c.parent_id).sort(sortByReactionScore)
+
+  const renderInlineReplyForm = () => (
+    <div className="flex gap-3 mt-3 w-full pr-4">
+      <Avatar className="h-6 w-6 mt-1 shrink-0">
+        <AvatarImage src="" />
+        <AvatarFallback className="bg-blue-500 text-[10px] text-white font-bold">ME</AvatarFallback>
+      </Avatar>
+      <form onSubmit={submitInlineReply} className="flex-1 flex flex-col">
+        <div className="flex items-center gap-1 border-b border-foreground pb-1">
+          <span className="bg-secondary/80 px-2 py-0.5 rounded-full text-[12px] font-bold">@{replyTo?.username}</span>
+          <input
+            ref={textareaRef}
+            value={inlineReplyText}
+            onChange={(e) => setInlineReplyText(e.target.value)}
+            className="flex-1 bg-transparent focus:outline-none text-[14px] px-1"
+          />
+        </div>
+        <div className="flex justify-end gap-2 mt-2">
+          <Button 
+            type="button" 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => { setReplyTo(null); setInlineReplyText(''); }} 
+            className="rounded-full text-foreground hover:bg-secondary font-bold text-xs px-4 h-8"
+          >
+            Cancel
+          </Button>
+          <Button 
+            type="submit" 
+            size="sm" 
+            disabled={!inlineReplyText.trim()}
+            className="rounded-full bg-secondary/80 hover:bg-secondary text-foreground font-bold text-xs px-4 h-8 disabled:opacity-50"
+          >
+            Reply
+          </Button>
+        </div>
+      </form>
+    </div>
+  )
   
   return (
     <div className="flex flex-col w-full text-foreground bg-background">
       
-      {/* 2. 댓글 입력창 (항상 확장된 상태) */}
+      {/* 2. 메인 댓글 입력창 (요청된 2번 이미지 형태 - 단순 라운드 폼) */}
       <div className="mb-8">
-        {replyTo && (
-          <div className="flex items-center justify-between bg-secondary/40 p-2 px-4 rounded-t-xl text-xs font-semibold mb-1">
-            <span>@{replyTo.username} 님에게 답글 작성 중...</span>
-            <button onClick={() => setReplyTo(null)} className="text-muted-foreground hover:text-foreground">✕ 취소</button>
-          </div>
-        )}
         <form 
-          onSubmit={submitComment}
-          className={`flex flex-col border transition-all duration-200 rounded-2xl border-foreground/30 bg-background shadow-sm ${replyTo ? 'rounded-tl-none rounded-tr-none' : ''}`}
+          onSubmit={submitTopLevelComment}
+          className="flex flex-col border border-border/50 rounded-full bg-background hover:bg-secondary/20 transition-all duration-200"
         >
-          <textarea
-            ref={textareaRef}
-            rows={3}
+          <input
             placeholder="대화에 참여해보세요"
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            className="w-full bg-transparent focus:outline-none resize-none px-4 py-3 min-h-[80px]"
+            value={topLevelComment}
+            onChange={(e) => setTopLevelComment(e.target.value)}
+            className="w-full bg-transparent focus:outline-none px-5 py-3.5 text-[15px]"
           />
-          
-          <div className="flex items-center justify-between px-3 pb-3 pt-1 border-t border-border/30">
-            <div className="flex items-center gap-1 text-[#FF4500]">
-              <button type="button" className="p-1.5 hover:bg-secondary rounded-full"><ImageIcon className="w-5 h-5" /></button>
-              <button type="button" className="p-1.5 hover:bg-secondary rounded-full"><MonitorPlay className="w-5 h-5" /></button>
-              <button type="button" className="p-1.5 hover:bg-secondary rounded-full text-sm font-bold px-2">GIF</button>
-              <button type="button" className="p-1.5 hover:bg-secondary rounded-full"><Type className="w-5 h-5" /></button>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button 
-                type="button" 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => {
-                  setNewComment('');
-                  setReplyTo(null);
-                }} 
-                className="rounded-full bg-secondary/50 hover:bg-secondary font-bold text-[#FF4500]"
-              >
-                취소
-              </Button>
-              <Button 
-                type="submit" 
-                size="sm" 
-                disabled={!newComment.trim()}
-                className="rounded-full bg-[#8B2C10] hover:bg-[#6e220c] text-white font-bold px-5 disabled:opacity-50"
-              >
-                댓글
-              </Button>
-            </div>
-          </div>
+          {/* 엔터키로 제출됨 */}
         </form>
       </div>
 
-      {/* 1. 상단: 댓글 개수 및 정렬 (유튜브 스타일 Dropdown) */}
+      {/* 1. 상단: 댓글 개수 및 정렬 */}
       <div className="flex items-center gap-6 mb-6">
         <h2 className="text-xl font-bold">{comments.length} Comments</h2>
         <DropdownMenu>
@@ -297,7 +289,7 @@ export default function CommentsSection({
               return (
                 <div key={parent.id} className="flex flex-col">
                   {/* 부모 댓글 */}
-                  <div className="flex gap-4 group">
+                  <div className="flex gap-4">
                     <Avatar className="h-10 w-10 shrink-0">
                       <AvatarImage src={parent.profiles?.avatar_url} />
                       <AvatarFallback>{parent.profiles?.username?.charAt(0)}</AvatarFallback>
@@ -309,9 +301,20 @@ export default function CommentsSection({
                           <span className="font-bold text-[13px]">@{parent.profiles?.username}</span>
                           <span className="text-muted-foreground">{formatTimeAgo(parent.created_at)}</span>
                         </div>
-                        <button className="opacity-0 group-hover:opacity-100 p-1 hover:bg-secondary rounded-full transition-all">
-                          <MoreVertical className="w-4 h-4" />
-                        </button>
+                        {/* 더보기 (항상 표시, 클릭 시 신고하기/취소) */}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger className="p-1 hover:bg-secondary rounded-full transition-all outline-none text-foreground">
+                            <MoreVertical className="w-4 h-4" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-[120px] bg-background border border-border shadow-md rounded-xl p-1">
+                            <DropdownMenuItem className="text-[13px] font-bold cursor-pointer rounded-lg px-3 py-2 hover:bg-secondary">
+                              신고하기
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-[13px] font-bold cursor-pointer rounded-lg px-3 py-2 hover:bg-secondary text-muted-foreground">
+                              취소
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                       
                       <div className="text-[14px] mb-2">{parent.content}</div>
@@ -327,12 +330,15 @@ export default function CommentsSection({
                         </button>
                         
                         <button 
-                          onClick={() => handleReplyClick(parent.id, parent.profiles?.username, parent.user_id)}
+                          onClick={() => handleReplyClick(parent.id, parent.profiles?.username, parent.user_id, parent.id)}
                           className="flex items-center ml-2 hover:bg-secondary p-1.5 px-3 rounded-full transition-colors text-xs"
                         >
                           Reply
                         </button>
                       </div>
+
+                      {/* 부모 댓글에 대한 인라인 답글 폼 */}
+                      {replyTo?.id === parent.id && renderInlineReplyForm()}
                     </div>
                   </div>
 
@@ -361,7 +367,7 @@ export default function CommentsSection({
                                 const childHasDownvoted = child.comment_likes?.some((l: any) => l.user_id === currentUserId && l.is_dislike);
                                 
                                 return (
-                                  <div key={child.id} className="flex gap-3 group">
+                                  <div key={child.id} className="flex gap-3">
                                     <Avatar className="h-7 w-7 mt-0.5 shrink-0">
                                       <AvatarImage src={child.profiles?.avatar_url} />
                                       <AvatarFallback>{child.profiles?.username?.charAt(0)}</AvatarFallback>
@@ -373,9 +379,20 @@ export default function CommentsSection({
                                           <span className="font-bold text-[13px]">@{child.profiles?.username}</span>
                                           <span className="text-muted-foreground">{formatTimeAgo(child.created_at)}</span>
                                         </div>
-                                        <button className="opacity-0 group-hover:opacity-100 p-1 hover:bg-secondary rounded-full transition-all">
-                                          <MoreVertical className="w-4 h-4" />
-                                        </button>
+                                        {/* 더보기 (항상 표시, 클릭 시 신고하기/취소) */}
+                                        <DropdownMenu>
+                                          <DropdownMenuTrigger className="p-1 hover:bg-secondary rounded-full transition-all outline-none text-foreground">
+                                            <MoreVertical className="w-4 h-4" />
+                                          </DropdownMenuTrigger>
+                                          <DropdownMenuContent align="end" className="w-[120px] bg-background border border-border shadow-md rounded-xl p-1">
+                                            <DropdownMenuItem className="text-[13px] font-bold cursor-pointer rounded-lg px-3 py-2 hover:bg-secondary">
+                                              신고하기
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem className="text-[13px] font-bold cursor-pointer rounded-lg px-3 py-2 hover:bg-secondary text-muted-foreground">
+                                              취소
+                                            </DropdownMenuItem>
+                                          </DropdownMenuContent>
+                                        </DropdownMenu>
                                       </div>
                                       
                                       <div className="text-[14px] mb-1.5">{child.content}</div>
@@ -391,12 +408,15 @@ export default function CommentsSection({
                                         </button>
                                         
                                         <button 
-                                          onClick={() => handleReplyClick(parent.id, child.profiles?.username, child.user_id)}
+                                          onClick={() => handleReplyClick(child.id, child.profiles?.username, child.user_id, parent.id)}
                                           className="flex items-center ml-1 hover:bg-secondary p-1.5 px-3 rounded-full transition-colors text-xs"
                                         >
                                           Reply
                                         </button>
                                       </div>
+
+                                      {/* 대댓글에 대한 인라인 답글 폼 */}
+                                      {replyTo?.id === child.id && renderInlineReplyForm()}
                                     </div>
                                   </div>
                                 );
