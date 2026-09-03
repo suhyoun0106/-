@@ -441,7 +441,71 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                 </>
               )}
             </div>
+            
+            {/* Tag / Category Section - Moved below buttons */}
+            <div className="flex flex-wrap items-center gap-2 mt-3">
+              {tags.map(t => (
+                <div key={t.id} className="group flex items-center">
+                  {editingTagId === t.id ? (
+                    <div className="flex items-center gap-1">
+                      <input
+                        autoFocus
+                        value={editingTagValue}
+                        onChange={e => setEditingTagValue(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') handleEditTag(t.id); if (e.key === 'Escape') setEditingTagId(null) }}
+                        className="border border-primary rounded-full px-3 py-0.5 text-sm font-medium outline-none w-28"
+                      />
+                      <button onClick={() => handleEditTag(t.id)} className="text-xs text-primary font-bold">✓</button>
+                      <button onClick={() => setEditingTagId(null)} className="text-xs text-muted-foreground">✕</button>
+                    </div>
+                  ) : (
+                    <span
+                      className={`inline-flex items-center gap-1.5 bg-secondary/60 hover:bg-secondary text-foreground text-sm font-semibold px-3 py-1 rounded-full transition-colors ${canEditTags ? 'cursor-pointer' : ''}`}
+                      onClick={() => { if (canEditTags) { setEditingTagId(t.id); setEditingTagValue(t.tag) } }}
+                    >
+                      #{t.tag}
+                      {canEditTags && (
+                        <button
+                          className="ml-0.5 text-muted-foreground hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 text-xs leading-none"
+                          onClick={e => { e.stopPropagation(); handleDeleteTag(t.id) }}
+                        >✕</button>
+                      )}
+                    </span>
+                  )}
+                </div>
+              ))}
+
+              {/* Add tag button or input */}
+              {canEditTags && tags.length < 5 && (
+                isAddingTag ? (
+                  <div className="flex items-center gap-1">
+                    <input
+                      autoFocus
+                      value={newTagInput}
+                      onChange={e => setNewTagInput(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') handleAddTag(); if (e.key === 'Escape') { setIsAddingTag(false); setNewTagInput('') } }}
+                      placeholder="태그 입력..."
+                      className="border border-primary rounded-full px-3 py-0.5 text-sm font-medium outline-none w-28"
+                    />
+                    <button onClick={handleAddTag} className="text-xs text-primary font-bold">✓</button>
+                    <button onClick={() => { setIsAddingTag(false); setNewTagInput('') }} className="text-xs text-muted-foreground">✕</button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setIsAddingTag(true)}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-primary border border-primary/30 hover:border-primary hover:bg-primary/5 px-3 py-1 rounded-full transition-colors"
+                  >
+                    + 카테고리
+                  </button>
+                )
+              )}
+
+              {tags.length === 0 && !canEditTags && (
+                <span className="text-xs text-muted-foreground">아직 카테고리가 없습니다.</span>
+              )}
+            </div>
           </div>
+
 
 
           {/* Stats Box */}
@@ -582,72 +646,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
         </DialogContent>
       </Dialog>
 
-      {/* Tag / Category Section */}
-      <div className="bg-white border-x border-b rounded-b-2xl px-8 py-5 shadow-sm">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider mr-1">카테고리</span>
-          
-          {tags.map(t => (
-            <div key={t.id} className="group flex items-center">
-              {editingTagId === t.id ? (
-                <div className="flex items-center gap-1">
-                  <input
-                    autoFocus
-                    value={editingTagValue}
-                    onChange={e => setEditingTagValue(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') handleEditTag(t.id); if (e.key === 'Escape') setEditingTagId(null) }}
-                    className="border border-primary rounded-full px-3 py-0.5 text-sm font-medium outline-none w-28"
-                  />
-                  <button onClick={() => handleEditTag(t.id)} className="text-xs text-primary font-bold">✓</button>
-                  <button onClick={() => setEditingTagId(null)} className="text-xs text-muted-foreground">✕</button>
-                </div>
-              ) : (
-                <span
-                  className={`inline-flex items-center gap-1.5 bg-secondary/60 hover:bg-secondary text-foreground text-sm font-semibold px-3 py-1 rounded-full transition-colors ${canEditTags ? 'cursor-pointer' : ''}`}
-                  onClick={() => { if (canEditTags) { setEditingTagId(t.id); setEditingTagValue(t.tag) } }}
-                >
-                  #{t.tag}
-                  {canEditTags && (
-                    <button
-                      className="ml-0.5 text-muted-foreground hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 text-xs leading-none"
-                      onClick={e => { e.stopPropagation(); handleDeleteTag(t.id) }}
-                    >✕</button>
-                  )}
-                </span>
-              )}
-            </div>
-          ))}
-
-          {/* Add tag button or input */}
-          {canEditTags && tags.length < 5 && (
-            isAddingTag ? (
-              <div className="flex items-center gap-1">
-                <input
-                  autoFocus
-                  value={newTagInput}
-                  onChange={e => setNewTagInput(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') handleAddTag(); if (e.key === 'Escape') { setIsAddingTag(false); setNewTagInput('') } }}
-                  placeholder="태그 입력..."
-                  className="border border-primary rounded-full px-3 py-0.5 text-sm font-medium outline-none w-28"
-                />
-                <button onClick={handleAddTag} className="text-xs text-primary font-bold">✓</button>
-                <button onClick={() => { setIsAddingTag(false); setNewTagInput('') }} className="text-xs text-muted-foreground">✕</button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setIsAddingTag(true)}
-                className="inline-flex items-center gap-1 text-xs font-bold text-primary border border-primary/30 hover:border-primary hover:bg-primary/5 px-3 py-1 rounded-full transition-colors"
-              >
-                + 카테고리
-              </button>
-            )
-          )}
-
-          {tags.length === 0 && !canEditTags && (
-            <span className="text-xs text-muted-foreground">아직 카테고리가 없습니다.</span>
-          )}
-        </div>
-      </div>
+      
 
       {/* Content Area */}
       <div className="grid md:grid-cols-3 gap-8 mt-8">
