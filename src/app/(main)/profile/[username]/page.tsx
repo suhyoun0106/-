@@ -270,15 +270,28 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
   async function handleAddTag() {
     const trimmed = newTagInput.trim()
     if (!trimmed || !profile) return
+    
+    // 중복 연타 방지: 이미 존재하는 태그면 조용히 닫기
+    if (tags.some(t => t.tag === trimmed)) {
+      setNewTagInput('')
+      setIsAddingTag(false)
+      return
+    }
+
     if (tags.length >= 5) { toast.error('태그는 최대 5개까지 추가할 수 있습니다.'); return }
     const { error } = await supabase.from('creator_tags').insert({
       profile_id: profile.id,
       tag: trimmed,
       created_by: currentUser?.id || null
     })
+    
     if (error) {
-      if (error.code === '23505') toast.error('이미 존재하는 태그입니다.')
-      else toast.error('태그 추가 실패: ' + error.message)
+      if (error.code === '23505') {
+        setNewTagInput('')
+        setIsAddingTag(false)
+      } else {
+        toast.error('태그 추가 실패: ' + error.message)
+      }
     } else {
       toast.success('태그 작성을 완료했습니다.')
       setNewTagInput('')
