@@ -137,7 +137,7 @@ export default function FeedPost({
           {showBackButton && (
             <button 
               onClick={() => router.back()}
-              className="absolute -left-11 w-9 h-9 flex items-center justify-center rounded-full bg-secondary/40 hover:bg-secondary transition-colors text-foreground"
+              className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-secondary/40 hover:bg-secondary transition-colors text-foreground"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>

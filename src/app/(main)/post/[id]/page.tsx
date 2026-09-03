@@ -35,7 +35,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
   }
 
   return (
-    <div className="max-w-2xl mx-auto py-8 pl-12 pr-4">
+    <div className="max-w-2xl mx-auto py-8 px-4">
       <div className="flex flex-col gap-8">
         {/* 게시물 본문 (피드 포스트 재사용) */}
         <div className="w-full">
