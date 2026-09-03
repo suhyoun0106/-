@@ -482,69 +482,13 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
               ) : null}
             </div>
 
-            {/* Tag / Category Section - Moved above buttons */}
+            {/* Tag / Category Section - Read Only */}
             <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-4">
               {tags.map(t => (
-                <div key={t.id} className="group flex items-center">
-                  {editingTagId === t.id ? (
-                    <div className="flex items-center gap-1">
-                      <input
-                        autoFocus
-                        maxLength={10}
-                        value={editingTagValue}
-                        onChange={e => setEditingTagValue(e.target.value)}
-                        onKeyDown={e => { if (e.key === 'Enter') handleEditTag(t.id); if (e.key === 'Escape') setEditingTagId(null) }}
-                        className="border border-primary rounded-full px-3 py-0.5 text-sm font-medium outline-none w-28"
-                      />
-                      <button onClick={() => handleEditTag(t.id)} className="text-xs text-primary font-bold">✓</button>
-                      <button onClick={() => setEditingTagId(null)} className="text-xs text-muted-foreground">✕</button>
-                    </div>
-                  ) : (
-                    <span
-                      className={`inline-flex items-center text-blue-600 hover:text-blue-800 text-sm md:text-base transition-colors ${canEditTags ? 'cursor-pointer group-hover:underline' : ''}`}
-                      onClick={() => { if (canEditTags) { setEditingTagId(t.id); setEditingTagValue(t.tag) } }}
-                    >
-                      #{t.tag}
-                      {canEditTags && (
-                        <button
-                          className="ml-1 text-muted-foreground hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 text-xs leading-none"
-                          onClick={e => { e.stopPropagation(); handleDeleteTag(t.id) }}
-                        >✕</button>
-                      )}
-                    </span>
-                  )}
-                </div>
+                <span key={t.id} className="text-blue-600 font-medium text-sm md:text-base">
+                  #{t.tag}
+                </span>
               ))}
-
-              {/* Add tag button or input */}
-              {canEditTags && tags.length < 5 && (
-                isAddingTag ? (
-                  <div className="flex items-center gap-1">
-                    <input
-                      autoFocus
-                      maxLength={10}
-                      value={newTagInput}
-                      onChange={e => setNewTagInput(e.target.value)}
-                      onKeyDown={e => { if (e.key === 'Enter') handleAddTag(); if (e.key === 'Escape') { setIsAddingTag(false); setNewTagInput('') } }}
-                      placeholder="태그 입력..."
-                      className="border border-primary rounded-full px-3 py-0.5 text-sm font-medium outline-none w-28"
-                    />
-                    <button onClick={handleAddTag} className="text-xs text-primary font-bold">✓</button>
-                    <button onClick={() => { setIsAddingTag(false); setNewTagInput('') }} className="text-xs text-muted-foreground">✕</button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setIsAddingTag(true)}
-                    className="inline-flex items-center text-sm md:text-base text-muted-foreground hover:text-primary transition-colors ml-1"
-                  >
-                    +태그추가
-                  </button>
-                )
-              )}
-
-              {tags.length === 0 && !canEditTags && (
-                <span className="text-xs text-muted-foreground">아직 카테고리가 없습니다.</span>
-              )}
             </div>
 
 <div className="flex flex-nowrap gap-2 md:gap-3 items-center w-full overflow-x-auto pb-2 scrollbar-hide">
@@ -696,6 +640,66 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                 placeholder="자신을 소개해보세요" 
               />
             </div>
+            
+            <div className="flex flex-col gap-2 mb-2">
+              <Label>태그 (최대 5개)</Label>
+              <div className="flex flex-wrap items-center gap-2">
+                {tags.map(t => (
+                  <div key={t.id} className="group flex items-center">
+                    {editingTagId === t.id ? (
+                      <div className="flex items-center gap-1">
+                        <input
+                          autoFocus
+                          maxLength={10}
+                          value={editingTagValue}
+                          onChange={e => setEditingTagValue(e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter') handleEditTag(t.id); if (e.key === 'Escape') setEditingTagId(null) }}
+                          className="border border-primary rounded-full px-3 py-0.5 text-sm font-medium outline-none w-28"
+                        />
+                        <button onClick={() => handleEditTag(t.id)} className="text-xs text-primary font-bold">✓</button>
+                        <button onClick={() => setEditingTagId(null)} className="text-xs text-muted-foreground">✕</button>
+                      </div>
+                    ) : (
+                      <span
+                        className="inline-flex items-center gap-1.5 bg-secondary/60 hover:bg-secondary text-foreground text-sm font-semibold px-3 py-1 rounded-full transition-colors cursor-pointer"
+                        onClick={() => { setEditingTagId(t.id); setEditingTagValue(t.tag) }}
+                      >
+                        #{t.tag}
+                        <button
+                          className="ml-0.5 text-muted-foreground hover:text-red-500 transition-colors text-xs leading-none"
+                          onClick={e => { e.stopPropagation(); handleDeleteTag(t.id) }}
+                        >✕</button>
+                      </span>
+                    )}
+                  </div>
+                ))}
+                {isAddingTag ? (
+                  <div className="flex items-center gap-1">
+                    <input
+                      autoFocus
+                      maxLength={10}
+                      value={newTagInput}
+                      onChange={e => setNewTagInput(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') handleAddTag(); if (e.key === 'Escape') { setIsAddingTag(false); setNewTagInput('') } }}
+                      placeholder="태그 입력..."
+                      className="border border-primary rounded-full px-3 py-0.5 text-sm font-medium outline-none w-28"
+                    />
+                    <button onClick={handleAddTag} className="text-xs text-primary font-bold">✓</button>
+                    <button onClick={() => { setIsAddingTag(false); setNewTagInput('') }} className="text-xs text-muted-foreground">✕</button>
+                  </div>
+                ) : (
+                  tags.length < 5 && (
+                    <button
+                      onClick={() => setIsAddingTag(true)}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-primary border border-primary/30 hover:border-primary hover:bg-primary/5 px-3 py-1 rounded-full transition-colors"
+                    >
+                      + 태그 추가
+                    </button>
+                  )
+                )}
+              </div>
+            </div>
+            
             <div className="flex flex-col gap-2">
               <Label>Instagram ID</Label>
               <Input 
