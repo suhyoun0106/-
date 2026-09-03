@@ -231,7 +231,7 @@ export default function CommentsSection({
   )
   
   return (
-    <div className="flex flex-col w-full text-foreground bg-background">
+    <div className="flex flex-col w-full px-3 text-foreground bg-background">
       
       {/* 2. 메인 댓글 입력창 (요청된 2번 이미지 형태 - 단순 라운드 폼) */}
       <div className="mb-8">
@@ -320,7 +320,7 @@ export default function CommentsSection({
                       <div className="text-[14px] mb-2">{parent.content}</div>
                       
                       {/* 액션 버튼 */}
-                      <div className="flex items-center gap-2 mt-1 text-[13px] font-bold text-foreground">
+                      <div className="flex items-center gap-2 mt-1 -ml-2 text-[13px] font-bold text-foreground">
                         <button onClick={() => toggleReaction(parent.id, 'like')} className="flex items-center gap-1.5 hover:bg-secondary p-1.5 px-2 rounded-full transition-colors">
                           <ThumbsUp className={`w-[18px] h-[18px] ${hasUpvoted ? 'fill-foreground' : ''}`} />
                           <span className="text-muted-foreground text-xs">{upvotes > 0 ? upvotes : ''}</span>
