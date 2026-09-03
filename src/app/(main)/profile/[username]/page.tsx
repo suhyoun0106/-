@@ -483,7 +483,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
             </div>
 
             {/* Tag / Category Section - Moved above buttons */}
-            <div className="flex flex-wrap items-center gap-2 mb-2">
+            <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-4">
               {tags.map(t => (
                 <div key={t.id} className="group flex items-center">
                   {editingTagId === t.id ? (
@@ -501,13 +501,13 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                     </div>
                   ) : (
                     <span
-                      className={`inline-flex items-center gap-1.5 bg-secondary/60 hover:bg-secondary text-foreground text-sm font-semibold px-3 py-1 rounded-full transition-colors ${canEditTags ? 'cursor-pointer' : ''}`}
+                      className={`inline-flex items-center text-blue-600 hover:text-blue-800 text-sm md:text-base transition-colors ${canEditTags ? 'cursor-pointer group-hover:underline' : ''}`}
                       onClick={() => { if (canEditTags) { setEditingTagId(t.id); setEditingTagValue(t.tag) } }}
                     >
                       #{t.tag}
                       {canEditTags && (
                         <button
-                          className="ml-0.5 text-muted-foreground hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 text-xs leading-none"
+                          className="ml-1 text-muted-foreground hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 text-xs leading-none"
                           onClick={e => { e.stopPropagation(); handleDeleteTag(t.id) }}
                         >✕</button>
                       )}
@@ -535,9 +535,9 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                 ) : (
                   <button
                     onClick={() => setIsAddingTag(true)}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-primary border border-primary/30 hover:border-primary hover:bg-primary/5 px-3 py-1 rounded-full transition-colors"
+                    className="inline-flex items-center text-sm md:text-base text-muted-foreground hover:text-primary transition-colors ml-1"
                   >
-                    + 카테고리
+                    +태그추가
                   </button>
                 )
               )}
