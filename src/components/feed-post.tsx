@@ -130,7 +130,7 @@ export default function FeedPost({
   }
 
   return (
-    <div className="border rounded-lg bg-card overflow-hidden">
+    <div className={`${showBackButton ? 'bg-background' : 'border rounded-lg bg-card'} overflow-hidden`}>
       {/* 1. 작성자 헤더 */}
       <div className="flex items-center justify-between p-3">
         <div className="flex items-center gap-3">
