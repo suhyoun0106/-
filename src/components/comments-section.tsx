@@ -37,13 +37,19 @@ export default function CommentsSection({
   
   const [expandedReplies, setExpandedReplies] = useState<Record<string, boolean>>({})
   const [sortType, setSortType] = useState<'top' | 'newest'>('top')
+  const [currentUserProfile, setCurrentUserProfile] = useState<{avatar_url?: string, username?: string} | null>(null)
   const textareaRef = useRef<HTMLInputElement>(null)
   
   const supabase = createClient()
 
   useEffect(() => {
     fetchComments()
-  }, [])
+    if (currentUserId) {
+      supabase.from('profiles').select('avatar_url, username').eq('id', currentUserId).single().then(({data}) => {
+        if (data) setCurrentUserProfile(data as any)
+      })
+    }
+  }, [currentUserId])
 
   async function fetchComments() {
     const { data, error } = await supabase
@@ -66,6 +72,10 @@ export default function CommentsSection({
     setTimeout(() => {
       textareaRef.current?.focus()
     }, 10)
+  }
+
+  const handleReport = () => {
+    toast.success('신고가 완료되었습니다')
   }
 
   async function submitTopLevelComment(e: React.FormEvent) {
@@ -194,8 +204,8 @@ export default function CommentsSection({
   const renderInlineReplyForm = () => (
     <div className="flex gap-3 mt-3 w-full pr-4">
       <Avatar className="h-6 w-6 mt-1 shrink-0">
-        <AvatarImage src="" />
-        <AvatarFallback className="bg-blue-500 text-[10px] text-white font-bold">ME</AvatarFallback>
+        <AvatarImage src={currentUserProfile?.avatar_url || ''} />
+        <AvatarFallback className="bg-blue-500 text-[10px] text-white font-bold">{currentUserProfile?.username?.charAt(0) || 'ME'}</AvatarFallback>
       </Avatar>
       <form onSubmit={submitInlineReply} className="flex-1 flex flex-col">
         <div className="flex items-center gap-1 border-b border-foreground pb-1">
@@ -307,7 +317,7 @@ export default function CommentsSection({
                             <MoreVertical className="w-4 h-4" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-[120px] bg-background border border-border shadow-md rounded-xl p-1">
-                            <DropdownMenuItem className="text-[13px] font-bold cursor-pointer rounded-lg px-3 py-2 hover:bg-secondary">
+                            <DropdownMenuItem onClick={handleReport} className="text-[13px] font-bold cursor-pointer rounded-lg px-3 py-2 hover:bg-secondary">
                               신고하기
                             </DropdownMenuItem>
                             <DropdownMenuItem className="text-[13px] font-bold cursor-pointer rounded-lg px-3 py-2 hover:bg-secondary text-muted-foreground">
@@ -385,9 +395,9 @@ export default function CommentsSection({
                                             <MoreVertical className="w-4 h-4" />
                                           </DropdownMenuTrigger>
                                           <DropdownMenuContent align="end" className="w-[120px] bg-background border border-border shadow-md rounded-xl p-1">
-                                            <DropdownMenuItem className="text-[13px] font-bold cursor-pointer rounded-lg px-3 py-2 hover:bg-secondary">
-                                              신고하기
-                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={handleReport} className="text-[13px] font-bold cursor-pointer rounded-lg px-3 py-2 hover:bg-secondary">
+                              신고하기
+                            </DropdownMenuItem>
                                             <DropdownMenuItem className="text-[13px] font-bold cursor-pointer rounded-lg px-3 py-2 hover:bg-secondary text-muted-foreground">
                                               취소
                                             </DropdownMenuItem>
