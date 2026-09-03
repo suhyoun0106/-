@@ -11,9 +11,11 @@ import { createClient } from '@/utils/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Heart, MessageCircle, Send } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<any[]>([])
+  const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
@@ -48,13 +50,22 @@ export default function NotificationsPage() {
 
   // 알림 종류에 따른 아이콘 및 텍스트 렌더링
   function getNotificationContent(type: string, actorName: string) {
+    const NameSpan = () => (
+      <span 
+        className="font-bold hover:underline cursor-pointer" 
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push(`/profile/${actorName}`) }}
+      >
+        {actorName}
+      </span>
+    )
+
     switch(type) {
       case 'like':
-        return { icon: <Heart className="w-5 h-5 text-red-500 fill-red-500" />, text: `${actorName}님이 회원님의 게시물을 좋아합니다.` }
+        return { icon: <Heart className="w-5 h-5 text-red-500 fill-red-500 shrink-0" />, text: <><NameSpan />님이 회원님의 게시물을 좋아합니다.</> }
       case 'comment':
-        return { icon: <MessageCircle className="w-5 h-5 text-blue-500 fill-blue-500" />, text: `${actorName}님이 댓글을 남겼습니다.` }
+        return { icon: <MessageCircle className="w-5 h-5 text-blue-500 fill-blue-500 shrink-0" />, text: <><NameSpan />님이 댓글을 남겼습니다.</> }
       case 'dm':
-        return { icon: <Send className="w-5 h-5 text-green-500 fill-green-500" />, text: `${actorName}님이 메시지를 보냈습니다.` }
+        return { icon: <Send className="w-5 h-5 text-green-500 fill-green-500 shrink-0" />, text: <><NameSpan />님이 메시지를 보냈습니다.</> }
       default:
         return { icon: null, text: '새로운 알림이 있습니다.' }
     }
@@ -73,23 +84,26 @@ export default function NotificationsPage() {
             const linkHref = notif.type === 'dm' ? '/messages' : `/post/${notif.reference_id}`
 
             return (
-              <Link 
+              <div 
                 key={notif.id} 
-                href={linkHref}
-                className={`flex items-center gap-4 p-4 border rounded-lg transition-colors hover:bg-secondary/50 ${!notif.is_read ? 'bg-secondary/20' : 'bg-card'}`}
+                onClick={() => router.push(linkHref)}
+                className={`flex items-center gap-4 p-4 border rounded-lg transition-colors hover:bg-secondary/50 cursor-pointer ${!notif.is_read ? 'bg-secondary/20' : 'bg-card'}`}
               >
-                <Avatar className="h-12 w-12">
+                <Avatar 
+                  className="h-12 w-12 shrink-0 cursor-pointer" 
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push(`/profile/${notif.actor?.username}`) }}
+                >
                   <AvatarImage src={notif.actor?.avatar_url} />
                   <AvatarFallback>{notif.actor?.username?.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 flex items-center gap-2">
                   {icon}
-                  <span className="font-medium text-sm">{text}</span>
+                  <span className="font-medium text-sm break-all">{text}</span>
                 </div>
                 {!notif.is_read && (
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                  <div className="w-2 h-2 rounded-full bg-blue-500 shrink-0"></div>
                 )}
-              </Link>
+              </div>
             )
           })
         )}
