@@ -31,6 +31,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
   const [editBio, setEditBio] = useState('')
   const [editInstagramId, setEditInstagramId] = useState('')
   const [editIsDonationEnabled, setEditIsDonationEnabled] = useState(true)
+  const [editIsStatsPublic, setEditIsStatsPublic] = useState(true)
   const [editIsInstagramPublic, setEditIsInstagramPublic] = useState(false)
   const [cropSrc, setCropSrc] = useState<string | null>(null)
   const [crop, setCrop] = useState({ x: 0, y: 0 })
