@@ -280,6 +280,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
       if (error.code === '23505') toast.error('이미 존재하는 태그입니다.')
       else toast.error('태그 추가 실패: ' + error.message)
     } else {
+      toast.success('태그 작성을 완료했습니다.')
       setNewTagInput('')
       setIsAddingTag(false)
       loadTags(profile.id)
@@ -289,7 +290,10 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
   async function handleDeleteTag(tagId: string) {
     const { error } = await supabase.from('creator_tags').delete().eq('id', tagId)
     if (error) toast.error('태그 삭제 실패')
-    else loadTags(profile.id)
+    else {
+      toast.success('태그를 삭제했습니다.')
+      loadTags(profile.id)
+    }
   }
 
   async function handleEditTag(tagId: string) {
@@ -303,7 +307,11 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
       created_by: currentUser?.id || null
     })
     if (error) toast.error('태그 수정 실패')
-    else { setEditingTagId(null); loadTags(profile.id) }
+    else { 
+      toast.success('태그 수정을 완료했습니다.')
+      setEditingTagId(null)
+      loadTags(profile.id) 
+    }
   }
 
   if (!profile) return <div className="p-8 text-center">Loading profile...</div>
