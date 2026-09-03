@@ -14,6 +14,8 @@ export default function SearchPage() {
   const [liveStream, setLiveStream] = useState<any[]>([])
   const [subscribedIds, setSubscribedIds] = useState<string[]>([])
   const [hotTrend, setHotTrend] = useState<any[]>([])
+  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [isSearching, setIsSearching] = useState(false)
   
   const router = useRouter()
   const supabase = createClient()
@@ -62,6 +64,28 @@ export default function SearchPage() {
       supabase.removeChannel(donationSub)
     }
   }, [])
+
+  useEffect(() => {
+    const q = searchQuery.trim().replace('@', '')
+    if (!q) {
+      setSearchResults([])
+      return
+    }
+
+    const delayDebounceFn = setTimeout(async () => {
+      setIsSearching(true)
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, username, avatar_url, is_claimed')
+        .ilike('username', `%${q}%`)
+        .limit(5)
+      
+      if (data) setSearchResults(data)
+      setIsSearching(false)
+    }, 300)
+
+    return () => clearTimeout(delayDebounceFn)
+  }, [searchQuery, supabase])
 
   async function fetchLeaderboard() {
     const { data, error } = await supabase
@@ -139,7 +163,7 @@ export default function SearchPage() {
   return (
     <div className="max-w-5xl mx-auto py-8 px-4 w-full h-full flex flex-col">
       {/* Search Bar */}
-      <form onSubmit={handleSearch} className="mb-12 relative">
+      <form onSubmit={handleSearch} className="mb-12 relative z-50">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
         <Input 
           className="w-full pl-12 py-6 text-lg rounded-xl bg-secondary/50 border-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -147,6 +171,39 @@ export default function SearchPage() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
+        
+        {searchQuery.trim() && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border overflow-hidden">
+            {isSearching ? (
+              <div className="p-4 text-center text-sm text-muted-foreground">검색 중...</div>
+            ) : searchResults.length > 0 ? (
+              <div className="flex flex-col">
+                {searchResults.map((user) => (
+                  <div 
+                    key={user.id} 
+                    className="flex items-center gap-3 p-3 hover:bg-secondary/50 cursor-pointer transition-colors border-b last:border-b-0"
+                    onClick={() => router.push(`/profile/${user.username}`)}
+                  >
+                    <Avatar className="h-10 w-10 border">
+                      <AvatarImage src={user.avatar_url || ''} />
+                      <AvatarFallback className="bg-secondary font-bold text-sm text-muted-foreground">{user.username.charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-1 font-bold text-sm">
+                        {user.username}
+                        {user.is_claimed && <span className="text-blue-500 text-xs">✓</span>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-4 text-center text-sm text-muted-foreground">
+                "{searchQuery}" 검색 결과가 없습니다.<br />엔터를 누르면 해당 이름으로 프로필로 이동합니다.
+              </div>
+            )}
+          </div>
+        )}
       </form>
 
       <div className="grid md:grid-cols-2 gap-8 flex-1 min-h-0">
