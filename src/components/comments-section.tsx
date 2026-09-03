@@ -241,7 +241,7 @@ export default function CommentsSection({
   )
   
   return (
-    <div className="flex flex-col w-full px-3 text-foreground bg-background">
+    <div className="flex flex-col w-full px-0 text-foreground bg-background">
       
       {/* 2. 메인 댓글 입력창 (요청된 2번 이미지 형태 - 단순 라운드 폼) */}
       <div className="mb-8">

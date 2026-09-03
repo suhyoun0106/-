@@ -132,13 +132,12 @@ export default function FeedPost({
   return (
     <div className={`${showBackButton ? 'bg-background' : 'border rounded-lg bg-card overflow-hidden'}`}>
       {/* 1. 작성자 헤더 */}
-      {/* 1. 작성자 헤더 */}
-      <div className="flex items-center justify-between p-3">
+      <div className={`flex items-center justify-between py-3 relative ${showBackButton ? 'px-0' : 'px-4'}`}>
         <div className="flex items-center gap-3">
           {showBackButton && (
             <button 
               onClick={() => router.back()}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-secondary/40 hover:bg-secondary transition-colors text-foreground -ml-3"
+              className="absolute -left-11 w-9 h-9 flex items-center justify-center rounded-full bg-secondary/40 hover:bg-secondary transition-colors text-foreground"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -184,7 +183,7 @@ export default function FeedPost({
 
       {/* 2. 글 제목 */}
       {post.title && (
-        <div className="px-4 pb-2 cursor-pointer" onClick={() => router.push(`/post/${post.id}`)}>
+        <div className={`pb-2 cursor-pointer ${showBackButton ? 'px-0' : 'px-4'}`} onClick={() => router.push(`/post/${post.id}`)}>
           <h2 className="text-xl font-bold">{post.title}</h2>
         </div>
       )}
@@ -241,7 +240,7 @@ export default function FeedPost({
       )}
 
       {/* 4. 본문 내용 및 액션 버튼 */}
-      <div className="p-3">
+      <div className={`py-3 ${showBackButton ? 'px-0' : 'px-4'}`}>
         {/* 본문 내용 */}
         <div 
           className="text-sm cursor-pointer mb-4"
