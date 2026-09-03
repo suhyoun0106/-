@@ -390,12 +390,10 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
   return (
     <div className="w-full max-w-5xl mx-auto min-h-screen bg-[#fcfcfd] md:p-8">
       {/* Banner / Header */}
-      <div className="bg-white rounded-t-2xl shadow-sm border p-8 md:p-12 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-blue-100 to-indigo-50"></div>
-        
-        <div className="relative z-10 flex flex-col md:flex-row gap-8 items-start">
-          <div className="relative group shrink-0">
-            <Avatar className="h-32 w-32 border-4 border-white shadow-lg ring-2 ring-primary">
+      <div className="bg-white rounded-t-2xl shadow-sm border p-6 md:p-10">
+        <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start">
+          <div className="relative group shrink-0 self-center md:self-start">
+            <Avatar className="h-28 w-28 md:h-36 md:w-36 border border-border shadow-sm">
               <AvatarImage src={profile.avatar_url || ''} />
               <AvatarFallback>{profile.username.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
@@ -416,56 +414,67 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
             )}
           </div>
           
-          <div className="flex-1 mt-4 md:mt-0">
-            <h1 className="text-4xl font-extrabold tracking-tight mb-2">{profile.username}</h1>
-            <div className="flex items-center gap-2 mb-4">
-              {profile.instagram_id && profile.is_instagram_public ? (
-                <span className="text-muted-foreground font-medium">@{profile.instagram_id}</span>
-              ) : isUnclaimed ? (
-                <span className="text-muted-foreground font-medium">@{profile.username}</span>
-              ) : null}
-              {isUnclaimed && (
-                <span className="bg-secondary text-secondary-foreground text-xs px-3 py-1 rounded-full font-bold">
-                  UNCLAIMED ACCOUNT
-                </span>
-              )}
-            </div>
-
-            {(isMe || profile.is_stats_public !== false) && (
-              <div className="flex items-center gap-2 mb-4 text-sm font-semibold text-muted-foreground">
-                <span className="text-foreground tracking-tight">{currentMonthTotal.toLocaleString()}₩</span>
-                <span className="text-xs">/ month</span>
-                <span className="text-border mx-1">|</span>
-                <span className="text-foreground tracking-tight">{currentMonthBackers}</span>
-                <span className="text-xs">backers</span>
-                {isMe && profile.is_stats_public === false && (
-                  <span className="text-xs text-red-500 ml-2 font-bold">(비공개 상태)</span>
+          <div className="flex-1 w-full flex flex-col gap-4 mt-2 md:mt-0">
+            {/* Top Row: Username and Secondary Name */}
+            <div className="flex flex-col gap-1">
+              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">{profile.username}</h1>
+              <div className="flex items-center gap-2">
+                {profile.instagram_id && profile.is_instagram_public ? (
+                  <span className="text-muted-foreground font-medium text-sm md:text-base">@{profile.instagram_id}</span>
+                ) : isUnclaimed ? (
+                  <span className="text-muted-foreground font-medium text-sm md:text-base">@{profile.username}</span>
+                ) : null}
+                {isUnclaimed && (
+                  <span className="bg-secondary text-secondary-foreground text-[10px] px-2 py-0.5 rounded-full font-bold">
+                    UNCLAIMED ACCOUNT
+                  </span>
                 )}
               </div>
-            )}
+            </div>
+
+            {/* Stats Row */}
+            <div className="flex items-center gap-5 md:gap-6 text-sm md:text-base mb-1">
+              <div>
+                <span className="text-muted-foreground mr-1.5">게시물</span>
+                <span className="font-bold">{posts.length}</span>
+              </div>
+              {(isMe || profile.is_stats_public !== false) && (
+                <>
+                  <div>
+                    <span className="text-muted-foreground mr-1.5">후원금액</span>
+                    <span className="font-bold">{currentMonthTotal.toLocaleString()}₩</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground mr-1.5">후원자</span>
+                    <span className="font-bold">{currentMonthBackers}</span>
+                    {isMe && profile.is_stats_public === false && (
+                      <span className="text-xs text-red-500 ml-1 font-bold">(비공개)</span>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
             
-            <div className="mt-2 mb-4 max-w-lg">
+            {/* Bio Row */}
+            <div className="text-sm md:text-base max-w-lg whitespace-pre-wrap mb-2">
               {profile.bio ? (
-                <p className="text-sm whitespace-pre-wrap">{profile.bio}</p>
+                <p>{profile.bio}</p>
               ) : isMe ? (
-                <p className="text-muted-foreground text-sm cursor-pointer hover:underline" onClick={() => {
+                <p className="text-muted-foreground cursor-pointer hover:underline" onClick={() => {
                   setEditBio(profile.bio || '')
-                    setEditInstagramId(profile.instagram_id || '')
-                    setEditIsInstagramPublic(profile.is_instagram_public || false)
-                    setEditIsDonationEnabled(profile.is_donation_enabled !== false)
-                    setEditIsStatsPublic(profile.is_stats_public !== false)
-                    setEditIsStatsPublic(profile.is_stats_public !== false)
+                  setEditInstagramId(profile.instagram_id || '')
+                  setEditIsInstagramPublic(profile.is_instagram_public || false)
+                  setEditIsDonationEnabled(profile.is_donation_enabled !== false)
+                  setEditIsStatsPublic(profile.is_stats_public !== false)
                   setIsEditProfileOpen(true)
                 }}>
                   소개글을 작성해주세요.
                 </p>
               ) : isUnclaimed ? (
-                <p className="text-muted-foreground text-sm">
-                  본인인증이 안된 계정입니다. 후원을 통해 해당 페이지 본인인증을 유도해 보세요!
-                </p>
+                <p className="text-muted-foreground">본인인증이 안된 계정입니다. 후원을 통해 해당 페이지 본인인증을 유도해 보세요!</p>
               ) : null}
             </div>
-            
+
             {/* Tag / Category Section - Moved above buttons */}
             <div className="flex flex-wrap items-center gap-2 mb-6">
               {tags.map(t => (
