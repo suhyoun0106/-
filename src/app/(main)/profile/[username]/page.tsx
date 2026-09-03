@@ -412,9 +412,9 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
   const canEditTags = !!currentUser && (isUnclaimed || isMe)
 
   return (
-    <div className="w-full max-w-5xl mx-auto min-h-screen bg-[#fcfcfd] md:p-8">
+    <div className="w-full max-w-4xl mx-auto min-h-screen bg-background pb-8">
       {/* Banner / Header */}
-      <div className="bg-white rounded-t-2xl shadow-sm border p-6 md:p-10">
+      <div className="p-6 md:p-8">
         <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start">
           <div className="relative group shrink-0 self-center md:self-start">
             <Avatar className="h-28 w-28 md:h-36 md:w-36 border border-border shadow-sm">
