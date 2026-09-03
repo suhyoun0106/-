@@ -788,7 +788,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
           {activeTab === 'donors' && (
             <div className="bg-white rounded-2xl border p-8 shadow-sm">
               <div className="flex items-end justify-between mb-1">
-                <h3 className="text-2xl font-bold">이번 달 Top Donors</h3>
+                <h3 className="text-2xl font-bold">Top Donors</h3>
                 {currentMonthTotal > 0 && (
                   <div className="text-sm font-medium text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full flex items-center gap-2">
                     <span>총 <span className="font-bold text-foreground">{currentMonthTotal.toLocaleString()}₩</span></span>
@@ -797,11 +797,11 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                   </div>
                 )}
               </div>
-              <p className="text-muted-foreground mb-8">Top backers supporting this creator this month</p>
+              <p className="text-muted-foreground mb-8">Top backers supporting this creator</p>
               
               {topDonors.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
-                  아직 이번 달 후원자가 없습니다.
+                  아직 후원자가 없습니다.
                 </div>
               ) : (
                 <div className="space-y-6">
