@@ -550,20 +550,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
 
 
 
-          {/* Stats Box */}
-          {currentMonthTotal > 0 && (
-            <div className="bg-secondary/50 rounded-2xl p-6 flex gap-8 items-center justify-center min-w-[300px]">
-              <div className="text-center">
-                <div className="text-2xl font-black">{currentMonthTotal.toLocaleString()}₩</div>
-                <div className="text-xs text-muted-foreground font-bold mt-1 uppercase">이번 달 DONATION</div>
-              </div>
-              <div className="w-px h-12 bg-border"></div>
-              <div className="text-center">
-                <div className="text-2xl font-black">{currentMonthBackers}</div>
-                <div className="text-xs text-muted-foreground font-bold mt-1 uppercase">BACKERS</div>
-              </div>
-            </div>
-          )}
+          
         </div>
       </div>
 
