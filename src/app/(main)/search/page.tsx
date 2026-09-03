@@ -112,7 +112,7 @@ export default function SearchPage() {
       .from('profiles')
       .select('id, username, avatar_url, is_claimed, total_donations')
       .order('total_donations', { ascending: false })
-      .limit(5)
+      .limit(10)
     
     if (data) {
       setLeaderboard(data)
