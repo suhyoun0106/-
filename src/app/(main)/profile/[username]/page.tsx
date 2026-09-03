@@ -781,7 +781,14 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
         {currentMonthTotal > 0 && (
           <div>
             <div className="bg-white rounded-2xl border p-6 shadow-sm">
-              <h3 className="text-xl font-bold mb-1">이번 달 Top Donors</h3>
+              <div className="flex items-end justify-between mb-1">
+                <h3 className="text-xl font-bold">이번 달 Top Donors</h3>
+                <div className="text-xs font-medium text-muted-foreground bg-secondary/50 px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                  <span>총 <span className="font-bold text-foreground">{currentMonthTotal.toLocaleString()}₩</span></span>
+                  <span className="text-border">|</span>
+                  <span><span className="font-bold text-foreground">{currentMonthBackers}</span>명</span>
+                </div>
+              </div>
               <p className="text-sm text-muted-foreground mb-6">Top backers supporting this creator this month</p>
               
               <div className="space-y-4">
