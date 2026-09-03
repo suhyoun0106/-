@@ -7,15 +7,29 @@ import { Input } from '@/components/ui/input'
 import { createClient } from '@/utils/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import LiveDonationStream from '@/components/live-donation-stream'
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [leaderboard, setLeaderboard] = useState<any[]>([])
   const [liveStream, setLiveStream] = useState<any[]>([])
+  const [subscribedIds, setSubscribedIds] = useState<string[]>([])
   const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
+    async function init() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data } = await supabase.from('donations').select('receiver_id').eq('donor_id', user.id)
+        if (data) {
+          const ids = Array.from(new Set(data.map(d => d.receiver_id)))
+          setSubscribedIds(ids)
+        }
+      }
+    }
+    init()
+    
     fetchLeaderboard()
     fetchLiveStream()
     
@@ -81,6 +95,12 @@ export default function SearchPage() {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </form>
+      
+      {subscribedIds.length > 0 && (
+        <div className="mb-8">
+          <LiveDonationStream subscribedIds={subscribedIds} />
+        </div>
+      )}
 
       <div className="grid md:grid-cols-2 gap-8 flex-1 min-h-0">
         {/* Leaderboard */}

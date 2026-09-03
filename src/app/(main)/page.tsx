@@ -7,7 +7,6 @@ import CommunityDropdown from '@/components/community-dropdown'
 import ScrollHideUI from '@/components/scroll-hide-ui'
 import TopDonorMessage from '@/components/top-donor-message'
 import FeedSearchBar from '@/components/feed-search-bar'
-import LiveDonationStream from '@/components/live-donation-stream'
 
 /**
  * 이 파일은 메인 피드(홈) 페이지입니다.
@@ -164,11 +163,7 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
             />
           )}
           
-          {user && (
-            <LiveDonationStream 
-              subscribedIds={communityId ? [communityId] : sponsoredCommunities.map(c => c.id)}
-            />
-          )}
+          
         </div>
       </ScrollHideUI>
 
