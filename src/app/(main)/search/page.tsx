@@ -16,6 +16,7 @@ export default function SearchPage() {
   const [hotTrend, setHotTrend] = useState<any[]>([])
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [isSearching, setIsSearching] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(-1)
   
   const router = useRouter()
   const supabase = createClient()
@@ -76,11 +77,12 @@ export default function SearchPage() {
       setIsSearching(true)
       const { data } = await supabase
         .from('profiles')
-        .select('id, username, avatar_url, is_claimed')
+        .select('id, username, avatar_url, is_claimed, total_donations')
         .ilike('username', `%${q}%`)
+        .order('total_donations', { ascending: false, nullsFirst: false })
         .limit(5)
       
-      if (data) setSearchResults(data)
+      if (data) { setSearchResults(data); setSelectedIndex(-1); }
       setIsSearching(false)
     }, 300)
 
@@ -160,6 +162,23 @@ export default function SearchPage() {
     router.push(`/profile/${username}`)
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (searchResults.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setSelectedIndex(prev => (prev < searchResults.length - 1 ? prev + 1 : prev))
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setSelectedIndex(prev => (prev > 0 ? prev - 1 : -1))
+      } else if (e.key === 'Enter') {
+        if (selectedIndex >= 0) {
+          e.preventDefault()
+          router.push(`/profile/${searchResults[selectedIndex].username}`)
+        }
+      }
+    }
+  }
+
   return (
     <div className="max-w-5xl mx-auto py-8 px-4 w-full h-full flex flex-col">
       {/* Search Bar */}
@@ -170,6 +189,7 @@ export default function SearchPage() {
           placeholder="Search Instagram ID (e.g. @chulsoo_art)..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
         />
         
         {searchQuery.trim() && (
@@ -178,12 +198,14 @@ export default function SearchPage() {
               <div className="p-4 text-center text-sm text-muted-foreground">검색 중...</div>
             ) : searchResults.length > 0 ? (
               <div className="flex flex-col">
-                {searchResults.map((user) => (
+                {searchResults.map((user, idx) => (
                   <div 
                     key={user.id} 
-                    className="flex items-center gap-3 p-3 hover:bg-secondary/50 cursor-pointer transition-colors border-b last:border-b-0"
+                    className={`flex items-center justify-between p-3 cursor-pointer transition-colors border-b last:border-b-0 ${selectedIndex === idx ? 'bg-secondary' : 'hover:bg-secondary/50'}`}
                     onClick={() => router.push(`/profile/${user.username}`)}
+                    onMouseEnter={() => setSelectedIndex(idx)}
                   >
+                    <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10 border">
                       <AvatarImage src={user.avatar_url || ''} />
                       <AvatarFallback className="bg-secondary font-bold text-sm text-muted-foreground">{user.username.charAt(0).toUpperCase()}</AvatarFallback>
@@ -194,6 +216,12 @@ export default function SearchPage() {
                         {user.is_claimed && <span className="text-blue-500 text-xs">✓</span>}
                       </div>
                     </div>
+                    </div>
+                    {user.total_donations > 0 && (
+                      <div className="text-xs font-bold text-muted-foreground">
+                        {user.total_donations.toLocaleString()} ₩
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
