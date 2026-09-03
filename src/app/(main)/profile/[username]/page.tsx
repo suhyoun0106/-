@@ -270,6 +270,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
   async function handleAddTag() {
     const trimmed = newTagInput.trim()
     if (!trimmed || !profile) return
+    if (trimmed.length > 20) { toast.error('태그는 최대 20자까지만 가능합니다.'); return }
     
     // 중복 연타 방지: 이미 존재하는 태그면 조용히 닫기
     if (tags.some(t => t.tag === trimmed)) {
@@ -312,6 +313,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
   async function handleEditTag(tagId: string) {
     const trimmed = editingTagValue.trim()
     if (!trimmed) return
+    if (trimmed.length > 20) { toast.error('태그는 최대 20자까지만 가능합니다.'); return }
     // delete old and insert new
     await supabase.from('creator_tags').delete().eq('id', tagId)
     const { error } = await supabase.from('creator_tags').insert({
@@ -471,6 +473,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                     <div className="flex items-center gap-1">
                       <input
                         autoFocus
+                        maxLength={20}
                         value={editingTagValue}
                         onChange={e => setEditingTagValue(e.target.value)}
                         onKeyDown={e => { if (e.key === 'Enter') handleEditTag(t.id); if (e.key === 'Escape') setEditingTagId(null) }}
@@ -502,6 +505,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                   <div className="flex items-center gap-1">
                     <input
                       autoFocus
+                      maxLength={20}
                       value={newTagInput}
                       onChange={e => setNewTagInput(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter') handleAddTag(); if (e.key === 'Escape') { setIsAddingTag(false); setNewTagInput('') } }}
