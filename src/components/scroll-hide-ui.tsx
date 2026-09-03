@@ -15,12 +15,12 @@ export default function ScrollHideUI({ children, direction, className }: ScrollH
   
   useEffect(() => {
     // layout.tsx에서 main 태그가 overflow-y-auto를 가지고 있으므로 해당 요소를 찾아서 이벤트를 겁니다.
-    const scrollContainer = document.querySelector('main')
     
-    if (!scrollContainer) return
+    
+    
 
     const handleScroll = () => {
-      const currentScrollY = scrollContainer.scrollTop
+      const currentScrollY = window.scrollY
       
       // 상단(0px)에 가까우면 무조건 보이게 설정
       if (currentScrollY < 50) {
@@ -44,8 +44,8 @@ export default function ScrollHideUI({ children, direction, className }: ScrollH
       lastScrollY.current = currentScrollY
     }
 
-    scrollContainer.addEventListener('scroll', handleScroll, { passive: true })
-    return () => scrollContainer.removeEventListener('scroll', handleScroll)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   return (

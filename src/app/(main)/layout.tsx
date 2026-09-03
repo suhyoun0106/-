@@ -26,10 +26,10 @@ export default async function MainLayout({
 
   return (
     <PresenceProvider userId={user.id}>
-      <div className="flex h-screen bg-background">
+      <div className="flex min-h-screen bg-background">
         <Sidebar unreadCount={count || 0} />
         {/* 사이드바(80px) 너비만큼 우측에 여백을 주어 메인 컨텐츠가 화면의 정확한 중앙에 오도록 함 */}
-        <main className="flex-1 overflow-y-auto pb-16 md:pb-0 md:pr-[80px] relative">
+        <main className="flex-1 pb-16 md:pb-0 md:pr-[80px] relative">
           {children}
         </main>
       </div>
