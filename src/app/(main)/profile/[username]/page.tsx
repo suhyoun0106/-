@@ -42,6 +42,38 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
   
   const [currentMonthTotal, setCurrentMonthTotal] = useState(0)
   const [currentMonthBackers, setCurrentMonthBackers] = useState(0)
+  
+  const [activeTab, setActiveTab] = useState<'posts' | 'liked'>('posts')
+  const [likedPosts, setLikedPosts] = useState<any[]>([])
+  const [hasFetchedLiked, setHasFetchedLiked] = useState(false)
+
+  async function fetchLikedPosts() {
+    if (!profile) return
+    const { data: likedData } = await supabase
+      .from('likes')
+      .select('post_id')
+      .eq('user_id', profile.id)
+    
+    if (likedData && likedData.length > 0) {
+      const postIds = likedData.map(l => l.post_id)
+      const { data: pData } = await supabase
+        .from('posts')
+        .select(`
+          *,
+          profiles!posts_user_id_fkey (id, username, avatar_url, instagram_id, is_instagram_public),
+          post_images (id, image_url, position),
+          likes (id, user_id),
+          shares (id, user_id),
+          comments (id)
+        `)
+        .in('id', postIds)
+        .order('created_at', { ascending: false })
+      setLikedPosts(pData || [])
+    } else {
+      setLikedPosts([])
+    }
+    setHasFetchedLiked(true)
+  }
 
   // Tag system state
   const [tags, setTags] = useState<any[]>([])
