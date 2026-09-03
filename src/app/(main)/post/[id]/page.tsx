@@ -35,23 +35,18 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4">
-      <div className="flex flex-col md:flex-row gap-8 items-start">
-        {/* 왼쪽: 게시물 본문 (피드 포스트 재사용) */}
-        <div className="w-full md:w-[60%] shrink-0">
+    <div className="max-w-2xl mx-auto py-8 px-4">
+      <div className="flex flex-col gap-8">
+        {/* 게시물 본문 (피드 포스트 재사용) */}
+        <div className="w-full">
           <FeedPost post={post} currentUserId={user?.id} showBackButton={true} />
         </div>
 
-      {/* 오른쪽 (또는 아래): 댓글 섹션 */}
-      <div className="w-full md:w-[40%] md:sticky md:top-24 flex flex-col border rounded-lg bg-card overflow-hidden h-[500px] md:h-[calc(100vh-120px)]">
-        <div className="p-4 border-b font-bold shrink-0">
-          댓글
-        </div>
-        <div className="flex-1 overflow-hidden relative min-h-0">
+        {/* 하단: Reddit 스타일 댓글 섹션 */}
+        <div className="w-full">
           <CommentsSection postId={postId} currentUserId={user?.id} postOwnerId={post.user_id} />
         </div>
       </div>
-    </div>
     </div>
   )
 }
