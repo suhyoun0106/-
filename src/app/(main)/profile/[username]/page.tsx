@@ -678,7 +678,12 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                   type="checkbox" 
                   id="instagram-public"
                   checked={editIsInstagramPublic}
-                  onChange={(e) => setEditIsInstagramPublic(e.target.checked)}
+                  onChange={(e) => {
+                    setEditIsInstagramPublic(e.target.checked)
+                    if (!e.target.checked) {
+                      setEditIsDonationEnabled(false)
+                    }
+                  }}
                   className="w-5 h-5 accent-primary cursor-pointer"
                 />
                 <Label htmlFor="instagram-public" className="flex-1 cursor-pointer flex flex-col gap-1">
@@ -691,7 +696,12 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                   type="checkbox" 
                   id="donation-mode"
                   checked={editIsDonationEnabled}
-                  onChange={(e) => setEditIsDonationEnabled(e.target.checked)}
+                  onChange={(e) => {
+                    setEditIsDonationEnabled(e.target.checked)
+                    if (e.target.checked) {
+                      setEditIsInstagramPublic(true)
+                    }
+                  }}
                   className="w-5 h-5 accent-primary cursor-pointer"
                 />
                 <Label htmlFor="donation-mode" className="flex-1 cursor-pointer flex flex-col gap-1">
