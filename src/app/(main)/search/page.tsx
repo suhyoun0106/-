@@ -167,7 +167,7 @@ export default function SearchPage() {
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
         <Input 
           className="w-full pl-12 py-6 text-lg rounded-xl bg-secondary/50 border-none focus-visible:ring-1 focus-visible:ring-ring"
-          placeholder="Search Creator (e.g. @chulsoo_art)..."
+          placeholder="Search Instagram ID (e.g. @chulsoo_art)..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
