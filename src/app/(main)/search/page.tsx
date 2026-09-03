@@ -1,21 +1,27 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Search, Trophy, MessageCircle } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { createClient } from '@/utils/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import LiveDonationStream from '@/components/live-donation-stream'
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [leaderboard, setLeaderboard] = useState<any[]>([])
   const [liveStream, setLiveStream] = useState<any[]>([])
   const [subscribedIds, setSubscribedIds] = useState<string[]>([])
+  
   const router = useRouter()
   const supabase = createClient()
+  
+  // Use a ref to always access the latest subscribedIds inside the realtime callback
+  const subscribedIdsRef = useRef(subscribedIds)
+  useEffect(() => {
+    subscribedIdsRef.current = subscribedIds
+  }, [subscribedIds])
 
   useEffect(() => {
     async function init() {
@@ -25,13 +31,17 @@ export default function SearchPage() {
         if (data) {
           const ids = Array.from(new Set(data.map(d => d.receiver_id)))
           setSubscribedIds(ids)
+          fetchLiveStream(ids)
+        } else {
+          fetchLiveStream([])
         }
+      } else {
+        fetchLiveStream([])
       }
     }
-    init()
     
+    init()
     fetchLeaderboard()
-    fetchLiveStream()
     
     // Subscribe to new donations
     const donationSub = supabase
@@ -40,7 +50,7 @@ export default function SearchPage() {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'donations' },
         (payload) => {
-          fetchLiveStream() // Refresh live stream on new donation
+          fetchLiveStream(subscribedIdsRef.current) // Refresh live stream on new donation
           fetchLeaderboard() // Refresh leaderboard too
         }
       )
@@ -63,13 +73,18 @@ export default function SearchPage() {
     }
   }
 
-  async function fetchLiveStream() {
-    // Fetch recent donations with donor and receiver details
-    const { data, error } = await supabase
+  async function fetchLiveStream(idsToFilter: string[]) {
+    let query = supabase
       .from('donations')
       .select('*, donor:donor_id(username), receiver:receiver_id(username)')
       .order('created_at', { ascending: false })
       .limit(10)
+      
+    if (idsToFilter && idsToFilter.length > 0) {
+      query = query.in('receiver_id', idsToFilter)
+    }
+    
+    const { data, error } = await query
     
     if (data) {
       setLiveStream(data)
@@ -95,12 +110,6 @@ export default function SearchPage() {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </form>
-      
-      {subscribedIds.length > 0 && (
-        <div className="mb-8">
-          <LiveDonationStream subscribedIds={subscribedIds} />
-        </div>
-      )}
 
       <div className="grid md:grid-cols-2 gap-8 flex-1 min-h-0">
         {/* Leaderboard */}
@@ -160,7 +169,11 @@ export default function SearchPage() {
             </div>
             <div>
               <h2 className="text-xl font-bold">Live Donation Stream</h2>
-              <p className="text-sm text-muted-foreground">Real-time activities happening across the platform</p>
+              <p className="text-sm text-muted-foreground">
+                {subscribedIds.length > 0 
+                  ? "Real-time donations to creators you subscribe to" 
+                  : "Real-time activities happening across the platform"}
+              </p>
             </div>
           </div>
 
