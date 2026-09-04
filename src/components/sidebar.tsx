@@ -7,7 +7,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, MessageCircle, Bell, User, PlusSquare, Search, Flame, Settings, LogOut, Menu, X, Receipt } from 'lucide-react'
+import { Home, MessageCircle, Bell, User, SquarePen, Search, Flame, Settings, LogOut, Menu, X, Receipt } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ScrollHideUI from '@/components/scroll-hide-ui'
 import { Badge } from '@/components/ui/badge'
@@ -35,7 +35,7 @@ export default function Sidebar({ unreadCount }: { unreadCount: number }) {
   const navItems = [
     { name: '홈', href: '/', icon: Home },
     { name: '인기', href: '/search', icon: Flame },
-    { name: '만들기', href: '/create', icon: PlusSquare },
+    { name: '만들기', href: '/create', icon: SquarePen },
     { name: '메시지', href: '/messages', icon: MessageCircle },
     { name: '알림', href: '/notifications', icon: Bell, badge: unreadCount },
     { name: '프로필', href: '/profile', icon: User },
