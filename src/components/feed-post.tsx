@@ -12,7 +12,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
-import { ThumbsUp, MessageCircle, Forward, Share2, MoreHorizontal, Edit2, Trash2, ArrowLeft, Eye, EyeOff, BarChart2, Repeat, User } from 'lucide-react'
+import { ThumbsUp, MessageCircle, Forward, Bookmark, Share2, MoreHorizontal, Edit2, Trash2, ArrowLeft, Eye, EyeOff, BarChart2, Repeat, User } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -101,6 +101,53 @@ export default function FeedPost({
   
   const [isLiked, setIsLiked] = useState(initialLiked)
   const [likesCount, setLikesCount] = useState(post.likes?.length || 0)
+  
+  const [isSaved, setIsSaved] = useState(false)
+  const [isSavedLoading, setIsSavedLoading] = useState(true)
+
+  useEffect(() => {
+    if (!currentUserId) {
+      setIsSavedLoading(false)
+      return
+    }
+    const checkSaved = async () => {
+      const supabase = createClient()
+      const { data } = await supabase.from('posts').select('id').match({ user_id: currentUserId, content: `[SAVED:${post.id}]` }).single()
+      if (data) setIsSaved(true)
+      setIsSavedLoading(false)
+    }
+    checkSaved()
+  }, [post.id, currentUserId])
+
+  async function toggleSave(e: any) {
+    e.stopPropagation()
+    if (!currentUserId) return
+    const supabase = createClient()
+    
+    if (isSaved) {
+      setIsSaved(false)
+      await supabase.from('posts').delete().match({ user_id: currentUserId, content: `[SAVED:${post.id}]` })
+      toast.success('사진첩에서 제거되었습니다.')
+    } else {
+      setIsSaved(true)
+      const { data } = await supabase.from('posts').insert({
+        user_id: currentUserId,
+        community_id: null, // intentionally null to hide from main feeds
+        content: `[SAVED:${post.id}]`
+      }).select().single()
+      
+      if (data && post.post_images && post.post_images.length > 0) {
+        const newImages = post.post_images.map((img: any) => ({
+          post_id: data.id,
+          image_url: img.image_url,
+          position: img.position
+        }))
+        await supabase.from('post_images').insert(newImages)
+      }
+      toast.success('사진첩에 저장되었습니다.')
+    }
+  }
+
   const [isReposted, setIsReposted] = useState(initialReposted)
   const [repostCount, setRepostCount] = useState(post.shares?.length || 0)
   const [isExpanded, setIsExpanded] = useState(false)
@@ -387,6 +434,15 @@ export default function FeedPost({
             <BarChart2 className="h-5 w-5" />
             <span>{formatCount(post.view_count || 0)}</span>
           </div>
+
+          {/* 저장하기 */}
+          <button 
+            onClick={toggleSave}
+            disabled={isSavedLoading}
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors font-semibold text-sm"
+          >
+            <Bookmark className={`h-5 w-5 ${isSaved ? 'fill-foreground text-foreground' : 'text-foreground'}`} />
+          </button>
 
           {/* 공유 */}
           <button 

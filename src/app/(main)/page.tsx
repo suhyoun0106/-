@@ -129,7 +129,7 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
   }
 
   let { data: rawPosts, error } = await query.order('created_at', { ascending: false })
-  rawPosts = (rawPosts || []).filter(p => !p.content?.startsWith('<!--HIDDEN-->'))
+  rawPosts = (rawPosts || []).filter(p => !p.content?.startsWith('<!--HIDDEN-->') && !p.content?.startsWith('[SAVED:'))
 
   // ── 7:3 Tag-based related content (no communityId, logged in, has sponsored creators) ──
   let relatedPosts: any[] = []
@@ -168,7 +168,7 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
           .order('created_at', { ascending: false })
           .limit(30)
 
-        if (relatedRaw) relatedPosts = relatedRaw.filter((p: any) => !p.content?.startsWith('<!--HIDDEN-->'))
+        if (relatedRaw) relatedPosts = relatedRaw.filter((p: any) => !p.content?.startsWith('<!--HIDDEN-->') && !p.content?.startsWith('[SAVED:'))
       }
     }
   }

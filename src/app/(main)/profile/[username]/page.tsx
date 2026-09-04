@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -65,7 +66,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
   const [currentMonthTotal, setCurrentMonthTotal] = useState(0)
   const [currentMonthBackers, setCurrentMonthBackers] = useState(0)
   
-  const [activeTab, setActiveTab] = useState<'posts' | 'liked' | 'donors' | 'hidden'>('posts')
+  const [activeTab, setActiveTab] = useState<'posts' | 'liked' | 'donors' | 'hidden' | 'album'>('posts')
   const [likedPosts, setLikedPosts] = useState<any[]>([])
   const [hasFetchedLiked, setHasFetchedLiked] = useState(false)
 
@@ -411,8 +412,9 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
   // Tags can be edited: unclaimed profiles = anyone logged in; claimed profiles = owner only
   const canEditTags = !!currentUser && (isUnclaimed || isMe)
 
-  const visiblePosts = posts.filter(p => !p.content?.startsWith('<!--HIDDEN-->'))
+  const visiblePosts = posts.filter(p => !p.content?.startsWith('<!--HIDDEN-->') && !p.content?.startsWith('[SAVED:'))
   const hiddenPosts = posts.filter(p => p.content?.startsWith('<!--HIDDEN-->'))
+  const albumPosts = posts.filter(p => p.content?.startsWith('[SAVED:'))
 
   return (
     <div className="w-full max-w-4xl mx-auto min-h-screen bg-background pb-8">
@@ -796,6 +798,14 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
             )}
             {isMe && (
               <button 
+                onClick={() => setActiveTab('album')}
+                className={`shrink-0 px-4 py-2 rounded-full font-bold text-sm transition-colors ${activeTab === 'album' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/50'}`}
+              >
+                사진첩
+              </button>
+            )}
+            {isMe && (
+              <button 
                 onClick={() => setActiveTab('hidden')}
                 className={`shrink-0 px-4 py-2 rounded-full font-bold text-sm transition-colors ${activeTab === 'hidden' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/50'}`}
               >
@@ -813,6 +823,27 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
               <div className="flex flex-col w-full max-w-2xl mx-auto">
                 {visiblePosts.map(post => (
                   <FeedPost key={post.id} post={post} currentUserId={currentUser?.id} />
+                ))}
+              </div>
+            )
+          )}
+          
+          {activeTab === 'album' && isMe && (
+            albumPosts.length === 0 ? (
+              <div className="bg-white rounded-2xl border p-12 text-center text-muted-foreground">
+                저장된 사진/영상이 없습니다.
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-1">
+                {albumPosts.flatMap(post => {
+                  const match = post.content?.match(/\[SAVED:(.+?)\]/);
+                  const originalPostId = match ? match[1] : post.id;
+                  return (post.post_images || []).map((img: any) => ({ ...img, originalPostId, albumSortKey: new Date(post.created_at).getTime() }))
+                }).sort((a: any, b: any) => b.albumSortKey - a.albumSortKey).map((img: any) => (
+                  <Link href={`/post/${img.originalPostId}`} key={img.id} className="aspect-square relative cursor-pointer group bg-zinc-100 block">
+                    <img src={img.image_url} alt="saved" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                  </Link>
                 ))}
               </div>
             )
