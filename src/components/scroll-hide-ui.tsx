@@ -54,8 +54,8 @@ export default function ScrollHideUI({ children, direction, className, style }: 
       className={cn(
         "transition-transform duration-300 ease-in-out z-40",
         direction === 'top' 
-          ? (isVisible ? "translate-y-0" : "-translate-y-full md:translate-y-0")
-          : (isVisible ? "translate-y-0" : "translate-y-[200%] md:translate-y-0"),
+          ? (isVisible ? "translate-y-0" : "-translate-y-full")
+          : (isVisible ? "translate-y-0" : "translate-y-[200%]"),
         className
       )}
       style={style}
