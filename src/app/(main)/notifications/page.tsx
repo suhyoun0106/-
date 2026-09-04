@@ -55,7 +55,23 @@ export default function NotificationsPage() {
       .order('created_at', { ascending: false })
 
     if (data) {
-      const dmRefs = data.filter((n: any) => n.type === 'dm' && n.reference_id).map((n: any) => n.reference_id)
+      // 프론트엔드 레벨에서 중복 DM 알림 제거 (동시 다발적 전송에 의한 레이스 컨디션 방어)
+      let seenDmActors = new Set()
+      let dedupedData: any[] = []
+      
+      for (const n of data) {
+        if (n.type === 'dm') {
+          // 아직 처리되지 않은(가장 최신) 발송자의 DM 알림만 표시
+          if (!seenDmActors.has(n.actor_id)) {
+            seenDmActors.add(n.actor_id)
+            dedupedData.push(n)
+          }
+        } else {
+          dedupedData.push(n)
+        }
+      }
+
+      const dmRefs = dedupedData.filter((n: any) => n.type === 'dm' && n.reference_id).map((n: any) => n.reference_id)
       let messagesMap: Record<string, string> = {}
       
       if (dmRefs.length > 0) {
@@ -65,7 +81,7 @@ export default function NotificationsPage() {
         }
       }
       
-      const enrichedData = data.map((n: any) => ({
+      const enrichedData = dedupedData.map((n: any) => ({
         ...n,
         messageContent: n.type === 'dm' && n.reference_id ? messagesMap[n.reference_id] : null
       }))
