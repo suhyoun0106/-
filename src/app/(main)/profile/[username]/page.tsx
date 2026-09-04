@@ -212,17 +212,17 @@ function SortablePhotoItem({ img, onClick }: { img: any, onClick: () => void }) 
       onClick={onClick}
     >
       <div {...attributes} {...listeners} className="absolute inset-0 z-10" />
-      {isVideo ? (
-        <div className="w-full h-full pointer-events-none flex items-center justify-center bg-black">
-          <iframe 
-            src={img.image_url} 
-            className="w-[200%] h-[200%] max-w-none scale-50 origin-center pointer-events-none object-cover"
-            frameBorder="0"
-          />
-        </div>
-      ) : (
-        <img src={img.image_url} alt="saved" className="w-full h-full object-cover pointer-events-none" />
-      )}
+      {(() => {
+        const url = img.image_url || '';
+        if (url.includes('youtube.com/embed/')) {
+          const videoId = url.split('embed/')[1]?.split('?')[0];
+          return <img src={`https://img.youtube.com/vi/${videoId}/0.jpg`} className="w-full h-full object-cover pointer-events-none" />;
+        } else if (url.includes('tiktok.com') || url.includes('instagram.com')) {
+          return <div className="w-full h-full bg-zinc-800" />;
+        } else {
+          return <img src={url} alt="saved" className="w-full h-full object-cover pointer-events-none" />;
+        }
+      })()}
       {isVideo && (
         <div className="absolute inset-0 bg-black/10 flex items-center justify-center pointer-events-none">
           <div className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
@@ -1534,7 +1534,30 @@ export default function UserProfilePage() {
                   onClick={() => setSelectedAlbumMedia(img)}
                   className={`shrink-0 h-[70px] w-[50px] relative overflow-hidden transition-all duration-200 snap-center ${isSelected ? 'opacity-100 scale-100 z-10 rounded border-[1.5px] border-white ring-2 ring-black' : 'opacity-40 hover:opacity-100 scale-95'}`}
                 >
-                  <img src={img.image_url} className="w-full h-full object-cover" loading={isNear ? "eager" : "lazy"} />
+                  
+                  {(() => {
+                    const url = img.image_url || '';
+                    if (url.includes('youtube.com/embed/')) {
+                      const videoId = url.split('embed/')[1]?.split('?')[0];
+                      return (
+                        <>
+                          <img src={`https://img.youtube.com/vi/${videoId}/0.jpg`} className="w-full h-full object-cover" loading={isNear ? "eager" : "lazy"} />
+                          <div className="absolute inset-0 bg-black/20 flex items-center justify-center pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                          </div>
+                        </>
+                      );
+                    } else if (url.includes('tiktok.com') || url.includes('instagram.com')) {
+                      return (
+                        <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        </div>
+                      );
+                    } else {
+                      return <img src={url} className="w-full h-full object-cover" loading={isNear ? "eager" : "lazy"} />;
+                    }
+                  })()}
+
                 </button>
               )
             })}
