@@ -1045,12 +1045,15 @@ export default function UserProfilePage() {
 
       {/* 사진첩 미디어 전체화면 모달 */}
       <Dialog open={!!selectedAlbumMedia} onOpenChange={(open) => !open && setSelectedAlbumMedia(null)}>
-        <DialogContent className="max-w-[100vw] max-h-[100vh] w-screen h-screen p-0 m-0 border-0 bg-black rounded-none flex items-center justify-center">
-          <div className="absolute top-4 right-4 z-50 flex items-center gap-4">
+        <DialogContent 
+          showCloseButton={false} 
+          className="!max-w-none !w-screen !h-screen !p-0 !m-0 !border-0 !bg-black !rounded-none flex items-center justify-center overflow-hidden z-[100]"
+        >
+          <div className="absolute top-4 right-4 z-50 flex items-center gap-3">
             {isMe && (
               <DropdownMenu>
-                <DropdownMenuTrigger className="w-10 h-10 flex items-center justify-center bg-black/50 hover:bg-black/80 rounded-full text-white transition-colors outline-none">
-                  <MoreVertical className="w-5 h-5" />
+                <DropdownMenuTrigger className="p-2 text-white/70 hover:text-white transition-colors outline-none drop-shadow-md">
+                  <MoreVertical className="w-6 h-6" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-32 z-[100]">
                   <DropdownMenuItem 
@@ -1058,19 +1061,11 @@ export default function UserProfilePage() {
                       if (!selectedAlbumMedia) return;
                       if (confirm('이 사진/영상을 사진첩에서 삭제하시겠습니까?')) {
                         const supabase = createClient();
-                        
-                        // If it's a saved post, delete the post. If it's the user's original post, 
-                        // wait, should we delete the original post? The user wants to delete it from the album.
-                        // If it's their own post, deleting the post is the only way to remove it from the album right now.
-                        // Or maybe we can just delete the post_image row? 
                         if (selectedAlbumMedia.isSavedPost) {
                           await supabase.from('posts').delete().eq('id', selectedAlbumMedia.post_id);
                         } else {
-                          // For their own post, we just delete the post_images row so it disappears from the album,
-                          // or delete the post completely? Usually deleting a photo deletes the photo.
                           await supabase.from('post_images').delete().eq('id', selectedAlbumMedia.id);
                         }
-                        
                         toast.success('삭제되었습니다.');
                         setSelectedAlbumMedia(null);
                         loadProfileAndData();
@@ -1083,15 +1078,16 @@ export default function UserProfilePage() {
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
-            <button onClick={() => setSelectedAlbumMedia(null)} className="w-10 h-10 flex items-center justify-center bg-black/50 hover:bg-black/80 rounded-full text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            <button onClick={() => setSelectedAlbumMedia(null)} className="p-2 text-white/70 hover:text-white transition-colors drop-shadow-md outline-none">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
             </button>
           </div>
+          
           {selectedAlbumMedia && (
             (selectedAlbumMedia.image_url.includes('youtube.com/embed') || selectedAlbumMedia.image_url.includes('tiktok.com/embed') || selectedAlbumMedia.image_url.includes('instagram.com/')) ? (
               <iframe 
                 src={selectedAlbumMedia.image_url} 
-                className="w-full h-full max-w-4xl max-h-screen object-contain"
+                className="w-full h-full max-w-5xl object-contain animate-in fade-in zoom-in-95 duration-200"
                 frameBorder="0"
                 allowFullScreen
               />
@@ -1099,7 +1095,7 @@ export default function UserProfilePage() {
               <img 
                 src={selectedAlbumMedia.image_url} 
                 alt="Fullscreen media" 
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain animate-in fade-in zoom-in-95 duration-200"
               />
             )
           )}
