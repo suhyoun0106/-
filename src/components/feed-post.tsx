@@ -459,7 +459,7 @@ export default function FeedPost({
               className="flex items-center gap-1.5 group transition-colors"
             >
               <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
-                <Bookmark className={`h-[18px] w-[18px] sm:h-[20px] sm:w-[20px] ${isSaved ? 'text-zinc-700 fill-zinc-700 dark:text-zinc-300 dark:fill-zinc-300' : ''}`} />
+                <Download className={`h-[18px] w-[18px] sm:h-[20px] sm:w-[20px] ${isSaved ? 'text-zinc-700 fill-zinc-700 dark:text-zinc-300 dark:fill-zinc-300' : ''}`} />
               </div>
             </button>
           </div>
