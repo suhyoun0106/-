@@ -500,10 +500,9 @@ export default function UserProfilePage() {
     }
   }
 
-  if (!profile) return <div className="p-8 text-center">Loading profile...</div>
 
-  const isUnclaimed = profile.is_claimed === false
-  const isMe = currentUser?.id === profile.id
+  const isUnclaimed = profile?.is_claimed === false
+  const isMe = currentUser?.id && currentUser.id === profile?.id
   // Tags can be edited: unclaimed profiles = anyone logged in; claimed profiles = owner only
   const canEditTags = !!currentUser && (isUnclaimed || isMe)
 
@@ -547,6 +546,8 @@ export default function UserProfilePage() {
   }, [albumPosts, visiblePosts, currentUser?.id]);
 
 
+
+  if (!profile) return <div className="p-8 text-center">Loading profile...</div>
 
   return (
     <div className="w-full max-w-4xl mx-auto min-h-screen bg-background pb-8">
