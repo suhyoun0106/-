@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { LogOut, Send, UserPlus, ArrowLeft } from 'lucide-react'
+import { LogOut, Send, UserPlus, ArrowLeft, Home, User } from 'lucide-react'
 import { Message, MessageContent } from '@/components/ui/message'
 import { Bubble, BubbleContent } from '@/components/ui/bubble'
 import { Attachment, AttachmentMedia, AttachmentContent, AttachmentTitle, AttachmentDescription, AttachmentActions, AttachmentAction } from '@/components/ui/attachment'
@@ -181,24 +181,28 @@ export default function ChatUI({ currentUser }: { currentUser: any }) {
     <div className="flex w-full h-full border rounded-lg overflow-hidden bg-background">
       {/* Sidebar */}
       <div className={`w-full md:w-80 border-r flex-col bg-card ${selectedFriend ? 'hidden md:flex' : 'flex'}`}>
-        <div className="p-4 border-b flex items-center justify-between">
-          <h2 className="font-bold text-xl">{currentUser?.username}</h2>
-          <Button variant="ghost" size="icon" onClick={handleLogout}>
-            <LogOut className="h-5 w-5" />
+        <div className="p-4 border-b flex items-center justify-between gap-3 bg-white/60 dark:bg-black/60 backdrop-blur-xl" style={{ WebkitBackdropFilter: "blur(20px) saturate(180%)", backdropFilter: "blur(20px) saturate(180%)" }}>
+          {/* 모바일 홈 버튼 */}
+          <Button variant="outline" size="icon" className="rounded-full shrink-0 md:hidden bg-white/80 dark:bg-black/80 backdrop-blur-xl border-border/50 shadow-sm" onClick={() => router.push('/')}>
+            <Home className="h-5 w-5" />
           </Button>
-        </div>
-        
-        <div className="p-4 border-b">
-          <form onSubmit={addFriend} className="flex gap-2">
+
+          <form onSubmit={addFriend} className="flex-1 flex gap-2">
             <Input 
               placeholder="유저 이름으로 친구 추가" 
               value={searchUsername}
               onChange={(e) => setSearchUsername(e.target.value)}
+              className="rounded-full bg-white/80 dark:bg-black/80 backdrop-blur-xl border-border/50 shadow-sm font-medium"
             />
-            <Button type="submit" size="icon" variant="secondary">
+            <Button type="submit" size="icon" variant="secondary" className="rounded-full shrink-0 bg-white/80 dark:bg-black/80 backdrop-blur-xl border border-border/50 shadow-sm">
               <UserPlus className="h-4 w-4" />
             </Button>
           </form>
+
+          {/* 모바일 프로필 버튼 */}
+          <Button variant="outline" size="icon" className="rounded-full shrink-0 md:hidden bg-white/80 dark:bg-black/80 backdrop-blur-xl border-border/50 shadow-sm" onClick={() => router.push('/profile')}>
+            <User className="h-5 w-5" />
+          </Button>
         </div>
 
         <ScrollArea className="flex-1">
