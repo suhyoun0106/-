@@ -9,7 +9,9 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Heart, MessageCircle, Send } from 'lucide-react'
+import { Heart, MessageCircle, Send, Home, User } from 'lucide-react'
+import ScrollHideUI from '@/components/scroll-hide-ui'
+import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
@@ -72,10 +74,35 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="max-w-xl mx-auto py-8 px-4">
-      <h1 className="text-2xl font-bold mb-6">알림</h1>
+    <div className="max-w-xl mx-auto pb-8">
+      <ScrollHideUI direction="top" className="sticky top-0 z-40 px-4 pt-8 md:pt-8 pb-3">
+        {/* 모바일 화면용 그라데이션 블러 배경 (데스크탑에서도 적용) */}
+        <div 
+          className="absolute inset-0 z-0 dark:bg-black/40 bg-white/40"
+          style={{
+            backdropFilter: 'blur(20px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)'
+          }}
+        />
+        
+        <div className="flex flex-row items-center justify-between gap-3 relative z-10 h-[44px]">
+          {/* 모바일 홈 버튼 */}
+          <Button variant="outline" size="icon" className="rounded-full shrink-0 md:hidden bg-white/80 dark:bg-black/80 backdrop-blur-xl border-border/50 shadow-sm outline-none" onClick={() => router.push('/')}>
+            <Home className="h-5 w-5" />
+          </Button>
+
+          {/* 데스크탑에서는 왼쪽 정렬, 모바일에서는 가운데 정렬처럼 보이게 */}
+          <h1 className="text-2xl font-bold flex-1 text-center md:text-left">알림</h1>
+
+          {/* 모바일 프로필 버튼 */}
+          <Button variant="outline" size="icon" className="rounded-full shrink-0 md:hidden bg-white/80 dark:bg-black/80 backdrop-blur-xl border-border/50 shadow-sm outline-none" onClick={() => router.push('/profile')}>
+            <User className="h-5 w-5" />
+          </Button>
+        </div>
+      </ScrollHideUI>
       
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 px-4 pt-4">
         {notifications.length === 0 ? (
           <p className="text-muted-foreground text-center py-10">새로운 알림이 없습니다.</p>
         ) : (
