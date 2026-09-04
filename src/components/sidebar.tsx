@@ -120,6 +120,7 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
   const menuRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
   const router = useRouter()
+  const isProfile = pathname.startsWith('/profile')
 
   if (pathname.startsWith('/post/') || pathname.startsWith('/create')) return null;
 
@@ -145,7 +146,7 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
   return (
     <div className="md:hidden">
       <ScrollHideUI direction="top" className="fixed top-0 left-0 right-0 z-50 pointer-events-none h-0">
-        <div className="absolute top-[16px] left-[16px]">
+        <div className={`absolute top-[16px] ${isProfile ? "right-[16px]" : "left-[16px]"}`}>
           <div 
             ref={menuRef}
             className={cn(
@@ -183,7 +184,7 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
                     >
                       <Settings className="w-5 h-5" />
                     </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" side="right" sideOffset={16} className="w-48 rounded-2xl p-2 z-[70]">
+                  <DropdownMenuContent align="start" side={isProfile ? "left" : "right"} sideOffset={16} className="w-48 rounded-2xl p-2 z-[70]">
                     <DropdownMenuItem onClick={() => { setIsOpen(false); router.push('/donations') }} className="font-bold cursor-pointer h-12 text-base rounded-xl focus:bg-secondary outline-none mb-1">
                       <Receipt className="mr-3 h-5 w-5" />
                       <span>후원 기록</span>
@@ -199,6 +200,7 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
           </div>
         </div>
 
+        {!isProfile && (
         <div className="absolute top-[16px] right-[16px]">
           <div 
             onClick={() => router.push('/profile')}
@@ -208,6 +210,7 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
             <User className="w-5 h-5 text-black" />
           </div>
         </div>
+        )}
       </ScrollHideUI>
     </div>
   )
