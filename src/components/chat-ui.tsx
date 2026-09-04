@@ -226,7 +226,7 @@ export default function ChatUI({ currentUser }: { currentUser: any }) {
   }
 
   return (
-    <div className="flex w-full h-full border rounded-lg overflow-hidden bg-background">
+    <div className="flex w-full min-h-screen md:min-h-0 h-full md:border md:rounded-lg md:overflow-hidden bg-background">
       {/* Sidebar */}
       <div className={`w-full md:w-80 border-r flex-col bg-card ${selectedFriend ? 'hidden md:flex' : 'flex'}`}>
         {/* 모바일 고정 프로필 버튼 */}
