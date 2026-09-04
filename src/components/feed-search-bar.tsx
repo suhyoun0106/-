@@ -1,6 +1,6 @@
 'use client'
 
-import { Search, Flame } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, FormEvent, useEffect, useRef } from 'react'
 import { createClient } from '@/utils/supabase/client'
@@ -70,7 +70,7 @@ export default function FeedSearchBar() {
   return (
     <div ref={containerRef} className="flex-1 relative flex flex-col z-50">
       <form onSubmit={handleSubmit} className="relative flex items-center h-[44px]">
-        <Flame className="absolute left-4 w-5 h-5 text-orange-500 z-10" />
+        <Search className="absolute left-4 w-5 h-5 text-muted-foreground z-10" />
         <input
           type="text"
           placeholder="아이디, 제목, 내용 검색..."
