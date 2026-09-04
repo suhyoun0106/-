@@ -53,15 +53,34 @@ function SortablePhotoItem({ img, onClick }: { img: any, onClick: () => void }) 
     opacity: isDragging ? 0.8 : 1,
   };
 
+  const isVideo = img.image_url?.includes('youtube.com/embed') || img.image_url?.includes('tiktok.com/embed') || img.image_url?.includes('instagram.com/');
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className="aspect-square relative cursor-pointer group bg-zinc-100 block"
+      className="aspect-square relative cursor-pointer group bg-zinc-200 block overflow-hidden"
       onClick={onClick}
     >
       <div {...attributes} {...listeners} className="absolute inset-0 z-10" />
-      <img src={img.image_url} alt="saved" className="w-full h-full object-cover pointer-events-none" />
+      {isVideo ? (
+        <div className="w-full h-full pointer-events-none flex items-center justify-center bg-black">
+          <iframe 
+            src={img.image_url} 
+            className="w-[200%] h-[200%] max-w-none scale-50 origin-center pointer-events-none object-cover"
+            frameBorder="0"
+          />
+        </div>
+      ) : (
+        <img src={img.image_url} alt="saved" className="w-full h-full object-cover pointer-events-none" />
+      )}
+      {isVideo && (
+        <div className="absolute inset-0 bg-black/10 flex items-center justify-center pointer-events-none">
+          <div className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </div>
+        </div>
+      )}
       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
     </div>
   );
