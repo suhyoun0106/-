@@ -12,7 +12,7 @@ import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
-import { ThumbsUp, MessageCircle, Forward, Download, Share2, MoreHorizontal, Edit2, Trash2, ArrowLeft, Eye, EyeOff, BarChart2, Repeat, User } from 'lucide-react'
+import { Heart, MessageCircle, Forward, Bookmark, Share, Download, Share2, MoreHorizontal, Edit2, Trash2, ArrowLeft, Eye, EyeOff, BarChart2, Repeat, User } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -399,85 +399,94 @@ export default function FeedPost({
           )}
         </div>
 
-        {/* 액션 버튼 (좋아요, 댓글, 공유) */}
-        <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
-          {/* 좋아요 */}
-          <button 
-            onClick={toggleLike} 
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors font-semibold text-sm"
-          >
-            <ThumbsUp className={`h-5 w-5 ${isLiked ? 'text-green-500 fill-green-500' : 'text-foreground'}`} />
-            <span className={isLiked ? 'text-green-500' : ''}>{formatCount(likesCount)}</span>
-          </button>
-          
-          {/* 댓글 */}
-          <Link 
-            href={`/post/${post.id}`}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors font-semibold text-sm"
-          >
-            <MessageCircle className={`h-5 w-5 ${hasCommented ? 'text-green-500' : 'text-foreground'}`} />
-            <span className={hasCommented ? 'text-green-500' : ''}>{formatCount(commentCount)}</span>
-          </Link>
+        {/* X(트위터) 스타일 액션 버튼 */}
+        <div className="flex items-center justify-between text-muted-foreground pt-1" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center gap-6 sm:gap-10">
+            {/* 댓글 */}
+            <Link 
+              href={`/post/${post.id}`}
+              className="flex items-center gap-1.5 group transition-colors"
+            >
+              <div className="p-2 -ml-2 rounded-full group-hover:bg-blue-500/10 group-hover:text-blue-500 transition-colors">
+                <MessageCircle className={`h-4 w-4 sm:h-[18px] sm:w-[18px] ${hasCommented ? 'text-blue-500 fill-blue-500' : ''}`} />
+              </div>
+              <span className={`text-xs sm:text-sm font-medium ${hasCommented ? 'text-blue-500' : 'group-hover:text-blue-500'}`}>{formatCount(commentCount)}</span>
+            </Link>
 
-          {/* 리포스트 */}
-          <button 
-            onClick={async (e) => {
-              e.stopPropagation();
-              if (!currentUserId) return;
-              const newIsReposted = !isReposted;
-              setIsReposted(newIsReposted);
-              setRepostCount((prev: number) => newIsReposted ? prev + 1 : prev - 1);
-              const supabase = createClient();
-              if (newIsReposted) {
-                await supabase.from('shares').insert({ post_id: post.id, user_id: currentUserId });
-                await supabase.from('posts').insert({ user_id: currentUserId, community_id: currentUserId, content: `[REPOST:${post.id}]` });
-                // 리포스트 수도 증가시키기 위해 shares 테이블에 기록
-                await supabase.from('shares').insert({ post_id: post.id, user_id: currentUserId });
-                
-                if (post.user_id !== currentUserId) {
-                  await supabase.from('notifications').insert({ user_id: post.user_id, actor_id: currentUserId, type: 'repost', reference_id: post.id })
+            {/* 리포스트 */}
+            <button 
+              onClick={async (e) => {
+                e.stopPropagation();
+                if (!currentUserId) return;
+                const newIsReposted = !isReposted;
+                setIsReposted(newIsReposted);
+                setRepostCount((prev: number) => newIsReposted ? prev + 1 : prev - 1);
+                const supabase = createClient();
+                if (newIsReposted) {
+                  await supabase.from('shares').insert({ post_id: post.id, user_id: currentUserId });
+                  await supabase.from('posts').insert({ user_id: currentUserId, community_id: currentUserId, content: `[REPOST:${post.id}]` });
+                  if (post.user_id !== currentUserId) {
+                    await supabase.from('notifications').insert({ user_id: post.user_id, actor_id: currentUserId, type: 'repost', reference_id: post.id })
+                  }
+                  toast.success('게시물을 리포스트했습니다.');
+                  router.refresh();
+                } else {
+                  await supabase.from('shares').delete().match({ post_id: post.id, user_id: currentUserId });
+                  await supabase.from('posts').delete().match({ user_id: currentUserId, content: `[REPOST:${post.id}]` });
+                  toast.success('리포스트를 취소했습니다.');
+                  router.refresh();
                 }
-                toast.success('게시물을 리포스트했습니다.');
-                router.refresh();
-              } else {
-                await supabase.from('shares').delete().match({ post_id: post.id, user_id: currentUserId });
-                await supabase.from('posts').delete().match({ user_id: currentUserId, content: `[REPOST:${post.id}]` });
-                toast.success('리포스트를 취소했습니다.');
-                router.refresh();
-              }
-            }}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors font-semibold text-sm"
-          >
-            <Repeat className={`h-5 w-5 ${isReposted ? 'text-green-500' : 'text-foreground'}`} />
-            <span className={isReposted ? 'text-green-500' : ''}>{formatCount(repostCount)}</span>
-          </button>
+              }}
+              className="flex items-center gap-1.5 group transition-colors"
+            >
+              <div className="p-2 -ml-2 rounded-full group-hover:bg-green-500/10 group-hover:text-green-500 transition-colors">
+                <Repeat className={`h-4 w-4 sm:h-[18px] sm:w-[18px] ${isReposted ? 'text-green-500' : ''}`} />
+              </div>
+              <span className={`text-xs sm:text-sm font-medium ${isReposted ? 'text-green-500' : 'group-hover:text-green-500'}`}>{formatCount(repostCount)}</span>
+            </button>
 
-          {/* 뷰 카운트 */}
-          <div className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full font-semibold text-sm">
-            <BarChart2 className="h-5 w-5" />
-            <span>{formatCount(post.view_count || 0)}</span>
+            {/* 좋아요 */}
+            <button 
+              onClick={toggleLike} 
+              className="flex items-center gap-1.5 group transition-colors"
+            >
+              <div className="p-2 -ml-2 rounded-full group-hover:bg-red-500/10 group-hover:text-red-500 transition-colors">
+                <Heart className={`h-4 w-4 sm:h-[18px] sm:w-[18px] ${isLiked ? 'text-red-500 fill-red-500' : ''}`} />
+              </div>
+              <span className={`text-xs sm:text-sm font-medium ${isLiked ? 'text-red-500' : 'group-hover:text-red-500'}`}>{formatCount(likesCount)}</span>
+            </button>
+
+            {/* 뷰 카운트 */}
+            <div className="flex items-center gap-1.5 group transition-colors cursor-default">
+              <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-500 transition-colors">
+                <BarChart2 className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+              </div>
+              <span className="text-xs sm:text-sm font-medium group-hover:text-zinc-500">{formatCount(post.view_count || 0)}</span>
+            </div>
           </div>
 
-          {/* 공유 */}
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsShareOpen(true);
-            }}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors font-semibold text-sm"
-          >
-            <Forward className="h-5 w-5" />
-            <span>공유</span>
-          </button>
+          <div className="flex items-center gap-1 sm:gap-2">
+            {/* 다운로드 (저장하기/북마크) */}
+            <button 
+              onClick={toggleSave}
+              disabled={isSavedLoading}
+              className="p-2 rounded-full hover:bg-blue-500/10 hover:text-blue-500 transition-colors"
+            >
+              <Bookmark className={`h-4 w-4 sm:h-[18px] sm:w-[18px] ${isSaved ? 'text-blue-500 fill-blue-500' : ''}`} />
+            </button>
 
-          {/* 다운로드 (저장하기) */}
-          <button 
-            onClick={toggleSave}
-            disabled={isSavedLoading}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors font-semibold text-sm"
-          >
-            <Download className={`h-5 w-5 ${isSaved ? 'text-green-500' : 'text-foreground'}`} />
-          </button></div>
+            {/* 공유 */}
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsShareOpen(true);
+              }}
+              className="p-2 rounded-full hover:bg-blue-500/10 hover:text-blue-500 transition-colors"
+            >
+              <Share className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+            </button>
+          </div>
+        </div>
       </div>
 
       <Dialog open={isShareOpen} onOpenChange={setIsShareOpen}>
