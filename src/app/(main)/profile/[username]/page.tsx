@@ -1275,6 +1275,12 @@ export default function UserProfilePage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-32 z-[100]">
                     <DropdownMenuItem 
+                      onClick={() => toast('편집 기능은 준비 중입니다.')} 
+                      className="font-bold cursor-pointer"
+                    >
+                      편집하기
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
                       onClick={async () => {
                         if (!selectedAlbumMedia) return;
                         if (confirm('이 사진/영상을 사진첩에서 삭제하시겠습니까?')) {
@@ -1302,7 +1308,31 @@ export default function UserProfilePage() {
           </div>
 
           {/* Center Image */}
-          <div className="flex-1 flex items-center justify-center relative w-full h-full overflow-hidden pb-20">
+          <div 
+            className="flex-1 flex items-center justify-center relative w-full h-full overflow-hidden pb-20 touch-pan-y select-none"
+            onPointerDown={(e) => {
+              e.currentTarget.dataset.startX = e.clientX.toString();
+              e.currentTarget.dataset.time = Date.now().toString();
+            }}
+            onPointerUp={(e) => {
+              const startX = parseFloat(e.currentTarget.dataset.startX || '0');
+              const startTime = parseInt(e.currentTarget.dataset.time || '0');
+              const endX = e.clientX;
+              const diff = startX - endX;
+              const timeDiff = Date.now() - startTime;
+              
+              if (Math.abs(diff) > 50 && timeDiff < 500) {
+                 const idx = orderedAlbumImages.findIndex(i => i.album_unique_id === selectedAlbumMedia?.album_unique_id);
+                 if (diff > 0) {
+                    // Swiped left, next
+                    if (idx !== -1 && idx < orderedAlbumImages.length - 1) setSelectedAlbumMedia(orderedAlbumImages[idx + 1]);
+                 } else {
+                    // Swiped right, prev
+                    if (idx > 0) setSelectedAlbumMedia(orderedAlbumImages[idx - 1]);
+                 }
+              }
+            }}
+          >
              {selectedAlbumMedia && (
                (selectedAlbumMedia.image_url.includes('youtube.com/embed') || selectedAlbumMedia.image_url.includes('tiktok.com/embed') || selectedAlbumMedia.image_url.includes('instagram.com/')) ? (
                  <iframe 
@@ -1322,15 +1352,8 @@ export default function UserProfilePage() {
                )
              )}
 
-             {/* Navigation Overlay Zones */}
-             <div className="absolute left-0 top-0 w-[40%] h-full cursor-pointer z-40" onClick={() => {
-                const idx = orderedAlbumImages.findIndex(i => i.album_unique_id === selectedAlbumMedia?.album_unique_id);
-                if (idx > 0) setSelectedAlbumMedia(orderedAlbumImages[idx - 1]);
-             }} />
-             <div className="absolute right-0 top-0 w-[40%] h-full cursor-pointer z-40" onClick={() => {
-                const idx = orderedAlbumImages.findIndex(i => i.album_unique_id === selectedAlbumMedia?.album_unique_id);
-                if (idx !== -1 && idx < orderedAlbumImages.length - 1) setSelectedAlbumMedia(orderedAlbumImages[idx + 1]);
-             }} />
+             
+             
           </div>
 
           {/* Bottom Thumbnails Strip */}
