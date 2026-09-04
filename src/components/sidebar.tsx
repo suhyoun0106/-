@@ -122,7 +122,7 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
   const router = useRouter()
   const isProfile = pathname.startsWith('/profile')
 
-  if (pathname.startsWith('/post/') || pathname.startsWith('/create')) return null;
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -142,6 +142,8 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
       window.removeEventListener('touchstart', handleClickOutside)
     }
   }, [isOpen])
+
+  if (pathname.startsWith('/post/') || pathname.startsWith('/create')) return null;
 
   return (
     <div className="md:hidden">
