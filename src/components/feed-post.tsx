@@ -42,6 +42,11 @@ import { formatTimeAgo } from '@/lib/format-time'
 
 import { useRouter } from 'next/navigation'
 
+function formatCount(count: number) {
+  if (!count) return 0;
+  return new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(count);
+}
+
 export default function FeedPost({ 
   post, 
   currentUserId,
@@ -338,7 +343,7 @@ export default function FeedPost({
             className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-secondary/80 transition-colors font-semibold text-sm"
           >
             <ThumbsUp className={`h-5 w-5 ${isLiked ? 'fill-foreground text-foreground' : 'text-foreground'}`} />
-            <span>{likesCount}</span>
+            <span>{formatCount(likesCount)}</span>
           </button>
           
           {/* 댓글 */}
@@ -347,7 +352,7 @@ export default function FeedPost({
             className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-secondary/80 transition-colors font-semibold text-sm"
           >
             <MessageCircle className="h-5 w-5" />
-            <span>{post.comments?.length || 0}</span>
+            <span>{formatCount(post.comments?.length || 0)}</span>
           </Link>
 
           {/* 리포스트 */}
@@ -374,13 +379,13 @@ export default function FeedPost({
             className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-secondary/80 transition-colors font-semibold text-sm"
           >
             <Repeat className={`h-5 w-5 ${isReposted ? 'text-green-500' : 'text-foreground'}`} />
-            <span className={isReposted ? 'text-green-500' : ''}>{repostCount}</span>
+            <span className={isReposted ? 'text-green-500' : ''}>{formatCount(repostCount)}</span>
           </button>
 
           {/* 뷰 카운트 */}
           <div className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full font-semibold text-sm">
             <BarChart2 className="h-5 w-5" />
-            <span>{post.view_count || 0}</span>
+            <span>{formatCount(post.view_count || 0)}</span>
           </div>
 
           {/* 공유 */}
