@@ -221,20 +221,20 @@ export default function ChatUI({ currentUser }: { currentUser: any }) {
       toast.error('메시지 전송 실패')
     } else if (insertedMsg) {
       // 메시지를 여러 번 보내도 알림은 1개만 (안 읽은 알림이 없을 때만 생성)
-      const { data: existingNotif } = await supabase
+      const { data: existingNotifs } = await supabase
         .from('notifications')
         .select('id')
         .eq('user_id', selectedFriend.id)
         .eq('actor_id', currentUser.id)
         .eq('type', 'dm')
         .eq('is_read', false)
-        .maybeSingle()
+        .limit(1)
         
-      if (existingNotif) {
+      if (existingNotifs && existingNotifs.length > 0) {
         // 읽지 않은 기존 알림이 있다면, 최근 메시지 ID와 시간으로 업데이트
         await supabase.from('notifications')
           .update({ reference_id: insertedMsg.id, created_at: new Date().toISOString() })
-          .eq('id', existingNotif.id)
+          .eq('id', existingNotifs[0].id)
       } else {
         await supabase.from('notifications').insert({
           user_id: selectedFriend.id,

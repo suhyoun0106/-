@@ -22,7 +22,7 @@ export default async function MainLayout({
     .from('notifications')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', user.id)
-    .neq('type', 'dm')
+
     .eq('is_read', false)
 
   // 안 읽은 메시지 알림 개수 가져오기

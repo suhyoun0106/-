@@ -43,6 +43,36 @@ export default function Sidebar({ unreadNotifCount, unreadMsgCount }: { unreadNo
     if (pathname === '/messages') setLocalMsgCount(0)
   }, [pathname])
 
+  useEffect(() => {
+    let sub: any = null
+    const setupRealtime = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      sub = supabase.channel('realtime:notifications')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+          (payload) => {
+            const notif = payload.new
+            if (notif.type === 'dm') {
+              if (pathname !== '/messages') setLocalMsgCount(prev => prev + 1)
+              // 알림 메뉴에도 dm을 포함하기로 했으므로 같이 올려줌
+              if (pathname !== '/notifications') setLocalNotifCount(prev => prev + 1)
+            } else {
+              if (pathname !== '/notifications') setLocalNotifCount(prev => prev + 1)
+            }
+          }
+        )
+        .subscribe()
+    }
+    setupRealtime()
+
+    return () => {
+      if (sub) supabase.removeChannel(sub)
+    }
+  }, [pathname])
+
   async function handleLogout() {
     await supabase.auth.signOut()
     router.push('/login')
