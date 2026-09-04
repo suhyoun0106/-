@@ -6,18 +6,16 @@ import { Search, Trophy, MessageCircle } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { createClient } from '@/utils/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import ScrollHideUI from '@/components/scroll-hide-ui'
+import FeedSearchBar from '@/components/feed-search-bar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 export default function SearchPage() {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [leaderboard, setLeaderboard] = useState<any[]>([])
+    const [leaderboard, setLeaderboard] = useState<any[]>([])
   const [liveStream, setLiveStream] = useState<any[]>([])
   const [subscribedIds, setSubscribedIds] = useState<string[]>([])
   const [hotTrend, setHotTrend] = useState<any[]>([])
-  const [searchResults, setSearchResults] = useState<any[]>([])
-  const [isSearching, setIsSearching] = useState(false)
-  const [selectedIndex, setSelectedIndex] = useState(-1)
-  
+        
   const router = useRouter()
   const supabase = createClient()
   
@@ -66,46 +64,7 @@ export default function SearchPage() {
     }
   }, [])
 
-  useEffect(() => {
-    const q = searchQuery.trim().replace('@', '')
-    if (!q) {
-      setSearchResults([])
-      return
-    }
-
-    const delayDebounceFn = setTimeout(async () => {
-      setIsSearching(true)
-      
-      // 1. Fetch tags matching the query
-      const tagQ = q.replace(/\s+/g, '').toLowerCase()
-      const { data: tagData } = await supabase
-        .from('creator_tags')
-        .select('profile_id')
-        .ilike('tag', `%${tagQ}%`)
-        
-      const tagProfileIds = tagData ? tagData.map(t => t.profile_id) : []
-      const uniqueTagIds = Array.from(new Set(tagProfileIds))
-      
-      let query = supabase
-        .from('profiles')
-        .select('id, username, avatar_url, is_claimed, total_donations, instagram_id')
-        
-      if (uniqueTagIds.length > 0) {
-        query = query.or(`id.in.(${uniqueTagIds.join(',')}),username.ilike.%${q}%,instagram_id.ilike.%${q}%,bio.ilike.%${q}%`)
-      } else {
-        query = query.or(`username.ilike.%${q}%,instagram_id.ilike.%${q}%,bio.ilike.%${q}%`)
-      }
-        
-      const { data } = await query
-        .order('total_donations', { ascending: false, nullsFirst: false })
-        .limit(5)
-      
-      if (data) { setSearchResults(data); setSelectedIndex(-1); }
-      setIsSearching(false)
-    }, 300)
-
-    return () => clearTimeout(delayDebounceFn)
-  }, [searchQuery, supabase])
+  
 
   async function fetchLeaderboard() {
     const { data, error } = await supabase
@@ -173,99 +132,32 @@ export default function SearchPage() {
     if (profiles) setHotTrend(profiles)
   }
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!searchQuery.trim()) return
-    const username = searchQuery.trim().replace('@', '')
-    router.push(`/profile/${username}`)
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (searchResults.length > 0) {
-      if (e.key === 'ArrowDown') {
-        e.preventDefault()
-        setSelectedIndex(prev => (prev < searchResults.length - 1 ? prev + 1 : prev))
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault()
-        setSelectedIndex(prev => (prev > 0 ? prev - 1 : -1))
-      } else if (e.key === 'Enter') {
-        if (selectedIndex >= 0) {
-          e.preventDefault()
-          router.push(`/profile/${searchResults[selectedIndex].username}`)
-        }
-      }
-    }
-  }
-
-  return (
-    <div className="max-w-5xl mx-auto py-8 px-4 w-full h-full flex flex-col">
+    return (
+    <div className="max-w-5xl mx-auto pb-8 w-full h-full flex flex-col">
       {/* Search Bar */}
-      <form onSubmit={handleSearch} className="mb-12 relative z-50">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
-        <Input 
-          className="w-full pl-12 py-6 text-lg rounded-xl bg-secondary/50 border-none focus-visible:ring-1 focus-visible:ring-ring"
-          placeholder="Search ID, Instagram, Bio, or Tags..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyDown={handleKeyDown}
+            <ScrollHideUI direction="top" className="sticky top-0 z-30 pt-4 pb-4 mb-6 pl-[68px] md:pl-4 pr-[68px] md:pr-4">
+        <div 
+          className="absolute inset-0 pointer-events-none bg-white/30 dark:bg-black/30"
+          style={{
+            backdropFilter: 'blur(5px)',
+            WebkitBackdropFilter: 'blur(5px)',
+            maskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)'
+          }}
         />
-        
-        {searchQuery.trim() && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border overflow-hidden">
-            {isSearching ? (
-              <div className="p-4 text-center text-sm text-muted-foreground">검색 중...</div>
-            ) : searchResults.length > 0 ? (
-              <div className="flex flex-col">
-                {searchResults.map((user, idx) => (
-                  <div 
-                    key={user.id} 
-                    className={`flex items-center justify-between p-3 cursor-pointer transition-colors border-b last:border-b-0 ${selectedIndex === idx ? 'bg-secondary' : 'hover:bg-secondary/50'}`}
-                    onClick={() => router.push(`/profile/${user.username}`)}
-                    onMouseEnter={() => setSelectedIndex(idx)}
-                  >
-                    <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10 border">
-                      <AvatarImage src={user.avatar_url || ''} />
-                      <AvatarFallback className="bg-secondary font-bold text-sm text-muted-foreground">{user.username.charAt(0).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-1 font-bold text-sm">
-                        {user.username}
-                        {user.is_claimed && <span className="text-blue-500 text-xs">✓</span>}
-                        {user.instagram_id && user.instagram_id !== user.username && (
-                          <span className="text-xs text-muted-foreground font-normal ml-1">@{user.instagram_id}</span>
-                        )}
-                      </div>
-                    </div>
-                    </div>
-                    {user.total_donations > 0 && (
-                      <div className="text-xs font-bold text-muted-foreground">
-                        {user.total_donations.toLocaleString()} ₩
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="p-4 text-center text-sm text-muted-foreground">
-                "{searchQuery}" 검색 결과가 없습니다.<br />엔터를 누르면 해당 이름으로 프로필로 이동합니다.
-              </div>
-            )}
+        <div className="flex flex-col gap-4 relative z-10">
+          <div className="flex flex-row items-stretch gap-3">
+            <FeedSearchBar />
           </div>
-        )}
-      </form>
+        </div>
+      </ScrollHideUI>
 
       {/* Hot Trend Section */}
       {hotTrend.length > 0 && (
-        <div className="bg-card rounded-2xl p-6 shadow-sm border mb-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="bg-orange-500/10 p-2 rounded-lg">
-              <span className="text-orange-500 text-xl">🔥</span>
-            </div>
-            <div>
-              <h2 className="text-xl font-bold">Hot Trend</h2>
-              <p className="text-sm text-muted-foreground">내가 응원한 크리에이터와 비슷한 태그를 가진 인기 크리에이터</p>
-            </div>
+        <div className="px-4 mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-orange-500 text-xl">🔥</span>
+            <h2 className="text-xl font-bold">Hot Trend</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
             {hotTrend.map((creator, idx) => (
@@ -292,13 +184,14 @@ export default function SearchPage() {
               </div>
             ))}
           </div>
+          <div className="h-px bg-border mt-8 w-full" />
         </div>
       )}
-      <div className="grid md:grid-cols-2 gap-8 flex-1 min-h-0">
+      <div className="grid md:grid-cols-2 gap-8 flex-1 min-h-0 px-4">
         {/* Leaderboard */}
-        <div className="bg-card rounded-2xl p-6 shadow-sm border flex flex-col">
+        <div className="flex flex-col">
           <div className="flex items-center gap-3 mb-6">
-            <div className="bg-primary/10 p-2 rounded-lg">
+            <div>
               <Trophy className="h-6 w-6 text-primary" />
             </div>
             <div>
@@ -345,9 +238,9 @@ export default function SearchPage() {
         </div>
 
         {/* Live Stream */}
-        <div className="bg-card rounded-2xl p-6 shadow-sm border flex flex-col">
+        <div className="flex flex-col">
           <div className="flex items-center gap-3 mb-6">
-            <div className="bg-blue-500/10 p-2 rounded-lg">
+            <div>
               <MessageCircle className="h-6 w-6 text-blue-500" />
             </div>
             <div>
