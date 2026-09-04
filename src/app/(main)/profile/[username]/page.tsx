@@ -15,6 +15,7 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
   rectSortingStrategy,
+  horizontalListSortingStrategy,
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -35,6 +36,46 @@ import Cropper from 'react-easy-crop'
 import { getCroppedImg } from '@/utils/cropImage'
 
 
+
+
+function SortableTabItem({ id, label, activeTab, onClick }: { id: string, label: string, activeTab: string, onClick: () => void }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 10 : 1,
+    opacity: isDragging ? 0.8 : 1,
+  };
+
+  return (
+    <button 
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      onClick={(e) => {
+        // Prevent click if we were just dragging
+        if (isDragging) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+        onClick();
+      }}
+      className={`shrink-0 px-4 py-2 rounded-full font-bold text-sm transition-colors ${activeTab === id ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/50'}`}
+    >
+      {label}
+    </button>
+  );
+}
 
 function SortablePhotoItem({ img, onClick }: { img: any, onClick: () => void }) {
   const {
@@ -182,6 +223,40 @@ export default function UserProfilePage() {
   const [currentMonthBackers, setCurrentMonthBackers] = useState(0)
   
   const [activeTab, setActiveTab] = useState<'posts' | 'liked' | 'donors' | 'hidden' | 'album'>('posts')
+
+  const [tabOrder, setTabOrder] = useState<string[]>(['posts', 'album', 'donors', 'hidden']);
+  useEffect(() => {
+    if (profile?.id) {
+      try {
+         const saved = localStorage.getItem(`tab_order_${profile.id}`);
+         if (saved) {
+           const parsed = JSON.parse(saved);
+           const allTabs = ['posts', 'album', 'donors', 'hidden'];
+           const merged = [...parsed];
+           allTabs.forEach(t => {
+             if (!merged.includes(t)) merged.push(t);
+           });
+           setTabOrder(merged);
+         }
+      } catch(e) {}
+    }
+  }, [profile?.id]);
+
+  function handleTabDragEnd(event: any) {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setTabOrder((items: string[]) => {
+        const oldIndex = items.indexOf(active.id);
+        const newIndex = items.indexOf(over.id);
+        const newOrder = arrayMove(items, oldIndex, newIndex);
+        try {
+          localStorage.setItem(`tab_order_${profile?.id}`, JSON.stringify(newOrder));
+        } catch(e) {}
+        return newOrder;
+      });
+    }
+  }
+
   const [likedPosts, setLikedPosts] = useState<any[]>([])
   const [hasFetchedLiked, setHasFetchedLiked] = useState(false)
 
@@ -952,38 +1027,38 @@ export default function UserProfilePage() {
       {/* Content Area */}
       <div className="w-full max-w-3xl mx-auto mt-8">
         <div>
-          <div className="flex items-center gap-2 mb-2 border-b pb-4 overflow-x-auto scrollbar-hide">
-            <button 
-              onClick={() => setActiveTab('posts')}
-              className={`shrink-0 px-4 py-2 rounded-full font-bold text-sm transition-colors ${activeTab === 'posts' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/50'}`}
-            >
-              게시물
-            </button>
-
-            {isMe && (
-              <button 
-                onClick={() => setActiveTab('album')}
-                className={`shrink-0 px-4 py-2 rounded-full font-bold text-sm transition-colors ${activeTab === 'album' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/50'}`}
+          <div className="flex items-center justify-between mb-2 border-b pb-4">
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide flex-1">
+              <DndContext 
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleTabDragEnd}
               >
-                사진첩
-              </button>
-            )}
-            {(currentMonthTotal > 0 || isMe) && (
-              <button 
-                onClick={() => setActiveTab('donors')}
-                className={`shrink-0 px-4 py-2 rounded-full font-bold text-sm transition-colors ${activeTab === 'donors' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/50'}`}
-              >
-                응원
-              </button>
-            )}
-            {isMe && (
-              <button 
-                onClick={() => setActiveTab('hidden')}
-                className={`shrink-0 px-4 py-2 rounded-full font-bold text-sm transition-colors ${activeTab === 'hidden' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/50'}`}
-              >
-                숨겨짐
-              </button>
-            )}
+                <SortableContext 
+                  items={tabOrder}
+                  strategy={horizontalListSortingStrategy}
+                >
+                  {tabOrder.map(tabId => {
+                     if (tabId === 'posts') return <SortableTabItem key="posts" id="posts" label="게시물" activeTab={activeTab} onClick={() => setActiveTab('posts')} />
+                     if (tabId === 'album' && isMe) return <SortableTabItem key="album" id="album" label="사진첩" activeTab={activeTab} onClick={() => setActiveTab('album')} />
+                     if (tabId === 'donors' && (currentMonthTotal > 0 || isMe)) return <SortableTabItem key="donors" id="donors" label="응원" activeTab={activeTab} onClick={() => setActiveTab('donors')} />
+                     if (tabId === 'hidden' && isMe) return <SortableTabItem key="hidden" id="hidden" label="숨겨짐" activeTab={activeTab} onClick={() => setActiveTab('hidden')} />
+                     return null;
+                  })}
+                </SortableContext>
+              </DndContext>
+            </div>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger className="p-2 ml-2 text-muted-foreground hover:text-foreground shrink-0 outline-none rounded-full hover:bg-secondary/50 transition-colors">
+                <MoreHorizontal className="w-5 h-5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40 z-[50]">
+                 <DropdownMenuItem onClick={() => toast('이 메뉴의 기능은 준비중입니다.')} className="font-medium cursor-pointer">
+                    설정 (준비중)
+                 </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           
           {activeTab === 'posts' && (
