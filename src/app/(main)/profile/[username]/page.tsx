@@ -85,7 +85,7 @@ function SortablePhotoItem({ img, onClick }: { img: any, onClick: () => void }) 
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: img.id });
+  } = useSortable({ id: img.album_unique_id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -187,14 +187,14 @@ export default function UserProfilePage() {
     
     if (over && active.id !== over.id) {
       setOrderedAlbumImages((items) => {
-        const oldIndex = items.findIndex((i) => i.id === active.id);
-        const newIndex = items.findIndex((i) => i.id === over.id);
+        const oldIndex = items.findIndex((i) => i.album_unique_id === active.id);
+        const newIndex = items.findIndex((i) => i.album_unique_id === over.id);
         
         const newOrder = arrayMove(items, oldIndex, newIndex);
         
         // Save new order to localStorage as a fallback persistence
         try {
-          const orderIds = newOrder.map((i: any) => i.id);
+          const orderIds = newOrder.map((i: any) => i.album_unique_id);
           localStorage.setItem(`album_order_${currentUser?.id}`, JSON.stringify(orderIds));
         } catch(e) {}
         
@@ -632,10 +632,10 @@ export default function UserProfilePage() {
       ...albumPosts.flatMap((post: any) => {
         const match = post.content?.match(/\[SAVED:(.+?)\]/);
         const originalPostId = match ? match[1] : post.id;
-        return (post.post_images || []).map((img: any) => ({ ...img, originalPostId, albumSortKey: new Date(post.created_at).getTime(), isSavedPost: true, post_id: post.id }))
+        return (post.post_images || []).map((img: any) => ({ ...img, album_unique_id: `${img.id}_${post.id}`, originalPostId, albumSortKey: new Date(post.created_at).getTime(), isSavedPost: true, post_id: post.id }))
       }),
       ...visiblePosts.flatMap((post: any) => {
-        return (post.post_images || []).map((img: any) => ({ ...img, originalPostId: post.id, albumSortKey: new Date(post.created_at).getTime(), isSavedPost: false, post_id: post.id }))
+        return (post.post_images || []).map((img: any) => ({ ...img, album_unique_id: `${img.id}_${post.id}`, originalPostId: post.id, albumSortKey: new Date(post.created_at).getTime(), isSavedPost: false, post_id: post.id }))
       })
     ].sort((a: any, b: any) => b.albumSortKey - a.albumSortKey)
   }, [albumPosts, visiblePosts]);
@@ -647,8 +647,8 @@ export default function UserProfilePage() {
         if (savedOrderStr) {
           const savedOrderIds = JSON.parse(savedOrderStr);
           const newOrdered = [...albumImages].sort((a, b) => {
-            const indexA = savedOrderIds.indexOf(a.id);
-            const indexB = savedOrderIds.indexOf(b.id);
+            const indexA = savedOrderIds.indexOf(a.album_unique_id);
+            const indexB = savedOrderIds.indexOf(b.album_unique_id);
             if (indexA === -1 && indexB === -1) return b.albumSortKey - a.albumSortKey;
             if (indexA === -1) return -1;
             if (indexB === -1) return 1;
@@ -1088,12 +1088,12 @@ export default function UserProfilePage() {
                   onDragEnd={handleDragEnd}
                 >
                   <SortableContext 
-                    items={orderedAlbumImages.map(img => img.id)}
+                    items={orderedAlbumImages.map(img => img.album_unique_id)}
                     strategy={rectSortingStrategy}
                   >
                     {orderedAlbumImages.map((img: any) => (
                       <SortablePhotoItem 
-                        key={img.id} 
+                        key={img.album_unique_id} 
                         img={img} 
                         onClick={() => setSelectedAlbumMedia(img)} 
                       />
@@ -1324,11 +1324,11 @@ export default function UserProfilePage() {
 
              {/* Navigation Overlay Zones */}
              <div className="absolute left-0 top-0 w-[40%] h-full cursor-pointer z-40" onClick={() => {
-                const idx = orderedAlbumImages.findIndex(i => i.id === selectedAlbumMedia?.id);
+                const idx = orderedAlbumImages.findIndex(i => i.album_unique_id === selectedAlbumMedia?.album_unique_id);
                 if (idx > 0) setSelectedAlbumMedia(orderedAlbumImages[idx - 1]);
              }} />
              <div className="absolute right-0 top-0 w-[40%] h-full cursor-pointer z-40" onClick={() => {
-                const idx = orderedAlbumImages.findIndex(i => i.id === selectedAlbumMedia?.id);
+                const idx = orderedAlbumImages.findIndex(i => i.album_unique_id === selectedAlbumMedia?.album_unique_id);
                 if (idx !== -1 && idx < orderedAlbumImages.length - 1) setSelectedAlbumMedia(orderedAlbumImages[idx + 1]);
              }} />
           </div>
@@ -1336,9 +1336,9 @@ export default function UserProfilePage() {
           {/* Bottom Thumbnails Strip */}
           <div className="w-full h-24 bg-black/90 absolute bottom-0 flex items-center px-4 overflow-x-auto snap-x scrollbar-hide gap-1.5 z-50">
             {orderedAlbumImages.map((img, idx) => {
-              const isSelected = selectedAlbumMedia?.id === img.id;
+              const isSelected = selectedAlbumMedia?.album_unique_id === img.album_unique_id;
               // Preload the next 3 images and previous 3 images for smooth transition
-              const isNear = Math.abs(orderedAlbumImages.findIndex(i => i.id === selectedAlbumMedia?.id) - idx) <= 3;
+              const isNear = Math.abs(orderedAlbumImages.findIndex(i => i.album_unique_id === selectedAlbumMedia?.album_unique_id) - idx) <= 3;
               return (
                 <button 
                   key={img.id}
