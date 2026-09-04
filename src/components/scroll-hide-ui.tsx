@@ -7,9 +7,10 @@ interface ScrollHideUIProps {
   children: React.ReactNode
   direction: 'top' | 'bottom'
   className?: string
+  style?: React.CSSProperties
 }
 
-export default function ScrollHideUI({ children, direction, className }: ScrollHideUIProps) {
+export default function ScrollHideUI({ children, direction, className, style }: ScrollHideUIProps) {
   const [isVisible, setIsVisible] = useState(true)
   const lastScrollY = useRef(0)
   
@@ -57,6 +58,7 @@ export default function ScrollHideUI({ children, direction, className }: ScrollH
           : (isVisible ? "translate-y-0" : "translate-y-[200%] md:translate-y-0"),
         className
       )}
+      style={style}
     >
       {children}
     </div>

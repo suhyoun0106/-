@@ -147,10 +147,9 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
           <div 
             ref={menuRef}
             className={cn(
-              "relative pointer-events-auto flex flex-col items-center bg-white/70 dark:bg-black/70 border border-border/50 shadow-sm overflow-hidden transition-all duration-300 ease-out cursor-pointer",
+              "relative pointer-events-auto flex flex-col items-center bg-background border border-border/50 shadow-sm overflow-hidden transition-all duration-300 ease-out cursor-pointer",
               isOpen ? "rounded-[2rem] px-2 py-3 h-max max-h-[80vh]" : "rounded-full w-[44px] h-[44px] justify-center"
             )}
-            style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
             onClick={() => setIsOpen(!isOpen)}
           >
             {!isOpen ? (
@@ -200,8 +199,7 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
         <div className="absolute top-[16px] right-[16px]">
           <div 
             onClick={() => router.push('/profile')}
-            className="pointer-events-auto flex items-center justify-center bg-white/70 dark:bg-black/70 border border-border/50 shadow-sm rounded-full w-[44px] h-[44px] cursor-pointer hover:bg-foreground/5 transition-colors"
-            style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+            className="pointer-events-auto flex items-center justify-center bg-background border border-border/50 shadow-sm rounded-full w-[44px] h-[44px] cursor-pointer hover:bg-foreground/5 transition-colors"
           >
             <User className="w-5 h-5 text-black" />
           </div>
