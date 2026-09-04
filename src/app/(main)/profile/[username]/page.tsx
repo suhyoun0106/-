@@ -799,7 +799,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                 작성된 게시물이 없습니다.
               </div>
             ) : (
-              <div className="flex flex-col gap-8 w-full max-w-2xl mx-auto">
+              <div className="flex flex-col w-full max-w-2xl mx-auto">
                 {posts.map(post => (
                   <FeedPost key={post.id} post={post} currentUserId={currentUser?.id} />
                 ))}
@@ -813,7 +813,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                 좋아요를 누른 게시물이 없습니다.
               </div>
             ) : (
-              <div className="flex flex-col gap-8 w-full max-w-2xl mx-auto">
+              <div className="flex flex-col w-full max-w-2xl mx-auto">
                 {likedPosts.map(post => (
                   <FeedPost key={post.id} post={post} currentUserId={currentUser?.id} />
                 ))}

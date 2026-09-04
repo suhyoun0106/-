@@ -204,10 +204,10 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
 
 
   return (
-    <div className="max-w-2xl mx-auto py-8 px-4 flex flex-col gap-8">
+    <div className="max-w-2xl mx-auto py-4 flex flex-col w-full">
       
       {/* 상단 필터 및 검색 바 (스크롤 반응형) */}
-      <ScrollHideUI direction="top" className="sticky top-0 z-30 pt-4 pb-2 -mt-4 mb-2">
+      <ScrollHideUI direction="top" className="sticky top-0 z-30 pt-4 pb-2 mb-2 px-4">
         <div className="flex flex-col gap-4">
           <div className="flex flex-row items-stretch gap-3">
             {user && sponsoredCommunities.length > 0 && (
@@ -234,13 +234,15 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
           {communityId ? '이 커뮤니티에는 아직 게시물이 없습니다.' : '게시물이 없습니다. 첫 게시물을 작성해 보세요!'}
         </div>
       ) : (
-        posts?.map((post) => (
-          <FeedPost 
-            key={post.id} 
-            post={post} 
-            currentUserId={user?.id} 
-          />
-        ))
+        <div className="flex flex-col w-full">
+          {posts?.map((post) => (
+            <FeedPost 
+              key={post.id} 
+              post={post} 
+              currentUserId={user?.id} 
+            />
+          ))}
+        </div>
       )}
     </div>
   )

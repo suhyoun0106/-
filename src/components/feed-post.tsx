@@ -130,7 +130,7 @@ export default function FeedPost({
   }
 
   return (
-    <div className={`${showBackButton ? 'bg-background' : 'border rounded-lg bg-card overflow-hidden'}`}>
+    <div className={`border-b border-border bg-background overflow-hidden ${showBackButton ? '' : 'py-4'}`}>
       {/* 1. 작성자 헤더 */}
       <div className={`flex items-center justify-between py-3 relative ${showBackButton ? 'px-0' : 'px-4'}`}>
         <div className="flex items-center gap-3">
