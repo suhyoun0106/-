@@ -12,7 +12,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
-import { ThumbsUp, MessageCircle, Forward, MoreHorizontal, Edit2, Trash2, ArrowLeft, Eye, EyeOff, BarChart2, Repeat, User } from 'lucide-react'
+import { ThumbsUp, MessageCircle, Forward, Share2, MoreHorizontal, Edit2, Trash2, ArrowLeft, Eye, EyeOff, BarChart2, Repeat, User } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -331,11 +331,8 @@ export default function FeedPost({
         </div>
 
         {/* 액션 버튼 (좋아요, 댓글, 공유) */}
-        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-          <div className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full font-semibold text-sm">
-            <BarChart2 className="h-5 w-5" />
-            <span>{post.view_count || 0}</span>
-          </div>
+        <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
+          {/* 좋아요 */}
           <button 
             onClick={toggleLike} 
             className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-secondary/80 transition-colors font-semibold text-sm"
@@ -344,6 +341,7 @@ export default function FeedPost({
             <span>{likesCount}</span>
           </button>
           
+          {/* 댓글 */}
           <Link 
             href={`/post/${post.id}`}
             className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-secondary/80 transition-colors font-semibold text-sm"
@@ -352,6 +350,7 @@ export default function FeedPost({
             <span>{post.comments?.length || 0}</span>
           </Link>
 
+          {/* 리포스트 */}
           <button 
             onClick={async (e) => {
               e.stopPropagation();
@@ -376,6 +375,25 @@ export default function FeedPost({
           >
             <Repeat className={`h-5 w-5 ${isReposted ? 'text-green-500' : 'text-foreground'}`} />
             <span className={isReposted ? 'text-green-500' : ''}>{repostCount}</span>
+          </button>
+
+          {/* 뷰 카운트 */}
+          <div className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full font-semibold text-sm">
+            <BarChart2 className="h-5 w-5" />
+            <span>{post.view_count || 0}</span>
+          </div>
+
+          {/* 공유 */}
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              const url = `${window.location.origin}/post/${post.id}`;
+              navigator.clipboard.writeText(url);
+              toast.success('게시물 링크가 복사되었습니다.');
+            }}
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-secondary/80 transition-colors font-semibold text-sm"
+          >
+            <Share2 className="h-5 w-5" />
           </button>
         </div>
       </div>
