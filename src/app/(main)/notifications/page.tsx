@@ -56,18 +56,23 @@ export default function NotificationsPage() {
 
     if (data) {
       // 프론트엔드 레벨에서 중복 DM 알림 제거 (동시 다발적 전송에 의한 레이스 컨디션 방어)
-      let seenDmActors = new Set()
+      let seenKeys = new Set()
       let dedupedData: any[] = []
       
       for (const n of data) {
         if (n.type === 'dm') {
-          // 아직 처리되지 않은(가장 최신) 발송자의 DM 알림만 표시
-          if (!seenDmActors.has(n.actor_id)) {
-            seenDmActors.add(n.actor_id)
+          // DM은 발송자 당 1개만
+          if (!seenKeys.has(`dm_${n.actor_id}`)) {
+            seenKeys.add(`dm_${n.actor_id}`)
             dedupedData.push(n)
           }
         } else {
-          dedupedData.push(n)
+          // 좋아요, 댓글, 리포스트 등은 [행위자+타입+게시물] 당 1개만
+          const key = `${n.type}_${n.actor_id}_${n.reference_id || ''}`
+          if (!seenKeys.has(key)) {
+            seenKeys.add(key)
+            dedupedData.push(n)
+          }
         }
       }
 
