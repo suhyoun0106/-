@@ -7,6 +7,8 @@ import CommunityDropdown from '@/components/community-dropdown'
 import ScrollHideUI from '@/components/scroll-hide-ui'
 import TopDonorMessage from '@/components/top-donor-message'
 import FeedSearchBar from '@/components/feed-search-bar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 
 /**
  * 이 파일은 메인 피드(홈) 페이지입니다.
@@ -102,13 +104,29 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
   if (communityId) {
     // Specific community view: no tag logic
     query = query.eq('community_id', communityId)
-  } else if (user) {
+  } else if (user && !searchQuery) {
     query = query.in('community_id', primaryIds)
   }
   
+  let matchedProfiles: any[] = []
   if (searchQuery) {
     const safeQuery = searchQuery.replace(/"/g, '""')
-    query = query.or(`title.ilike."%${safeQuery}%",content.ilike."%${safeQuery}%"`)
+    
+    // Search for profiles matching the query
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('*')
+      .or(`username.ilike."%${safeQuery}%",instagram_id.ilike."%${safeQuery}%"`)
+      .limit(3)
+      
+    matchedProfiles = profiles || []
+    
+    if (matchedProfiles.length > 0) {
+      const matchedUserIds = matchedProfiles.map(p => p.id)
+      query = query.or(`title.ilike."%${safeQuery}%",content.ilike."%${safeQuery}%",user_id.in.(${matchedUserIds.join(',')})`)
+    } else {
+      query = query.or(`title.ilike."%${safeQuery}%",content.ilike."%${safeQuery}%"`)
+    }
   }
 
   const { data: rawPosts, error } = await query.order('created_at', { ascending: false })
@@ -228,6 +246,28 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
           
         </div>
       </ScrollHideUI>
+
+      {searchQuery && matchedProfiles.length > 0 && (
+        <div className="flex flex-col gap-3 px-4">
+          <h3 className="text-sm font-bold text-muted-foreground ml-1">프로필 검색 결과</h3>
+          {matchedProfiles.map(profile => (
+            <div key={profile.id} className="flex items-center gap-4 p-4 border rounded-2xl bg-card shadow-sm">
+              <Avatar className="h-14 w-14">
+                <AvatarImage src={profile.avatar_url} />
+                <AvatarFallback>{profile.username?.charAt(0).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col">
+                <span className="font-bold text-lg leading-tight">{profile.username}</span>
+                {profile.instagram_id && <span className="text-muted-foreground text-sm">@{profile.instagram_id}</span>}
+              </div>
+              <Link href={`/profile/${profile.username}`} className="ml-auto">
+                <Button variant="secondary" className="rounded-full font-bold h-9 px-4">프로필</Button>
+              </Link>
+            </div>
+          ))}
+          <div className="h-px bg-border my-2" />
+        </div>
+      )}
 
       {posts?.length === 0 ? (
         <div className="text-center text-muted-foreground py-20">
