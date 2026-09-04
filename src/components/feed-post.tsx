@@ -371,7 +371,7 @@ export default function FeedPost({
                 router.refresh();
               } else {
                 await supabase.from('shares').delete().match({ post_id: post.id, user_id: currentUserId });
-                await supabase.from('posts').delete().match({ user_id: currentUserId, community_id: currentUserId, content: `[REPOST:${post.id}]` });
+                await supabase.from('posts').delete().match({ user_id: currentUserId, content: `[REPOST:${post.id}]` });
                 toast.success('리포스트를 취소했습니다.');
                 router.refresh();
               }
