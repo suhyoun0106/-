@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
+import React, { useState, useEffect, use } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -506,9 +506,9 @@ export default function UserProfilePage() {
   // Tags can be edited: unclaimed profiles = anyone logged in; claimed profiles = owner only
   const canEditTags = !!currentUser && (isUnclaimed || isMe)
 
-  const visiblePosts = posts.filter(p => !p.content?.startsWith('<!--HIDDEN-->') && !p.content?.startsWith('[SAVED:'))
-  const hiddenPosts = posts.filter(p => p.content?.startsWith('<!--HIDDEN-->'))
-  const albumPosts = posts.filter(p => p.content?.startsWith('[SAVED:'))
+  const visiblePosts = React.useMemo(() => posts.filter(p => !p.content?.startsWith('<!--HIDDEN-->') && !p.content?.startsWith('[SAVED:')), [posts]);
+  const hiddenPosts = React.useMemo(() => posts.filter(p => p.content?.startsWith('<!--HIDDEN-->')), [posts]);
+  const albumPosts = React.useMemo(() => posts.filter(p => p.content?.startsWith('[SAVED:')), [posts]);
     const albumImages = [
     ...albumPosts.flatMap((post: any) => {
       const match = post.content?.match(/\[SAVED:(.+?)\]/);
@@ -543,7 +543,7 @@ export default function UserProfilePage() {
     } else {
       setOrderedAlbumImages([]);
     }
-  }, [albumPosts, visiblePosts, currentUser?.id]);
+  }, [albumImages, currentUser?.id]);
 
 
 
