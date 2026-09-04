@@ -289,6 +289,29 @@ export default function UserProfilePage() {
     }
     
     if (postData) {
+      // Find all saved posts and fetch their images
+      const savedPostIds = postData.map(p => {
+        const m = p.content?.match(/\[SAVED:(.+?)\]/)
+        return m ? m[1] : null
+      }).filter(Boolean)
+
+      if (savedPostIds.length > 0) {
+        const { data: savedImagesData } = await supabase
+          .from('post_images')
+          .select('*')
+          .in('post_id', savedPostIds)
+          
+        if (savedImagesData) {
+          // Attach these images to the saved posts in postData
+          postData.forEach(p => {
+            const m = p.content?.match(/\[SAVED:(.+?)\]/)
+            if (m) {
+              const origId = m[1]
+              p.post_images = savedImagesData.filter(img => img.post_id === origId)
+            }
+          })
+        }
+      }
       setPosts(postData)
     }
 
