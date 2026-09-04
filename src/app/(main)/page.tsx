@@ -217,31 +217,37 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
   }
 
   // Hacker News (Gravity) 알고리즘을 이용한 피드 랭킹 적용
-  let primaryPosts = rankPosts(rawPosts || [])
-  let relatedRanked = rankPosts(relatedPosts)
-
-  // 7:3 interleaving: for every 10 posts, 7 primary + 3 related
   let posts: any[] = []
-  if (relatedRanked.length > 0) {
-    const primaryDeduped = primaryPosts
-    const relatedDeduped = relatedRanked.filter(r => !primaryDeduped.find(p => p.id === r.id))
-    
-    const totalSlots = Math.max(primaryDeduped.length + Math.ceil(primaryDeduped.length * 3 / 7), 1)
-    let pi = 0, ri = 0
-    for (let i = 0; i < totalSlots; i++) {
-      // Every 10 slots: positions 0-6 → primary, 7-9 → related
-      const slotInGroup = i % 10
-      if (slotInGroup < 7) {
-        if (pi < primaryDeduped.length) posts.push(primaryDeduped[pi++])
-      } else {
-        if (ri < relatedDeduped.length) posts.push(relatedDeduped[ri++])
-        else if (pi < primaryDeduped.length) posts.push(primaryDeduped[pi++])
-      }
-    }
-    // Append any remaining primary posts
-    while (pi < primaryDeduped.length) posts.push(primaryDeduped[pi++])
+  
+  if (searchQuery) {
+    // 검색 시에는 커스텀 정렬(작성자 -> 제목 -> 내용)을 유지해야 하므로 랭킹 알고리즘을 건너뜁니다.
+    posts = rawPosts || []
   } else {
-    posts = primaryPosts
+    let primaryPosts = rankPosts(rawPosts || [])
+    let relatedRanked = rankPosts(relatedPosts)
+
+    // 7:3 interleaving: for every 10 posts, 7 primary + 3 related
+    if (relatedRanked.length > 0) {
+      const primaryDeduped = primaryPosts
+      const relatedDeduped = relatedRanked.filter(r => !primaryDeduped.find(p => p.id === r.id))
+      
+      const totalSlots = Math.max(primaryDeduped.length + Math.ceil(primaryDeduped.length * 3 / 7), 1)
+      let pi = 0, ri = 0
+      for (let i = 0; i < totalSlots; i++) {
+        // Every 10 slots: positions 0-6 → primary, 7-9 → related
+        const slotInGroup = i % 10
+        if (slotInGroup < 7) {
+          if (pi < primaryDeduped.length) posts.push(primaryDeduped[pi++])
+        } else {
+          if (ri < relatedDeduped.length) posts.push(relatedDeduped[ri++])
+          else if (pi < primaryDeduped.length) posts.push(primaryDeduped[pi++])
+        }
+      }
+      // Append any remaining primary posts
+      while (pi < primaryDeduped.length) posts.push(primaryDeduped[pi++])
+    } else {
+      posts = primaryPosts
+    }
   }
 
   if (error) {
