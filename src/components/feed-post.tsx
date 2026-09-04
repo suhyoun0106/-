@@ -429,12 +429,6 @@ export default function FeedPost({
             <span className={isReposted ? 'text-green-500' : ''}>{formatCount(repostCount)}</span>
           </button>
 
-          {/* 뷰 카운트 */}
-          <div className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full font-semibold text-sm">
-            <BarChart2 className="h-5 w-5" />
-            <span>{formatCount(post.view_count || 0)}</span>
-          </div>
-
           {/* 저장하기 */}
           <button 
             onClick={toggleSave}
@@ -455,6 +449,12 @@ export default function FeedPost({
             <Forward className="h-5 w-5" />
             <span>공유</span>
           </button>
+
+          {/* 뷰 카운트 */}
+          <div className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full font-semibold text-sm">
+            <BarChart2 className="h-5 w-5" />
+            <span>{formatCount(post.view_count || 0)}</span>
+          </div>
         </div>
       </div>
 
