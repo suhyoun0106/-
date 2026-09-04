@@ -78,7 +78,7 @@ function SortableTabItem({ id, label, activeTab, onClick }: { id: string, label:
 }
 
 
-function AlbumMediaControls({ media, currentUser }: { media: any, currentUser: any }) {
+function AlbumMediaControls({ media, currentUser, isMe }: { media: any, currentUser: any, isMe: boolean }) {
   const [likes, setLikes] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [views, setViews] = useState(0);
@@ -102,10 +102,13 @@ function AlbumMediaControls({ media, currentUser }: { media: any, currentUser: a
       // Fetch Views
       const { data: postData } = await supabase.from('posts').select('view_count').eq('id', postId).single();
       if (postData) {
-        const newCount = (postData.view_count || 0) + 1;
-        setViews(newCount);
-        // Increment view count since they opened it
-        await supabase.from('posts').update({ view_count: newCount }).eq('id', postId);
+        if (!isMe) {
+          const newCount = (postData.view_count || 0) + 1;
+          setViews(newCount);
+          await supabase.from('posts').update({ view_count: newCount }).eq('id', postId);
+        } else {
+          setViews(postData.view_count || 0);
+        }
       }
 
       // Fetch Saves
@@ -166,7 +169,7 @@ function AlbumMediaControls({ media, currentUser }: { media: any, currentUser: a
   }
 
   return (
-    <div className="flex items-center gap-4 z-50 mr-2">
+    <div className="absolute top-16 right-4 flex items-center gap-4 z-50 pointer-events-auto" onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()}>
       <button onClick={(e) => { e.stopPropagation(); toggleLike(); }} className="flex items-center gap-1.5 group">
         <Heart className={`w-[22px] h-[22px] transition-colors drop-shadow ${isLiked ? 'fill-red-500 text-red-500' : 'text-white'}`} />
         <span className="text-white font-bold text-[15px] drop-shadow-md">{likes}</span>
@@ -1433,7 +1436,6 @@ export default function UserProfilePage() {
             )}
 
             <div className="flex items-center gap-1">
-              {selectedAlbumMedia && <AlbumMediaControls media={selectedAlbumMedia} currentUser={currentUser} />}
               {isMe ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger className="p-2 rounded-full bg-zinc-800/80 text-white hover:bg-zinc-700 transition-colors outline-none cursor-pointer">
@@ -1499,6 +1501,7 @@ export default function UserProfilePage() {
               }
             }}
           >
+             {selectedAlbumMedia && <AlbumMediaControls media={selectedAlbumMedia} currentUser={currentUser} isMe={isMe} />}
              {selectedAlbumMedia && (
                (selectedAlbumMedia.image_url.includes('youtube.com/embed') || selectedAlbumMedia.image_url.includes('tiktok.com/embed') || selectedAlbumMedia.image_url.includes('instagram.com/')) ? (
                  <iframe 
