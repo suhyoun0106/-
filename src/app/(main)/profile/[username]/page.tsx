@@ -166,26 +166,20 @@ function AlbumMediaControls({ media, currentUser }: { media: any, currentUser: a
   }
 
   return (
-    <div className="absolute bottom-[104px] right-4 flex flex-col gap-5 z-50">
-      <button onClick={(e) => { e.stopPropagation(); toggleLike(); }} className="flex flex-col items-center gap-1 group">
-        <div className="p-2.5 rounded-full bg-black/40 backdrop-blur-md text-white transition-transform active:scale-90 shadow-[0_2px_10px_rgba(0,0,0,0.3)]">
-          <Heart className={`w-6 h-6 transition-colors ${isLiked ? 'fill-red-500 text-red-500' : 'text-white'}`} />
-        </div>
-        <span className="text-white font-bold text-xs drop-shadow-md">{likes}</span>
+    <div className="flex items-center gap-4 z-50 mr-2">
+      <button onClick={(e) => { e.stopPropagation(); toggleLike(); }} className="flex items-center gap-1.5 group">
+        <Heart className={`w-[22px] h-[22px] transition-colors drop-shadow ${isLiked ? 'fill-red-500 text-red-500' : 'text-white'}`} />
+        <span className="text-white font-bold text-[15px] drop-shadow-md">{likes}</span>
       </button>
 
-      <button onClick={(e) => { e.stopPropagation(); toggleSave(); }} className="flex flex-col items-center gap-1 group">
-        <div className="p-2.5 rounded-full bg-black/40 backdrop-blur-md text-white transition-transform active:scale-90 shadow-[0_2px_10px_rgba(0,0,0,0.3)]">
-          <Download className={`w-6 h-6 transition-colors ${isSaved ? 'fill-white' : ''}`} />
-        </div>
-        <span className="text-white font-bold text-xs drop-shadow-md">{saves}</span>
+      <button onClick={(e) => { e.stopPropagation(); toggleSave(); }} className="flex items-center gap-1.5 group">
+        <Download className={`w-[22px] h-[22px] transition-colors drop-shadow ${isSaved ? 'fill-white text-white' : 'text-white'}`} />
+        <span className="text-white font-bold text-[15px] drop-shadow-md">{saves}</span>
       </button>
 
-      <div className="flex flex-col items-center gap-1">
-        <div className="p-2.5 rounded-full bg-black/40 backdrop-blur-md text-white shadow-[0_2px_10px_rgba(0,0,0,0.3)]">
-          <Eye className="w-6 h-6" />
-        </div>
-        <span className="text-white font-bold text-xs drop-shadow-md">{views}</span>
+      <div className="flex items-center gap-1.5">
+        <Eye className="w-[22px] h-[22px] text-white drop-shadow" />
+        <span className="text-white font-bold text-[15px] drop-shadow-md">{views}</span>
       </div>
     </div>
   );
@@ -1427,17 +1421,18 @@ export default function UserProfilePage() {
             </button>
 
             {selectedAlbumMedia && (
-              <div className="flex flex-col items-center justify-center bg-zinc-800/80 px-6 py-1.5 rounded-full pointer-events-none">
-                <span className="text-white font-bold text-[15px]">
+              <div className="flex flex-col items-center justify-center pointer-events-none drop-shadow-md">
+                <span className="text-white font-bold text-[16px] drop-shadow">
                   {new Date(selectedAlbumMedia.albumSortKey).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
                 </span>
-                <span className="text-white/70 text-[11px] font-medium -mt-0.5">
+                <span className="text-white/90 text-xs font-medium -mt-0.5 drop-shadow">
                   {new Date(selectedAlbumMedia.albumSortKey).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
             )}
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
+              {selectedAlbumMedia && <AlbumMediaControls media={selectedAlbumMedia} currentUser={currentUser} />}
               {isMe ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger className="p-2 rounded-full bg-zinc-800/80 text-white hover:bg-zinc-700 transition-colors outline-none cursor-pointer">
@@ -1526,9 +1521,7 @@ export default function UserProfilePage() {
              
           </div>
 
-          {selectedAlbumMedia && <AlbumMediaControls media={selectedAlbumMedia} currentUser={currentUser} />}
-
-          {/* Bottom Thumbnails Strip */}
+                    {/* Bottom Thumbnails Strip */}
           <div className="w-full h-24 bg-black/90 absolute bottom-0 flex items-center px-4 overflow-x-auto snap-x scrollbar-hide gap-1.5 z-50">
             {orderedAlbumImages.map((img, idx) => {
               const isSelected = selectedAlbumMedia?.album_unique_id === img.album_unique_id;
