@@ -1427,11 +1427,11 @@ export default function UserProfilePage() {
       <Dialog open={!!selectedAlbumMedia} onOpenChange={(open) => !open && setSelectedAlbumMedia(null)}>
         <DialogContent 
           showCloseButton={false} 
-          className="!max-w-none !w-screen !h-screen !p-0 !m-0 !border-0 !bg-black/60 backdrop-blur-2xl !rounded-none flex flex-col overflow-hidden z-[100]"
+          className="!max-w-none !w-screen !h-[100dvh] !p-0 !m-0 !border-0 !bg-black/60 backdrop-blur-2xl !rounded-none flex flex-col overflow-hidden z-[100]"
           style={{ WebkitBackdropFilter: "blur(30px) saturate(180%)", backdropFilter: "blur(30px) saturate(180%)" }}
         >
           {/* Top Bar */}
-          <div className="flex items-center justify-between p-4 z-50 absolute top-0 w-full">
+          <div className="flex items-center justify-between p-4 z-50 absolute top-0 w-full bg-black/30 backdrop-blur-xl">
             <button onClick={() => setSelectedAlbumMedia(null)} className="p-2 rounded-full bg-zinc-800/80 text-white hover:bg-zinc-700 transition-colors cursor-pointer">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
             </button>
@@ -1556,7 +1556,7 @@ export default function UserProfilePage() {
           </div>
 
                     {/* Bottom Thumbnails Strip */}
-          <div className="w-full h-28 bg-gradient-to-t from-black/70 to-transparent absolute bottom-0 flex items-center px-4 overflow-x-auto snap-x scrollbar-hide gap-1.5 z-50 pb-4">
+          <div className="w-full h-28 bg-black/30 backdrop-blur-xl absolute bottom-0 flex items-center px-4 overflow-x-auto snap-x scrollbar-hide gap-1.5 z-50 pb-4">
             {orderedAlbumImages.map((img, idx) => {
               const isSelected = selectedAlbumMedia?.album_unique_id === img.album_unique_id;
               // Preload the next 3 images and previous 3 images for smooth transition
