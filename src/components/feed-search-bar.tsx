@@ -118,15 +118,37 @@ export default function FeedSearchBar() {
                 className="p-3 text-center text-sm font-bold text-primary hover:bg-secondary/50 cursor-pointer border-t"
                 onClick={handleSubmit}
               >
-                "{query}" 검색 결과 전체보기
+                "{query}" 게시물 검색하기
+              </div>
+              <div 
+                className="p-3 text-center text-sm font-bold text-muted-foreground hover:bg-secondary/50 cursor-pointer border-t"
+                onClick={() => {
+                  setQuery('')
+                  setIsFocused(false)
+                  router.push(`/profile/${query.trim().replace('@', '')}`)
+                }}
+              >
+                "{query}" 프로필 이동 / 생성하기
               </div>
             </div>
           ) : (
-            <div 
-              className="p-4 text-center text-sm font-bold text-primary hover:bg-secondary/50 cursor-pointer"
-              onClick={handleSubmit}
-            >
-              "{query}" 게시물 검색하기
+            <div className="flex flex-col">
+              <div 
+                className="p-4 text-center text-sm font-bold text-primary hover:bg-secondary/50 cursor-pointer"
+                onClick={handleSubmit}
+              >
+                "{query}" 게시물 검색하기
+              </div>
+              <div 
+                className="p-4 text-center text-sm font-bold text-muted-foreground hover:bg-secondary/50 cursor-pointer border-t"
+                onClick={() => {
+                  setQuery('')
+                  setIsFocused(false)
+                  router.push(`/profile/${query.trim().replace('@', '')}`)
+                }}
+              >
+                "{query}" 새로운 프로필 이동/생성
+              </div>
             </div>
           )}
         </div>
