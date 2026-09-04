@@ -1,6 +1,23 @@
 'use client'
 
 import { useState, useEffect, use } from 'react'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  TouchSensor
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
@@ -15,6 +32,38 @@ import FeedPost from '@/components/feed-post'
 import Cropper from 'react-easy-crop'
 import { getCroppedImg } from '@/utils/cropImage'
 
+
+
+function SortablePhotoItem({ img, onClick }: { img: any, onClick: () => void }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: img.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 10 : 1,
+    opacity: isDragging ? 0.8 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="aspect-square relative cursor-pointer group bg-zinc-100 block"
+      onClick={onClick}
+    >
+      <div {...attributes} {...listeners} className="absolute inset-0 z-10" />
+      <img src={img.image_url} alt="saved" className="w-full h-full object-cover pointer-events-none" />
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
+    </div>
+  );
+}
 
 function DonationMessage({ text }: { text: string }) {
   const [expanded, setExpanded] = useState(false)
@@ -49,7 +98,49 @@ export default function UserProfilePage() {
   const [donationMessage, setDonationMessage] = useState('')
   const [currentUser, setCurrentUser] = useState<any>(null)
   
-  const [selectedAlbumMedia, setSelectedAlbumMedia] = useState<string | null>(null)
+    const [selectedAlbumMedia, setSelectedAlbumMedia] = useState<string | null>(null)
+  const [orderedAlbumImages, setOrderedAlbumImages] = useState<any[]>([])
+
+  // Setup sensors for drag and drop
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        delay: 250, // Long press for 250ms
+        tolerance: 5,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  function handleDragEnd(event: any) {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      setOrderedAlbumImages((items) => {
+        const oldIndex = items.findIndex((i) => i.id === active.id);
+        const newIndex = items.findIndex((i) => i.id === over.id);
+        
+        const newOrder = arrayMove(items, oldIndex, newIndex);
+        
+        // Save new order to localStorage as a fallback persistence
+        try {
+          const orderIds = newOrder.map((i: any) => i.id);
+          localStorage.setItem(`album_order_${currentUser?.id}`, JSON.stringify(orderIds));
+        } catch(e) {}
+        
+        return newOrder;
+      });
+    }
+  }
+
   const [isUploading, setIsUploading] = useState(false)
   
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
@@ -417,16 +508,42 @@ export default function UserProfilePage() {
   const visiblePosts = posts.filter(p => !p.content?.startsWith('<!--HIDDEN-->') && !p.content?.startsWith('[SAVED:'))
   const hiddenPosts = posts.filter(p => p.content?.startsWith('<!--HIDDEN-->'))
   const albumPosts = posts.filter(p => p.content?.startsWith('[SAVED:'))
-  const albumImages = [
-    ...albumPosts.flatMap(post => {
+    const albumImages = [
+    ...albumPosts.flatMap((post: any) => {
       const match = post.content?.match(/\[SAVED:(.+?)\]/);
       const originalPostId = match ? match[1] : post.id;
       return (post.post_images || []).map((img: any) => ({ ...img, originalPostId, albumSortKey: new Date(post.created_at).getTime() }))
     }),
-    ...visiblePosts.flatMap(post => {
+    ...visiblePosts.flatMap((post: any) => {
       return (post.post_images || []).map((img: any) => ({ ...img, originalPostId: post.id, albumSortKey: new Date(post.created_at).getTime() }))
     })
   ].sort((a: any, b: any) => b.albumSortKey - a.albumSortKey)
+
+  useEffect(() => {
+    if (albumImages.length > 0) {
+      try {
+        const savedOrderStr = localStorage.getItem(`album_order_${currentUser?.id}`);
+        if (savedOrderStr) {
+          const savedOrderIds = JSON.parse(savedOrderStr);
+          const newOrdered = [...albumImages].sort((a, b) => {
+            const indexA = savedOrderIds.indexOf(a.id);
+            const indexB = savedOrderIds.indexOf(b.id);
+            if (indexA === -1 && indexB === -1) return 0;
+            if (indexA === -1) return 1;
+            if (indexB === -1) return -1;
+            return indexA - indexB;
+          });
+          setOrderedAlbumImages(newOrdered);
+          return;
+        }
+      } catch(e) {}
+      
+      setOrderedAlbumImages(albumImages);
+    } else {
+      setOrderedAlbumImages([]);
+    }
+  }, [albumPosts, visiblePosts, currentUser?.id]);
+
 
 
   return (
@@ -824,22 +941,30 @@ export default function UserProfilePage() {
           )}
           
           {activeTab === 'album' && isMe && (
-            albumImages.length === 0 ? (
+            orderedAlbumImages.length === 0 ? (
               <div className="bg-white rounded-2xl border p-12 text-center text-muted-foreground">
                 저장된 사진/영상이 없습니다.
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-1">
-                {albumImages.map((img: any) => (
-                  <div 
-                    key={img.id} 
-                    onClick={() => setSelectedAlbumMedia(img.image_url)}
-                    className="aspect-square relative cursor-pointer group bg-zinc-100 block"
+                <DndContext 
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext 
+                    items={orderedAlbumImages.map(img => img.id)}
+                    strategy={rectSortingStrategy}
                   >
-                    <img src={img.image_url} alt="saved" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                  </div>
-                ))}
+                    {orderedAlbumImages.map((img: any) => (
+                      <SortablePhotoItem 
+                        key={img.id} 
+                        img={img} 
+                        onClick={() => setSelectedAlbumMedia(img.image_url)} 
+                      />
+                    ))}
+                  </SortableContext>
+                </DndContext>
               </div>
             )
           )}
