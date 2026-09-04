@@ -473,7 +473,7 @@ export default function FeedPost({
             <div className="flex items-center gap-1.5 group transition-colors cursor-default relative">
               <span className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-md">조회수</span>
               <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
-                <BarChart2 className="h-[18px] w-[18px] sm:h-[20px] sm:w-[20px]" />
+                <Eye className="h-[18px] w-[18px] sm:h-[20px] sm:w-[20px]" />
               </div>
               <span className="text-sm sm:text-[15px] font-medium group-hover:text-zinc-600 dark:group-hover:text-zinc-400">{formatCount(post.view_count || 0)}</span>
             </div>
