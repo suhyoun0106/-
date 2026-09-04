@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import ScrollHideUI from '@/components/scroll-hide-ui'
 import { LogOut, Send, UserPlus, ArrowLeft, Home, User } from 'lucide-react'
 import { Message, MessageContent } from '@/components/ui/message'
 import { Bubble, BubbleContent } from '@/components/ui/bubble'
@@ -181,7 +182,7 @@ export default function ChatUI({ currentUser }: { currentUser: any }) {
     <div className="flex w-full h-full border rounded-lg overflow-hidden bg-background">
       {/* Sidebar */}
       <div className={`w-full md:w-80 border-r flex-col bg-card ${selectedFriend ? 'hidden md:flex' : 'flex'}`}>
-        <div className="relative pt-6 pb-3 px-4 md:pt-4 border-b-0 flex items-center justify-between gap-3">
+        <ScrollHideUI direction="top" className="sticky top-0 z-40 px-4 pt-8 md:pt-4 pb-3">
           {/* 그라데이션 블러 배경 */}
           <div 
             className="absolute inset-0 z-0 dark:bg-black/40 bg-white/40 pointer-events-none"
@@ -192,7 +193,7 @@ export default function ChatUI({ currentUser }: { currentUser: any }) {
             }}
           />
           
-          <div className="relative z-10 flex w-full items-center gap-3">
+          <div className="relative z-10 flex w-full items-center gap-3 h-[44px]">
             {/* 모바일 홈 버튼 */}
             <Button variant="outline" size="icon" className="rounded-full shrink-0 md:hidden bg-white/80 dark:bg-black/80 backdrop-blur-xl border-border/50 shadow-sm outline-none w-11 h-11" onClick={() => router.push('/')}>
               <Home className="h-5 w-5" />
@@ -212,7 +213,7 @@ export default function ChatUI({ currentUser }: { currentUser: any }) {
               <User className="h-5 w-5" />
             </Button>
           </div>
-        </div>
+        </ScrollHideUI>
 
         <ScrollArea className="flex-1">
           <div className="p-2 space-y-1">

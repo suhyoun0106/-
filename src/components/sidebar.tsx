@@ -143,7 +143,7 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
     }
   }, [isOpen])
 
-  if (pathname.startsWith('/post/') || pathname.startsWith('/create')) return null;
+  if (pathname.startsWith('/post/') || pathname.startsWith('/create') || pathname.startsWith('/messages')) return null;
 
   return (
     <div className="md:hidden">
