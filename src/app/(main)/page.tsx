@@ -251,17 +251,17 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
         <div className="flex flex-col gap-3 px-4">
           <h3 className="text-sm font-bold text-muted-foreground ml-1">프로필 검색 결과</h3>
           {matchedProfiles.map(profile => (
-            <div key={profile.id} className="flex items-center gap-4 p-4 border rounded-2xl bg-card shadow-sm">
-              <Avatar className="h-14 w-14">
+            <div key={profile.id} className="flex items-center gap-3 py-2">
+              <Avatar className="h-10 w-10 border">
                 <AvatarImage src={profile.avatar_url} />
                 <AvatarFallback>{profile.username?.charAt(0).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <span className="font-bold text-lg leading-tight">{profile.username}</span>
-                {profile.instagram_id && <span className="text-muted-foreground text-sm">@{profile.instagram_id}</span>}
+                <span className="font-bold text-sm leading-tight">{profile.username}</span>
+                {profile.instagram_id && <span className="text-muted-foreground text-xs">@{profile.instagram_id}</span>}
               </div>
               <Link href={`/profile/${profile.username}`} className="ml-auto">
-                <Button variant="secondary" className="rounded-full font-bold h-9 px-4">프로필</Button>
+                <Button variant="secondary" className="rounded-full font-bold h-8 px-4 text-xs">프로필</Button>
               </Link>
             </div>
           ))}
