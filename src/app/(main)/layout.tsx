@@ -17,17 +17,26 @@ export default async function MainLayout({
     redirect('/login')
   }
 
-  // 안 읽은 알림 개수 가져오기
-  const { count } = await supabase
+  // 안 읽은 일반 알림 개수 가져오기
+  const { count: unreadNotifCount } = await supabase
     .from('notifications')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', user.id)
+    .neq('type', 'dm')
+    .eq('is_read', false)
+
+  // 안 읽은 메시지 알림 개수 가져오기
+  const { count: unreadMsgCount } = await supabase
+    .from('notifications')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .eq('type', 'dm')
     .eq('is_read', false)
 
   return (
     <PresenceProvider userId={user.id}>
       <div className="flex min-h-screen bg-background">
-        <Sidebar unreadCount={count || 0} />
+        <Sidebar unreadNotifCount={unreadNotifCount || 0} unreadMsgCount={unreadMsgCount || 0} />
         {/* 사이드바(80px) 너비만큼 우측에 여백을 주어 메인 컨텐츠가 화면의 정확한 중앙에 오도록 함 */}
         <main className="flex-1 pb-28 md:pb-0 md:pr-[80px] relative">
           {children}

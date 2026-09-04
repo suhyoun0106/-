@@ -16,6 +16,14 @@ export default async function MessagesPage() {
     redirect('/login')
   }
 
+  // 메시지 페이지에 진입하면 DM 관련 알림을 모두 읽음 처리
+  await supabase
+    .from('notifications')
+    .update({ is_read: true })
+    .eq('user_id', user.id)
+    .eq('type', 'dm')
+    .eq('is_read', false)
+
   // Fetch user profile
   const { data: profile } = await supabase
     .from('profiles')

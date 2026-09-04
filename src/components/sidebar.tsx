@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-export default function Sidebar({ unreadCount }: { unreadCount: number }) {
+export default function Sidebar({ unreadNotifCount, unreadMsgCount }: { unreadNotifCount: number, unreadMsgCount: number }) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
@@ -36,8 +36,8 @@ export default function Sidebar({ unreadCount }: { unreadCount: number }) {
     { name: '홈', href: '/', icon: Home },
     { name: '인기', href: '/search', icon: Flame },
     { name: '만들기', href: '/create', icon: SquarePen },
-    { name: '메시지', href: '/messages', icon: MessageCircle },
-    { name: '알림', href: '/notifications', icon: Bell, badge: unreadCount },
+    { name: '메시지', href: '/messages', icon: MessageCircle, badge: unreadMsgCount },
+    { name: '알림', href: '/notifications', icon: Bell, badge: unreadNotifCount },
     { name: '프로필', href: '/profile', icon: User },
   ]
 
@@ -159,7 +159,7 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
             {!isOpen ? (
               <div className="relative">
                 <Home className="w-5 h-5 text-black" />
-                {navItems.find(i => i.name === '알림')?.badge ? (
+                {(navItems.find(i => i.name === '알림')?.badge || navItems.find(i => i.name === '메시지')?.badge) ? (
                   <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full border border-white"></div>
                 ) : null}
               </div>
