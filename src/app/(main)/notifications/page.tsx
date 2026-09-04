@@ -9,7 +9,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Heart, MessageCircle, Send, Home, User, Repeat, Forward, Download } from 'lucide-react'
+import { Heart, MessageCircle, Send, Home, User, Repeat, Forward, Download, Trash2 } from 'lucide-react'
 import ScrollHideUI from '@/components/scroll-hide-ui'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -23,6 +23,22 @@ export default function NotificationsPage() {
   useEffect(() => {
     fetchAndMarkRead()
   }, [])
+
+  async function handleDeleteAll() {
+    if (!confirm('모든 알림을 삭제하시겠습니까?')) return;
+    
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const { error } = await supabase
+      .from('notifications')
+      .delete()
+      .eq('user_id', user.id)
+
+    if (!error) {
+      setNotifications([])
+    }
+  }
 
   async function fetchAndMarkRead() {
     const { data: { user } } = await supabase.auth.getUser()
@@ -150,6 +166,19 @@ export default function NotificationsPage() {
               </div>
             )
           })
+        )}
+        
+        {notifications.length > 0 && (
+          <div className="flex justify-center mt-6 mb-10">
+            <Button 
+              variant="outline" 
+              onClick={handleDeleteAll}
+              className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              전체 삭제하기
+            </Button>
+          </div>
         )}
       </div>
     </div>
