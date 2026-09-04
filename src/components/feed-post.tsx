@@ -130,7 +130,10 @@ export default function FeedPost({
   }
 
   return (
-    <div className={`border-b border-border bg-background overflow-hidden ${showBackButton ? '' : 'py-4'}`}>
+    <div 
+      className={`border-b border-border bg-background overflow-hidden ${showBackButton ? '' : 'py-4 hover:bg-secondary/30 active:bg-secondary/50 cursor-pointer transition-colors'}`}
+      onClick={() => { if (!showBackButton) router.push(`/post/${post.id}`) }}
+    >
       {/* 1. 작성자 헤더 */}
       <div className={`flex items-center justify-between py-3 relative ${showBackButton ? 'px-0' : 'px-4'}`}>
         <div className="flex items-center gap-3">
@@ -142,13 +145,13 @@ export default function FeedPost({
               <ArrowLeft className="w-5 h-5" />
             </button>
           )}
-          <Avatar className="h-10 w-10">
+          <div onClick={(e) => e.stopPropagation()}><Avatar className="h-10 w-10">
             <AvatarImage src={post.profiles?.avatar_url || ''} />
             <AvatarFallback>{post.profiles?.username?.charAt(0).toUpperCase()}</AvatarFallback>
-          </Avatar>
+          </Avatar></div>
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
-              <Link href={`/profile/${post.profiles?.username}`} className="font-bold text-base hover:underline">
+              <Link href={`/profile/${post.profiles?.username}`} className="font-bold text-base hover:underline" onClick={(e) => e.stopPropagation()}>
                 {post.profiles?.username}
               </Link>
               <span className="text-muted-foreground text-sm">
@@ -163,7 +166,7 @@ export default function FeedPost({
           </div>
         </div>
         {post.user_id === currentUserId && (
-          <DropdownMenu>
+          <div onClick={(e) => e.stopPropagation()}><DropdownMenu>
             <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground transition-colors outline-none">
               <MoreHorizontal className="h-5 w-5" />
             </DropdownMenuTrigger>
@@ -177,13 +180,13 @@ export default function FeedPost({
                 삭제하기
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu></div>
         )}
       </div>
 
       {/* 2. 글 제목 */}
       {post.title && (
-        <div className={`pb-2 cursor-pointer ${showBackButton ? 'px-0' : 'px-4'}`} onClick={() => router.push(`/post/${post.id}`)}>
+        <div className={`pb-2 cursor-pointer ${showBackButton ? 'px-0' : 'px-4'}`} >
           <h2 className="text-xl font-bold">{post.title}</h2>
         </div>
       )}
@@ -221,7 +224,7 @@ export default function FeedPost({
                           src={url} 
                           alt="Post content" 
                           className="relative w-full max-h-[70vh] object-contain cursor-pointer z-10 shadow-2xl"
-                          onClick={() => router.push(`/post/${post.id}`)}
+                          
                         />
                       )}
                     </>
@@ -244,7 +247,7 @@ export default function FeedPost({
         {/* 본문 내용 */}
         <div 
           className="text-sm cursor-pointer mb-4"
-          onClick={() => router.push(`/post/${post.id}`)}
+          
         >
           <div 
             dangerouslySetInnerHTML={{ __html: post.content }} 
@@ -264,7 +267,7 @@ export default function FeedPost({
         </div>
 
         {/* 액션 버튼 (좋아요, 댓글, 공유) */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
           <button 
             onClick={toggleLike} 
             className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-secondary/80 transition-colors font-semibold text-sm"
