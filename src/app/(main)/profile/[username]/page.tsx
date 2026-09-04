@@ -440,19 +440,22 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
               <AvatarFallback>{profile.username.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
             {isMe && (
-              <label className="absolute inset-0 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity z-20">
-                <Camera className="w-8 h-8" />
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  className="hidden" 
-                  onChange={(e) => {
-                    setIsEditProfileOpen(true);
-                    handleAvatarSelect(e);
-                  }}
-                  disabled={isUploading}
-                />
-              </label>
+              <div 
+                className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 text-white rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity z-20"
+                onClick={() => {
+                  setEditBio(profile.bio || '')
+                  setEditInstagramId(profile.instagram_id || '')
+                  setEditIsInstagramPublic(profile.is_instagram_public || false)
+                  setEditIsDonationEnabled(profile.is_donation_enabled !== false)
+                  setPendingAvatarFile(null)
+                  setPendingAvatarPreview(null)
+                  setOriginalFileName(null)
+                  setIsEditProfileOpen(true)
+                }}
+              >
+                <Camera className="w-5 h-5 md:w-6 md:h-6 mb-0.5 md:mb-1" />
+                <span className="text-[9px] md:text-xs font-bold text-center leading-tight">프로필<br/>편집</span>
+              </div>
             )}
           </div>
           
@@ -506,77 +509,60 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                 </span>
               ))}
             </div>
-
-<div className="flex flex-nowrap gap-2 md:gap-3 items-center w-full overflow-x-auto pb-2 scrollbar-hide">
-              {isMe ? (
-                <>
-                  <Button className="shrink-0 bg-primary hover:opacity-90 text-primary-foreground font-bold rounded-full h-11 px-5" onClick={() => {
-                    setEditBio(profile.bio || '')
-                    setEditInstagramId(profile.instagram_id || '')
-                    setEditIsInstagramPublic(profile.is_instagram_public || false)
-                    setEditIsDonationEnabled(profile.is_donation_enabled !== false)
-                    setPendingAvatarFile(null)
-                    setPendingAvatarPreview(null)
-                    setOriginalFileName(null)
-                    setIsEditProfileOpen(true)
-                  }}>
-                    프로필 편집하기
-                  </Button>
-                  <Button variant="secondary" className="shrink-0 rounded-full font-bold h-11 px-5" onClick={() => router.push('/create')}>
-                    게시물 작성하기
-                  </Button>
-                  {profile.instagram_id ? (
-                    profile.is_instagram_public ? (
-                      <Button variant="secondary" className="shrink-0 rounded-full font-bold h-11 px-5" onClick={() => window.open(`https://instagram.com/${profile.instagram_id}`, '_blank')}>
-                        Instagram: @{profile.instagram_id}
-                      </Button>
-                    ) : (
-                      <Button disabled variant="secondary" className="shrink-0 rounded-full font-bold h-11 px-5 opacity-70">
-                        Instagram: 비공개
-                      </Button>
-                    )
-                  ) : (
-                    <Button variant="secondary" className="shrink-0 rounded-full font-bold h-11 px-5" onClick={() => setIsEditProfileOpen(true)}>
-                      Instagram 연동하기
-                    </Button>
-                  )}
-                </>
-              ) : (
-                <>
-                  {profile.is_donation_enabled !== false ? (
-                    <>
-                      <Button className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground font-extrabold rounded-xl h-11 px-6 shadow-md shadow-primary/20 border-0" onClick={() => setIsDonateOpen(true)}>
-                        <Heart className="w-5 h-5 mr-2 fill-zinc-900 text-zinc-900" />
-                        응원하기
-                      </Button>
-                      <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={startDM}>
-                        <MessageSquare className="w-5 h-5 mr-2 fill-current" />
-                        메시지
-                      </Button>
-                      {profile.instagram_id && profile.is_instagram_public ? (
-                        <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={() => window.open(`https://instagram.com/${profile.instagram_id}`, '_blank')}>
-                          Instagram: @{profile.instagram_id}
-                        </Button>
-                      ) : isUnclaimed ? (
-                        <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={() => window.open(`https://instagram.com/${profile.username}`, '_blank')}>
-                          Instagram: @{profile.username}
-                        </Button>
-                      ) : null}
-                    </>
-                  ) : (
-                    <>
-                      <Button disabled className="shrink-0 bg-secondary/80 text-muted-foreground font-bold rounded-xl h-11 px-6 border-0">
-                        🔒 인스타그램 및 응원 비공개
-                      </Button>
-                      <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={startDM}>
-                        <MessageSquare className="w-5 h-5 mr-2 fill-current" />
-                        메시지
-                      </Button>
-                    </>
-                  )}
-                </>
-              )}
+            
+            {/* Instagram Hyperlink */}
+            <div className="mb-4">
+              {profile.instagram_id && profile.is_instagram_public ? (
+                <a href={`https://instagram.com/${profile.instagram_id}`} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-blue-500 hover:underline">
+                  Instagram: @{profile.instagram_id}
+                </a>
+              ) : isMe && !profile.instagram_id ? (
+                <button onClick={() => setIsEditProfileOpen(true)} className="text-sm font-bold text-blue-500 hover:underline">
+                  Instagram 연동하기
+                </button>
+              ) : isMe && !profile.is_instagram_public ? (
+                <span className="text-sm font-bold text-muted-foreground">
+                  Instagram: 비공개
+                </span>
+              ) : !isMe && isUnclaimed ? (
+                <a href={`https://instagram.com/${profile.username}`} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-blue-500 hover:underline">
+                  Instagram: @{profile.username}
+                </a>
+              ) : !isMe && profile.is_donation_enabled === false ? (
+                <span className="text-sm font-bold text-muted-foreground">
+                  🔒 인스타그램 비공개
+                </span>
+              ) : null}
             </div>
+
+
+            {!isMe && (
+              <div className="flex flex-nowrap gap-2 md:gap-3 items-center w-full overflow-x-auto pb-2 scrollbar-hide">
+                {profile.is_donation_enabled !== false ? (
+                  <>
+                    <Button className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground font-extrabold rounded-xl h-11 px-6 shadow-md shadow-primary/20 border-0" onClick={() => setIsDonateOpen(true)}>
+                      <Heart className="w-5 h-5 mr-2 fill-zinc-900 text-zinc-900" />
+                      응원하기
+                    </Button>
+                    <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={startDM}>
+                      <MessageSquare className="w-5 h-5 mr-2 fill-current" />
+                      메시지
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button disabled className="shrink-0 bg-secondary/80 text-muted-foreground font-bold rounded-xl h-11 px-6 border-0">
+                      🔒 응원 비공개
+                    </Button>
+                    <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={startDM}>
+                      <MessageSquare className="w-5 h-5 mr-2 fill-current" />
+                      메시지
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
+
           </div>
 
 
