@@ -402,15 +402,26 @@ export default function FeedPost({
         {/* X(트위터) 스타일 액션 버튼 */}
         <div className="flex items-center justify-between text-muted-foreground pt-1" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center gap-6 sm:gap-10">
+            {/* 좋아요 */}
+            <button 
+              onClick={toggleLike} 
+              className="flex items-center gap-1.5 group transition-colors"
+            >
+              <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
+                <Heart className={`h-4 w-4 sm:h-[18px] sm:w-[18px] ${isLiked ? 'text-zinc-700 fill-zinc-700 dark:text-zinc-300 dark:fill-zinc-300' : ''}`} />
+              </div>
+              <span className={`text-xs sm:text-sm font-medium ${isLiked ? 'text-zinc-700 dark:text-zinc-300' : 'group-hover:text-zinc-600 dark:group-hover:text-zinc-400'}`}>{formatCount(likesCount)}</span>
+            </button>
+
             {/* 댓글 */}
             <Link 
               href={`/post/${post.id}`}
               className="flex items-center gap-1.5 group transition-colors"
             >
-              <div className="p-2 -ml-2 rounded-full group-hover:bg-blue-500/10 group-hover:text-blue-500 transition-colors">
-                <MessageCircle className={`h-4 w-4 sm:h-[18px] sm:w-[18px] ${hasCommented ? 'text-blue-500 fill-blue-500' : ''}`} />
+              <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
+                <MessageCircle className={`h-4 w-4 sm:h-[18px] sm:w-[18px] ${hasCommented ? 'text-zinc-700 fill-zinc-700 dark:text-zinc-300 dark:fill-zinc-300' : ''}`} />
               </div>
-              <span className={`text-xs sm:text-sm font-medium ${hasCommented ? 'text-blue-500' : 'group-hover:text-blue-500'}`}>{formatCount(commentCount)}</span>
+              <span className={`text-xs sm:text-sm font-medium ${hasCommented ? 'text-zinc-700 dark:text-zinc-300' : 'group-hover:text-zinc-600 dark:group-hover:text-zinc-400'}`}>{formatCount(commentCount)}</span>
             </Link>
 
             {/* 리포스트 */}
@@ -439,41 +450,32 @@ export default function FeedPost({
               }}
               className="flex items-center gap-1.5 group transition-colors"
             >
-              <div className="p-2 -ml-2 rounded-full group-hover:bg-green-500/10 group-hover:text-green-500 transition-colors">
-                <Repeat className={`h-4 w-4 sm:h-[18px] sm:w-[18px] ${isReposted ? 'text-green-500' : ''}`} />
+              <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
+                <Repeat className={`h-4 w-4 sm:h-[18px] sm:w-[18px] ${isReposted ? 'text-zinc-700 dark:text-zinc-300' : ''}`} />
               </div>
-              <span className={`text-xs sm:text-sm font-medium ${isReposted ? 'text-green-500' : 'group-hover:text-green-500'}`}>{formatCount(repostCount)}</span>
+              <span className={`text-xs sm:text-sm font-medium ${isReposted ? 'text-zinc-700 dark:text-zinc-300' : 'group-hover:text-zinc-600 dark:group-hover:text-zinc-400'}`}>{formatCount(repostCount)}</span>
             </button>
 
-            {/* 좋아요 */}
-            <button 
-              onClick={toggleLike} 
-              className="flex items-center gap-1.5 group transition-colors"
-            >
-              <div className="p-2 -ml-2 rounded-full group-hover:bg-red-500/10 group-hover:text-red-500 transition-colors">
-                <Heart className={`h-4 w-4 sm:h-[18px] sm:w-[18px] ${isLiked ? 'text-red-500 fill-red-500' : ''}`} />
-              </div>
-              <span className={`text-xs sm:text-sm font-medium ${isLiked ? 'text-red-500' : 'group-hover:text-red-500'}`}>{formatCount(likesCount)}</span>
-            </button>
-
-            {/* 뷰 카운트 */}
-            <div className="flex items-center gap-1.5 group transition-colors cursor-default">
-              <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-500 transition-colors">
-                <BarChart2 className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
-              </div>
-              <span className="text-xs sm:text-sm font-medium group-hover:text-zinc-500">{formatCount(post.view_count || 0)}</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1 sm:gap-2">
             {/* 다운로드 (저장하기/북마크) */}
             <button 
               onClick={toggleSave}
               disabled={isSavedLoading}
-              className="p-2 rounded-full hover:bg-blue-500/10 hover:text-blue-500 transition-colors"
+              className="flex items-center gap-1.5 group transition-colors"
             >
-              <Bookmark className={`h-4 w-4 sm:h-[18px] sm:w-[18px] ${isSaved ? 'text-blue-500 fill-blue-500' : ''}`} />
+              <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
+                <Bookmark className={`h-4 w-4 sm:h-[18px] sm:w-[18px] ${isSaved ? 'text-zinc-700 fill-zinc-700 dark:text-zinc-300 dark:fill-zinc-300' : ''}`} />
+              </div>
             </button>
+          </div>
+
+          <div className="flex items-center gap-3 sm:gap-4">
+            {/* 뷰 카운트 */}
+            <div className="flex items-center gap-1.5 group transition-colors cursor-default">
+              <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
+                <BarChart2 className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+              </div>
+              <span className="text-xs sm:text-sm font-medium group-hover:text-zinc-600 dark:group-hover:text-zinc-400">{formatCount(post.view_count || 0)}</span>
+            </div>
 
             {/* 공유 */}
             <button 
@@ -481,7 +483,7 @@ export default function FeedPost({
                 e.stopPropagation();
                 setIsShareOpen(true);
               }}
-              className="p-2 rounded-full hover:bg-blue-500/10 hover:text-blue-500 transition-colors"
+              className="p-2 rounded-full hover:bg-zinc-500/10 hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors"
             >
               <Share className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
             </button>
