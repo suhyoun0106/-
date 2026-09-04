@@ -509,16 +509,18 @@ export default function UserProfilePage() {
   const visiblePosts = React.useMemo(() => posts.filter(p => !p.content?.startsWith('<!--HIDDEN-->') && !p.content?.startsWith('[SAVED:')), [posts]);
   const hiddenPosts = React.useMemo(() => posts.filter(p => p.content?.startsWith('<!--HIDDEN-->')), [posts]);
   const albumPosts = React.useMemo(() => posts.filter(p => p.content?.startsWith('[SAVED:')), [posts]);
-    const albumImages = [
-    ...albumPosts.flatMap((post: any) => {
-      const match = post.content?.match(/\[SAVED:(.+?)\]/);
-      const originalPostId = match ? match[1] : post.id;
-      return (post.post_images || []).map((img: any) => ({ ...img, originalPostId, albumSortKey: new Date(post.created_at).getTime() }))
-    }),
-    ...visiblePosts.flatMap((post: any) => {
-      return (post.post_images || []).map((img: any) => ({ ...img, originalPostId: post.id, albumSortKey: new Date(post.created_at).getTime() }))
-    })
-  ].sort((a: any, b: any) => b.albumSortKey - a.albumSortKey)
+    const albumImages = React.useMemo(() => {
+    return [
+      ...albumPosts.flatMap((post: any) => {
+        const match = post.content?.match(/\[SAVED:(.+?)\]/);
+        const originalPostId = match ? match[1] : post.id;
+        return (post.post_images || []).map((img: any) => ({ ...img, originalPostId, albumSortKey: new Date(post.created_at).getTime(), isSavedPost: true, post_id: post.id }))
+      }),
+      ...visiblePosts.flatMap((post: any) => {
+        return (post.post_images || []).map((img: any) => ({ ...img, originalPostId: post.id, albumSortKey: new Date(post.created_at).getTime(), isSavedPost: false, post_id: post.id }))
+      })
+    ].sort((a: any, b: any) => b.albumSortKey - a.albumSortKey)
+  }, [albumPosts, visiblePosts]);
 
   useEffect(() => {
     if (albumImages.length > 0) {
