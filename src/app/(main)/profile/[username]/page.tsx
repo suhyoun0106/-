@@ -440,19 +440,22 @@ export default function UserProfilePage() {
               <AvatarFallback>{profile.username.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
             {isMe && (
-              <label className="absolute inset-0 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity z-20">
-                <Camera className="w-8 h-8" />
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  className="hidden" 
-                  onChange={(e) => {
-                    setIsEditProfileOpen(true);
-                    handleAvatarSelect(e);
-                  }}
-                  disabled={isUploading}
-                />
-              </label>
+              <div 
+                className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 text-white rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity z-20"
+                onClick={() => {
+                  setEditBio(profile.bio || '')
+                  setEditInstagramId(profile.instagram_id || '')
+                  setEditIsInstagramPublic(profile.is_instagram_public || false)
+                  setEditIsDonationEnabled(profile.is_donation_enabled !== false)
+                  setPendingAvatarFile(null)
+                  setPendingAvatarPreview(null)
+                  setOriginalFileName(null)
+                  setIsEditProfileOpen(true)
+                }}
+              >
+                <Camera className="w-5 h-5 md:w-6 md:h-6 mb-0.5 md:mb-1" />
+                <span className="text-[9px] md:text-xs font-bold text-center leading-tight">프로필<br/>편집</span>
+              </div>
             )}
           </div>
           
@@ -510,18 +513,7 @@ export default function UserProfilePage() {
 <div className="flex flex-nowrap gap-2 md:gap-3 items-center w-full overflow-x-auto pb-2 scrollbar-hide">
               {isMe ? (
                 <>
-                  <Button className="shrink-0 bg-primary hover:opacity-90 text-primary-foreground font-bold rounded-full h-11 px-5" onClick={() => {
-                    setEditBio(profile.bio || '')
-                    setEditInstagramId(profile.instagram_id || '')
-                    setEditIsInstagramPublic(profile.is_instagram_public || false)
-                    setEditIsDonationEnabled(profile.is_donation_enabled !== false)
-                    setPendingAvatarFile(null)
-                    setPendingAvatarPreview(null)
-                    setOriginalFileName(null)
-                    setIsEditProfileOpen(true)
-                  }}>
-                    프로필 편집하기
-                  </Button>
+
                   <Button variant="secondary" className="shrink-0 rounded-full font-bold h-11 px-5" onClick={() => router.push('/create')}>
                     게시물 작성하기
                   </Button>
