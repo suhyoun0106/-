@@ -305,6 +305,10 @@ export default function FeedPost({
 
         {/* 액션 버튼 (좋아요, 댓글, 공유) */}
         <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full font-semibold text-sm">
+            <BarChart2 className="h-5 w-5" />
+            <span>{post.view_count || 0}</span>
+          </div>
           <button 
             onClick={toggleLike} 
             className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-secondary/80 transition-colors font-semibold text-sm"
