@@ -159,9 +159,20 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
       isDragging.current = true
     }
     if (isDragging.current) {
+      let newX = translateStart.current.x + dx
+      let newY = translateStart.current.y + dy
+      
+      const minX = -16
+      const maxX = window.innerWidth - 16 - 52
+      const maxY = 24
+      const minY = -(window.innerHeight - 24 - 52)
+      
+      newX = Math.max(minX, Math.min(newX, maxX))
+      newY = Math.max(minY, Math.min(newY, maxY))
+
       setTranslate({
-        x: translateStart.current.x + dx,
-        y: translateStart.current.y + dy
+        x: newX,
+        y: newY
       })
     }
   }
@@ -190,8 +201,8 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
       <div 
         ref={menuRef}
         className={cn(
-          "relative pointer-events-auto flex items-center bg-white border border-border/50 shadow-xl overflow-visible transition-all duration-300 ease-out",
-          isOpen ? "rounded-[2rem] px-2 py-2 w-max max-w-[90vw]" : "rounded-full w-[52px] h-[52px] justify-center"
+          "relative pointer-events-auto flex flex-col items-center bg-white border border-border/50 shadow-xl overflow-visible transition-all duration-300 ease-out",
+          isOpen ? "rounded-[2rem] px-2 py-3 h-max max-h-[80vh]" : "rounded-full w-[52px] h-[52px] justify-center"
         )}
         style={{ 
           transform: `translate(${translate.x}px, ${translate.y}px)`,
@@ -205,7 +216,7 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
         {!isOpen ? (
           <Menu className="w-6 h-6 text-black" />
         ) : (
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex flex-col items-center gap-2">
             {navItems.map((item) => {
               const Icon = item.icon
               const isActive = pathname === item.href
