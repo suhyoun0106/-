@@ -142,13 +142,13 @@ export default function FeedPost({
               <ArrowLeft className="w-5 h-5" />
             </button>
           )}
-          <Avatar className="h-8 w-8">
+          <Avatar className="h-10 w-10">
             <AvatarImage src={post.profiles?.avatar_url || ''} />
             <AvatarFallback>{post.profiles?.username?.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
-              <Link href={`/profile/${post.profiles?.username}`} className="font-semibold text-sm hover:underline">
+              <Link href={`/profile/${post.profiles?.username}`} className="font-bold text-base hover:underline">
                 {post.profiles?.username}
               </Link>
               <span className="text-muted-foreground text-sm">
@@ -156,7 +156,7 @@ export default function FeedPost({
               </span>
             </div>
             {post.profiles?.is_instagram_public && post.profiles?.instagram_id && (
-              <span className="text-xs text-muted-foreground mt-0.5">
+              <span className="text-sm text-muted-foreground mt-0.5">
                 @{post.profiles.instagram_id}
               </span>
             )}
