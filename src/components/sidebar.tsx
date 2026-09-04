@@ -9,9 +9,9 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, MessageCircle, Bell, User, PlusSquare, Search, Settings, LogOut, Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import ScrollHideUI from '@/components/scroll-hide-ui'
 import { Badge } from '@/components/ui/badge'
 import { useRouter } from 'next/navigation'
-import ScrollHideUI from '@/components/scroll-hide-ui'
 import { createClient } from '@/utils/supabase/client'
 import { useState, useRef, useEffect } from 'react'
 import {
@@ -115,6 +115,7 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
+  const router = useRouter()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -136,45 +137,58 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
   }, [isOpen])
 
   return (
-    <div className="md:hidden fixed z-50 pointer-events-none" style={{ top: '16px', left: '16px' }}>
-      <div 
-        ref={menuRef}
-        className={cn(
-          "relative pointer-events-auto flex flex-col items-center bg-white border border-border/50 shadow-xl overflow-hidden transition-all duration-300 ease-out cursor-pointer",
-          isOpen ? "rounded-[2rem] px-2 py-3 h-max max-h-[80vh]" : "rounded-full w-[44px] h-[44px] justify-center"
-        )}
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        {!isOpen ? (
-          <Home className="w-5 h-5 text-black" />
-        ) : (
-          <div className="flex flex-col items-center gap-2">
-            {navItems.map((item) => {
-              const Icon = item.icon
-              const isActive = pathname === item.href
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={(e) => { e.stopPropagation(); setIsOpen(false) }}
-                  className={cn(
-                    "flex items-center justify-center p-2.5 rounded-full transition-colors relative",
-                    isActive ? "bg-black/5 text-black" : "text-black/60 hover:bg-black/5 hover:text-black"
-                  )}
+    <div className="md:hidden">
+      <ScrollHideUI direction="top" className="fixed top-0 left-0 right-0 z-50 pointer-events-none h-0">
+        <div className="absolute top-[16px] left-[16px]">
+          <div 
+            ref={menuRef}
+            className={cn(
+              "relative pointer-events-auto flex flex-col items-center bg-white border border-border/50 shadow-xl overflow-hidden transition-all duration-300 ease-out cursor-pointer",
+              isOpen ? "rounded-[2rem] px-2 py-3 h-max max-h-[80vh]" : "rounded-full w-[44px] h-[44px] justify-center"
+            )}
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {!isOpen ? (
+              <Menu className="w-5 h-5 text-black" />
+            ) : (
+              <div className="flex flex-col items-center gap-2">
+                {navItems.map((item) => {
+                  const Icon = item.icon
+                  const isActive = pathname === item.href
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={(e) => { e.stopPropagation(); setIsOpen(false) }}
+                      className={cn(
+                        "flex items-center justify-center p-2.5 rounded-full transition-colors relative",
+                        isActive ? "bg-black/5 text-black" : "text-black/60 hover:bg-black/5 hover:text-black"
+                      )}
+                    >
+                      <Icon className="w-5 h-5" />
+                    </Link>
+                  )
+                })}
+                <button
+                  onClick={(e) => { e.stopPropagation(); setIsOpen(false); handleLogout() }}
+                  className="flex items-center justify-center p-2.5 rounded-full text-red-500 hover:bg-red-50 transition-colors mt-2"
                 >
-                  <Icon className="w-5 h-5" />
-                </Link>
-              )
-            })}
-            <button
-              onClick={(e) => { e.stopPropagation(); setIsOpen(false); handleLogout() }}
-              className="flex items-center justify-center p-2.5 rounded-full text-red-500 hover:bg-red-50 transition-colors mt-2"
-            >
-              <LogOut className="w-5 h-5" />
-            </button>
+                  <LogOut className="w-5 h-5" />
+                </button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+
+        <div className="absolute top-[16px] right-[16px]">
+          <div 
+            onClick={() => router.push('/profile')}
+            className="pointer-events-auto flex items-center justify-center bg-white border border-border/50 shadow-xl rounded-full w-[44px] h-[44px] cursor-pointer hover:bg-black/5 transition-colors"
+          >
+            <User className="w-5 h-5 text-black" />
+          </div>
+        </div>
+      </ScrollHideUI>
     </div>
   )
 }
