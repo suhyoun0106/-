@@ -131,13 +131,8 @@ export default function CommentsSection({
       fetchComments()
       // 알림 전송 (대댓글인 경우 대상에게, 아니면 게시물 작성자에게)
       const notifyUserId = currentTargetUserId || postOwnerId;
-      if (notifyUserId && notifyUserId !== currentUserId) {
-        await supabase.from('notifications').insert({
-          user_id: notifyUserId,
-          actor_id: currentUserId,
-          type: 'comment',
-          reference_id: postId
-        })
+      if (notifyUserId) {
+        const { error: err } = await supabase.from('notifications').insert({ user_id: notifyUserId, actor_id: currentUserId, type: 'comment', reference_id: postId }); if (err) toast.error("댓글 알림 실패: " + err.message);
       }
     }
   }
