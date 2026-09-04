@@ -233,7 +233,7 @@ export default function FeedPost({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               
-              <DropdownMenuItem onClick={toggleHide} className="cursor-pointer text-muted-foreground">
+              <DropdownMenuItem onClick={toggleHide} className="cursor-pointer">
                 {isHidden ? (
                   <><Eye className="w-4 h-4 mr-2" /> 숨기기 취소</>
                 ) : (
