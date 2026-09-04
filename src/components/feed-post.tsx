@@ -403,9 +403,9 @@ export default function FeedPost({
               className="flex items-center gap-1.5 group transition-colors"
             >
               <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
-                <Heart className={`h-4 w-4 sm:h-[18px] sm:w-[18px] ${isLiked ? 'text-zinc-700 fill-zinc-700 dark:text-zinc-300 dark:fill-zinc-300' : ''}`} />
+                <Heart className={`h-[18px] w-[18px] sm:h-[20px] sm:w-[20px] ${isLiked ? 'text-zinc-700 fill-zinc-700 dark:text-zinc-300 dark:fill-zinc-300' : ''}`} />
               </div>
-              <span className={`text-xs sm:text-sm font-medium ${isLiked ? 'text-zinc-700 dark:text-zinc-300' : 'group-hover:text-zinc-600 dark:group-hover:text-zinc-400'}`}>{formatCount(likesCount)}</span>
+              <span className={`text-sm sm:text-[15px] font-medium ${isLiked ? 'text-zinc-700 dark:text-zinc-300' : 'group-hover:text-zinc-600 dark:group-hover:text-zinc-400'}`}>{formatCount(likesCount)}</span>
             </button>
 
             {/* 댓글 */}
@@ -414,9 +414,9 @@ export default function FeedPost({
               className="flex items-center gap-1.5 group transition-colors"
             >
               <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
-                <MessageCircle className={`h-4 w-4 sm:h-[18px] sm:w-[18px] ${hasCommented ? 'text-zinc-700 fill-zinc-700 dark:text-zinc-300 dark:fill-zinc-300' : ''}`} />
+                <MessageCircle className={`h-[18px] w-[18px] sm:h-[20px] sm:w-[20px] ${hasCommented ? 'text-zinc-700 fill-zinc-700 dark:text-zinc-300 dark:fill-zinc-300' : ''}`} />
               </div>
-              <span className={`text-xs sm:text-sm font-medium ${hasCommented ? 'text-zinc-700 dark:text-zinc-300' : 'group-hover:text-zinc-600 dark:group-hover:text-zinc-400'}`}>{formatCount(commentCount)}</span>
+              <span className={`text-sm sm:text-[15px] font-medium ${hasCommented ? 'text-zinc-700 dark:text-zinc-300' : 'group-hover:text-zinc-600 dark:group-hover:text-zinc-400'}`}>{formatCount(commentCount)}</span>
             </Link>
 
             {/* 리포스트 */}
@@ -446,9 +446,9 @@ export default function FeedPost({
               className="flex items-center gap-1.5 group transition-colors"
             >
               <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
-                <Repeat className={`h-4 w-4 sm:h-[18px] sm:w-[18px] ${isReposted ? 'text-zinc-700 dark:text-zinc-300' : ''}`} />
+                <Repeat className={`h-[18px] w-[18px] sm:h-[20px] sm:w-[20px] ${isReposted ? 'text-zinc-700 dark:text-zinc-300' : ''}`} />
               </div>
-              <span className={`text-xs sm:text-sm font-medium ${isReposted ? 'text-zinc-700 dark:text-zinc-300' : 'group-hover:text-zinc-600 dark:group-hover:text-zinc-400'}`}>{formatCount(repostCount)}</span>
+              <span className={`text-sm sm:text-[15px] font-medium ${isReposted ? 'text-zinc-700 dark:text-zinc-300' : 'group-hover:text-zinc-600 dark:group-hover:text-zinc-400'}`}>{formatCount(repostCount)}</span>
             </button>
 
             {/* 다운로드 (저장하기/북마크) */}
@@ -458,7 +458,7 @@ export default function FeedPost({
               className="flex items-center gap-1.5 group transition-colors"
             >
               <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
-                <Bookmark className={`h-4 w-4 sm:h-[18px] sm:w-[18px] ${isSaved ? 'text-zinc-700 fill-zinc-700 dark:text-zinc-300 dark:fill-zinc-300' : ''}`} />
+                <Bookmark className={`h-[18px] w-[18px] sm:h-[20px] sm:w-[20px] ${isSaved ? 'text-zinc-700 fill-zinc-700 dark:text-zinc-300 dark:fill-zinc-300' : ''}`} />
               </div>
             </button>
           </div>
@@ -467,9 +467,9 @@ export default function FeedPost({
             {/* 뷰 카운트 */}
             <div className="flex items-center gap-1.5 group transition-colors cursor-default">
               <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
-                <BarChart2 className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+                <BarChart2 className="h-[18px] w-[18px] sm:h-[20px] sm:w-[20px]" />
               </div>
-              <span className="text-xs sm:text-sm font-medium group-hover:text-zinc-600 dark:group-hover:text-zinc-400">{formatCount(post.view_count || 0)}</span>
+              <span className="text-sm sm:text-[15px] font-medium group-hover:text-zinc-600 dark:group-hover:text-zinc-400">{formatCount(post.view_count || 0)}</span>
             </div>
 
             {/* 공유 */}
@@ -480,7 +480,7 @@ export default function FeedPost({
               }}
               className="p-2 rounded-full hover:bg-zinc-500/10 hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors"
             >
-              <Share className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+              <Share className="h-[18px] w-[18px] sm:h-[20px] sm:w-[20px]" />
             </button>
           </div>
         </div>
