@@ -16,7 +16,7 @@ export default function CommunityDropdown({
   const currentCommunity = communities.find(c => c.id === currentCommunityId)
   
   const getDisplayName = (creator: any) => {
-    if (!creator) return '전체보기'
+    if (!creator) return '커뮤니티 선택'
     return (creator.is_instagram_public && creator.instagram_id) ? creator.instagram_id : (creator.instagram_id || creator.username)
   }
 
