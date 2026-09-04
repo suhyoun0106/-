@@ -221,7 +221,7 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
 
 
   return (
-    <div className="max-w-2xl mx-auto py-4 flex flex-col w-full">
+    <div className="max-w-2xl mx-auto pb-4 flex flex-col w-full">
       
       {/* 상단 필터 및 검색 바 (스크롤 반응형) */}
       <ScrollHideUI direction="top" className="sticky top-0 z-30 pt-4 pb-2 mb-2 pl-[68px] md:pl-4 pr-[68px] md:pr-4">
