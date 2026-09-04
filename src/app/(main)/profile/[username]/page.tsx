@@ -23,7 +23,7 @@ import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Heart, MessageSquare, ExternalLink, Trophy, Crown, Camera, LogOut, MoreVertical, Hash } from 'lucide-react'
+import { Heart, MessageSquare, ExternalLink, Trophy, Crown, Camera, LogOut, MoreVertical, Hash, MoreHorizontal } from 'lucide-react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -1169,62 +1169,112 @@ export default function UserProfilePage() {
         </DialogContent>
       </Dialog>
 
-      {/* 사진첩 미디어 전체화면 모달 */}
+      {/* 사진첩 미디어 전체화면 모달 (iOS 스타일) */}
       <Dialog open={!!selectedAlbumMedia} onOpenChange={(open) => !open && setSelectedAlbumMedia(null)}>
         <DialogContent 
           showCloseButton={false} 
-          className="!max-w-none !w-screen !h-screen !p-0 !m-0 !border-0 !bg-black !rounded-none flex items-center justify-center overflow-hidden z-[100]"
+          className="!max-w-none !w-screen !h-screen !p-0 !m-0 !border-0 !bg-black !rounded-none flex flex-col overflow-hidden z-[100]"
         >
-          <div className="absolute top-4 right-4 z-50 flex items-center gap-3">
-            {isMe && (
-              <DropdownMenu>
-                <DropdownMenuTrigger className="p-2 text-white/70 hover:text-white transition-colors outline-none drop-shadow-md">
-                  <MoreVertical className="w-6 h-6" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-32 z-[100]">
-                  <DropdownMenuItem 
-                    onClick={async () => {
-                      if (!selectedAlbumMedia) return;
-                      if (confirm('이 사진/영상을 사진첩에서 삭제하시겠습니까?')) {
-                        const supabase = createClient();
-                        if (selectedAlbumMedia.isSavedPost) {
-                          await supabase.from('posts').delete().eq('id', selectedAlbumMedia.post_id);
-                        } else {
-                          await supabase.from('post_images').delete().eq('id', selectedAlbumMedia.id);
-                        }
-                        toast.success('삭제되었습니다.');
-                        setSelectedAlbumMedia(null);
-                        loadProfileAndData();
-                      }
-                    }} 
-                    className="text-red-500 font-bold focus:text-red-600 focus:bg-red-50 cursor-pointer"
-                  >
-                    삭제하기
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-            <button onClick={() => setSelectedAlbumMedia(null)} className="p-2 text-white/70 hover:text-white transition-colors drop-shadow-md outline-none">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          {/* Top Bar */}
+          <div className="flex items-center justify-between p-4 z-50 bg-gradient-to-b from-black/50 to-transparent absolute top-0 w-full">
+            <button onClick={() => setSelectedAlbumMedia(null)} className="p-2 rounded-full bg-zinc-800/80 text-white hover:bg-zinc-700 transition-colors cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
             </button>
+
+            {selectedAlbumMedia && (
+              <div className="flex flex-col items-center justify-center bg-zinc-800/80 px-6 py-1.5 rounded-full pointer-events-none">
+                <span className="text-white font-bold text-[15px]">
+                  {new Date(selectedAlbumMedia.albumSortKey).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
+                </span>
+                <span className="text-white/70 text-[11px] font-medium -mt-0.5">
+                  {new Date(selectedAlbumMedia.albumSortKey).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
+            )}
+
+            <div className="flex items-center gap-3">
+              {isMe ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="p-2 rounded-full bg-zinc-800/80 text-white hover:bg-zinc-700 transition-colors outline-none cursor-pointer">
+                    <MoreHorizontal className="w-6 h-6" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-32 z-[100]">
+                    <DropdownMenuItem 
+                      onClick={async () => {
+                        if (!selectedAlbumMedia) return;
+                        if (confirm('이 사진/영상을 사진첩에서 삭제하시겠습니까?')) {
+                          const supabase = createClient();
+                          if (selectedAlbumMedia.isSavedPost) {
+                            await supabase.from('posts').delete().eq('id', selectedAlbumMedia.post_id);
+                          } else {
+                            await supabase.from('post_images').delete().eq('id', selectedAlbumMedia.id);
+                          }
+                          toast.success('삭제되었습니다.');
+                          setSelectedAlbumMedia(null);
+                          loadProfileAndData();
+                        }
+                      }} 
+                      className="text-red-500 font-bold focus:text-red-600 focus:bg-red-50 cursor-pointer"
+                    >
+                      삭제하기
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <div className="w-10"></div>
+              )}
+            </div>
           </div>
-          
-          {selectedAlbumMedia && (
-            (selectedAlbumMedia.image_url.includes('youtube.com/embed') || selectedAlbumMedia.image_url.includes('tiktok.com/embed') || selectedAlbumMedia.image_url.includes('instagram.com/')) ? (
-              <iframe 
-                src={selectedAlbumMedia.image_url} 
-                className="w-full h-full max-w-5xl object-contain animate-in fade-in zoom-in-95 duration-200"
-                frameBorder="0"
-                allowFullScreen
-              />
-            ) : (
-              <img 
-                src={selectedAlbumMedia.image_url} 
-                alt="Fullscreen media" 
-                className="w-full h-full object-contain animate-in fade-in zoom-in-95 duration-200"
-              />
-            )
-          )}
+
+          {/* Center Image */}
+          <div className="flex-1 flex items-center justify-center relative w-full h-full overflow-hidden pb-20">
+             {selectedAlbumMedia && (
+               (selectedAlbumMedia.image_url.includes('youtube.com/embed') || selectedAlbumMedia.image_url.includes('tiktok.com/embed') || selectedAlbumMedia.image_url.includes('instagram.com/')) ? (
+                 <iframe 
+                   key={selectedAlbumMedia.id}
+                   src={selectedAlbumMedia.image_url} 
+                   className="w-full h-full max-w-5xl object-contain animate-in fade-in zoom-in-95 duration-200"
+                   frameBorder="0"
+                   allowFullScreen
+                 />
+               ) : (
+                 <img 
+                   key={selectedAlbumMedia.id}
+                   src={selectedAlbumMedia.image_url} 
+                   alt="Fullscreen media" 
+                   className="w-full h-full object-contain animate-in fade-in zoom-in-95 duration-200"
+                 />
+               )
+             )}
+
+             {/* Navigation Overlay Zones */}
+             <div className="absolute left-0 top-0 w-[40%] h-full cursor-pointer z-40" onClick={() => {
+                const idx = orderedAlbumImages.findIndex(i => i.id === selectedAlbumMedia?.id);
+                if (idx > 0) setSelectedAlbumMedia(orderedAlbumImages[idx - 1]);
+             }} />
+             <div className="absolute right-0 top-0 w-[40%] h-full cursor-pointer z-40" onClick={() => {
+                const idx = orderedAlbumImages.findIndex(i => i.id === selectedAlbumMedia?.id);
+                if (idx !== -1 && idx < orderedAlbumImages.length - 1) setSelectedAlbumMedia(orderedAlbumImages[idx + 1]);
+             }} />
+          </div>
+
+          {/* Bottom Thumbnails Strip */}
+          <div className="w-full h-24 bg-black/90 absolute bottom-0 flex items-center px-4 overflow-x-auto snap-x scrollbar-hide gap-1.5 z-50">
+            {orderedAlbumImages.map((img, idx) => {
+              const isSelected = selectedAlbumMedia?.id === img.id;
+              // Preload the next 3 images and previous 3 images for smooth transition
+              const isNear = Math.abs(orderedAlbumImages.findIndex(i => i.id === selectedAlbumMedia?.id) - idx) <= 3;
+              return (
+                <button 
+                  key={img.id}
+                  onClick={() => setSelectedAlbumMedia(img)}
+                  className={`shrink-0 h-[70px] w-[50px] relative overflow-hidden transition-all duration-200 snap-center ${isSelected ? 'opacity-100 scale-100 z-10 rounded border-[1.5px] border-white ring-2 ring-black' : 'opacity-40 hover:opacity-100 scale-95'}`}
+                >
+                  <img src={img.image_url} className="w-full h-full object-cover" loading={isNear ? "eager" : "lazy"} />
+                </button>
+              )
+            })}
+          </div>
         </DialogContent>
       </Dialog>
 
