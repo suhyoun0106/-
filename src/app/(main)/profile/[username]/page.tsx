@@ -24,7 +24,7 @@ import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Heart, MessageSquare, ExternalLink, Trophy, Crown, Camera, LogOut, MoreVertical, Hash, MoreHorizontal } from 'lucide-react'
+import { Heart, MessageSquare, ExternalLink, Trophy, Crown, Camera, LogOut, MoreVertical, Hash, MoreHorizontal, Download, Eye } from 'lucide-react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -74,6 +74,120 @@ function SortableTabItem({ id, label, activeTab, onClick }: { id: string, label:
     >
       {label}
     </button>
+  );
+}
+
+
+function AlbumMediaControls({ media, currentUser }: { media: any, currentUser: any }) {
+  const [likes, setLikes] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [views, setViews] = useState(0);
+  const [saves, setSaves] = useState(0);
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    if (!media?.originalPostId) return;
+    
+    const supabase = createClient();
+    const postId = media.originalPostId;
+
+    async function fetchData() {
+      // Fetch Likes
+      const { data: likesData } = await supabase.from('likes').select('user_id').eq('post_id', postId);
+      if (likesData) {
+        setLikes(likesData.length);
+        setIsLiked(likesData.some(l => l.user_id === currentUser?.id));
+      }
+
+      // Fetch Views
+      const { data: postData } = await supabase.from('posts').select('view_count').eq('id', postId).single();
+      if (postData) {
+        const newCount = (postData.view_count || 0) + 1;
+        setViews(newCount);
+        // Increment view count since they opened it
+        await supabase.from('posts').update({ view_count: newCount }).eq('id', postId);
+      }
+
+      // Fetch Saves
+      const { count: saveCount } = await supabase.from('posts').select('*', { count: 'exact', head: true }).eq('content', `[SAVED:${postId}]`);
+      if (saveCount !== null) setSaves(saveCount);
+
+      if (currentUser?.id) {
+        const { data: mySave } = await supabase.from('posts').select('id').eq('user_id', currentUser.id).eq('content', `[SAVED:${postId}]`).single();
+        setIsSaved(!!mySave);
+      }
+    }
+    fetchData();
+  }, [media?.originalPostId, currentUser?.id]);
+
+  async function toggleLike() {
+    if (!currentUser?.id || !media?.originalPostId) return;
+    const supabase = createClient();
+    const postId = media.originalPostId;
+
+    if (isLiked) {
+      setIsLiked(false);
+      setLikes(prev => prev - 1);
+      await supabase.from('likes').delete().match({ user_id: currentUser.id, post_id: postId });
+    } else {
+      setIsLiked(true);
+      setLikes(prev => prev + 1);
+      await supabase.from('likes').insert({ user_id: currentUser.id, post_id: postId });
+      // Notify original author? We don't have author ID easily here unless we fetch it, skipping for simplicity or fetching it if needed
+    }
+  }
+
+  async function toggleSave() {
+    if (!currentUser?.id || !media?.originalPostId) return;
+    const supabase = createClient();
+    const postId = media.originalPostId;
+
+    if (isSaved) {
+      setIsSaved(false);
+      setSaves(prev => prev - 1);
+      await supabase.from('posts').delete().match({ user_id: currentUser.id, content: `[SAVED:${postId}]` });
+    } else {
+      setIsSaved(true);
+      setSaves(prev => prev + 1);
+      const { data } = await supabase.from('posts').insert({
+        user_id: currentUser.id,
+        community_id: null,
+        content: `[SAVED:${postId}]`
+      }).select().single();
+      
+      if (data) {
+        await supabase.from('post_images').insert({
+          post_id: data.id,
+          image_url: media.image_url,
+          position: media.position || 0
+        });
+      }
+    }
+  }
+
+  return (
+    <div className="absolute bottom-[104px] right-4 flex flex-col gap-5 z-50">
+      <button onClick={(e) => { e.stopPropagation(); toggleLike(); }} className="flex flex-col items-center gap-1 group">
+        <div className="p-2.5 rounded-full bg-black/40 backdrop-blur-md text-white transition-transform active:scale-90 shadow-[0_2px_10px_rgba(0,0,0,0.3)]">
+          <Heart className={`w-6 h-6 transition-colors ${isLiked ? 'fill-red-500 text-red-500' : 'text-white'}`} />
+        </div>
+        <span className="text-white font-bold text-xs drop-shadow-md">{likes}</span>
+      </button>
+
+      <button onClick={(e) => { e.stopPropagation(); toggleSave(); }} className="flex flex-col items-center gap-1 group">
+        <div className="p-2.5 rounded-full bg-black/40 backdrop-blur-md text-white transition-transform active:scale-90 shadow-[0_2px_10px_rgba(0,0,0,0.3)]">
+          <Download className={`w-6 h-6 transition-colors ${isSaved ? 'fill-white' : ''}`} />
+        </div>
+        <span className="text-white font-bold text-xs drop-shadow-md">{saves}</span>
+      </button>
+
+      <div className="flex flex-col items-center gap-1">
+        <div className="p-2.5 rounded-full bg-black/40 backdrop-blur-md text-white shadow-[0_2px_10px_rgba(0,0,0,0.3)]">
+          <Eye className="w-6 h-6" />
+        </div>
+        <span className="text-white font-bold text-xs drop-shadow-md">{views}</span>
+      </div>
+    </div>
   );
 }
 
@@ -1411,6 +1525,8 @@ export default function UserProfilePage() {
              
              
           </div>
+
+          {selectedAlbumMedia && <AlbumMediaControls media={selectedAlbumMedia} currentUser={currentUser} />}
 
           {/* Bottom Thumbnails Strip */}
           <div className="w-full h-24 bg-black/90 absolute bottom-0 flex items-center px-4 overflow-x-auto snap-x scrollbar-hide gap-1.5 z-50">
