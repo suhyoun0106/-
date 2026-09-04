@@ -12,7 +12,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
-import { ThumbsUp, MessageCircle, Forward, MoreHorizontal, Edit2, Trash2, ArrowLeft } from 'lucide-react'
+import { ThumbsUp, MessageCircle, Forward, MoreHorizontal, Edit2, Trash2, ArrowLeft, BarChart2, Repeat, User } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -51,16 +51,53 @@ export default function FeedPost({
   currentUserId?: string,
   showBackButton?: boolean
 }) {
+  const isRepostMatch = post.content?.match(/^\[REPOST:([0-9a-fA-F-]+)\]/);
+  const isRepost = !!isRepostMatch;
+  const originalPostId = isRepost ? isRepostMatch[1] : null;
+
+  const router = useRouter();
+
+  const [originalPost, setOriginalPost] = useState<any>(null);
+
+  useEffect(() => {
+    if (isRepost && originalPostId) {
+      const supabase = createClient();
+      supabase.from('posts').select(`
+        *,
+        profiles!posts_user_id_fkey (id, username, avatar_url, instagram_id, is_instagram_public),
+        post_images (id, image_url, position),
+        likes (id, user_id),
+        shares (id, user_id),
+        comments (id)
+      `).eq('id', originalPostId).single().then(({ data }) => {
+        setOriginalPost(data);
+      });
+    }
+  }, [isRepost, originalPostId]);
+
+  if (isRepost) {
+    if (!originalPost) return null; // or a skeleton
+    return (
+      <div className="bg-background border-b border-border">
+        <div className="flex items-center gap-1.5 px-4 pt-3 text-xs font-bold text-muted-foreground cursor-pointer hover:underline" onClick={() => router.push(`/profile/${post.profiles?.username}`)}>
+          <Repeat className="w-3.5 h-3.5" />
+          {post.profiles?.username}님이 리포스트했습니다
+        </div>
+        <FeedPost post={originalPost} currentUserId={currentUserId} showBackButton={showBackButton} />
+      </div>
+    );
+  }
+
   const supabase = createClient()
-  const router = useRouter()
+  // router hoisted
   
   const initialLiked = post.likes?.some((like: any) => like.user_id === currentUserId)
-  const initialShared = post.shares?.some((share: any) => share.user_id === currentUserId)
+  const initialReposted = post.shares?.some((share: any) => share.user_id === currentUserId)
   
   const [isLiked, setIsLiked] = useState(initialLiked)
   const [likesCount, setLikesCount] = useState(post.likes?.length || 0)
-  const [isShared, setIsShared] = useState(initialShared)
-  const [shareCount, setShareCount] = useState(post.shares?.length || 0)
+  const [isReposted, setIsReposted] = useState(initialReposted)
+  const [repostCount, setRepostCount] = useState(post.shares?.length || 0)
   const [isExpanded, setIsExpanded] = useState(false)
   const [isShareOpen, setIsShareOpen] = useState(false)
 
@@ -68,8 +105,8 @@ export default function FeedPost({
   useEffect(() => {
     setIsLiked(post.likes?.some((like: any) => like.user_id === currentUserId))
     setLikesCount(post.likes?.length || 0)
-    setIsShared(post.shares?.some((share: any) => share.user_id === currentUserId))
-    setShareCount(post.shares?.length || 0)
+    setIsReposted(post.shares?.some((share: any) => share.user_id === currentUserId))
+    setRepostCount(post.shares?.length || 0)
   }, [post, currentUserId])
 
   const handleCopyLink = async () => {
@@ -78,9 +115,9 @@ export default function FeedPost({
     toast.success('링크가 복사되었습니다.')
     
     // 이미 공유를 누르지 않은 경우에만 공유 수 + 1
-    if (currentUserId && !isShared) {
-      setIsShared(true)
-      setShareCount((prev: number) => prev + 1)
+    if (currentUserId && !isReposted) {
+      setIsReposted(true)
+      setRepostCount((prev: number) => prev + 1)
       await supabase.from('shares').insert({ post_id: post.id, user_id: currentUserId })
       router.refresh() // 캐시 갱신
     }
@@ -285,11 +322,27 @@ export default function FeedPost({
           </Link>
 
           <button 
-            onClick={() => setIsShareOpen(true)}
+            onClick={async (e) => {
+              e.stopPropagation();
+              if (!currentUserId) return;
+              const newIsReposted = !isReposted;
+              setIsReposted(newIsReposted);
+              setRepostCount((prev: number) => newIsReposted ? prev + 1 : prev - 1);
+              const supabase = createClient();
+              if (newIsReposted) {
+                await supabase.from('shares').insert({ post_id: post.id, user_id: currentUserId });
+                await supabase.from('posts').insert({ user_id: currentUserId, content: `[REPOST:${post.id}]` });
+                toast.success('게시물을 리포스트했습니다.');
+              } else {
+                await supabase.from('shares').delete().match({ post_id: post.id, user_id: currentUserId });
+                await supabase.from('posts').delete().match({ user_id: currentUserId, content: `[REPOST:${post.id}]` });
+                toast.success('리포스트를 취소했습니다.');
+              }
+            }}
             className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-secondary/80 transition-colors font-semibold text-sm"
           >
-            <Forward className={`h-5 w-5 ${isShared ? 'fill-foreground text-foreground' : 'text-foreground'}`} />
-            <span>{shareCount}</span>
+            <Repeat className={`h-5 w-5 ${isReposted ? 'text-green-500' : 'text-foreground'}`} />
+            <span className={isReposted ? 'text-green-500' : ''}>{repostCount}</span>
           </button>
         </div>
       </div>
