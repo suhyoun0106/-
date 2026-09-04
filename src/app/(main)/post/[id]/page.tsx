@@ -34,6 +34,16 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
     notFound()
   }
 
+  // 조회수(뷰수) 증가 (서버 컴포넌트 렌더링 시점에 1 증가)
+  // 원래는 RPC로 원자적 업데이트(Atomic update)를 하거나 클라이언트에서 Intersection Observer를 쓰는게 좋지만,
+  // 빠르고 간단한 적용을 위해 현재 조회수 + 1로 바로 업데이트합니다.
+  if (post) {
+    const newViewCount = (post.view_count || 0) + 1
+    await supabase.from('posts').update({ view_count: newViewCount }).eq('id', postId)
+    // 현재 페이지 렌더링에는 증가된 값을 보여줌
+    post.view_count = newViewCount
+  }
+
   return (
     <div className="max-w-2xl mx-auto py-8 px-4">
       <div className="flex flex-col gap-8">
