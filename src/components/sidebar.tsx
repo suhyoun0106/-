@@ -113,10 +113,6 @@ export default function Sidebar({ unreadCount }: { unreadCount: number }) {
 
 function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handleLogout: () => void }) {
   const [isOpen, setIsOpen] = useState(false)
-  const [translate, setTranslate] = useState({ x: 0, y: 0 })
-  const pointerStart = useRef({ x: 0, y: 0 })
-  const translateStart = useRef({ x: 0, y: 0 })
-  const isDragging = useRef(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
 
@@ -139,82 +135,18 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
     }
   }, [isOpen])
 
-  const pointerDownFlag = useRef(false)
-  const onPointerDown = (e: React.PointerEvent) => {
-    pointerDownFlag.current = true
-    pointerStart.current = { x: e.clientX, y: e.clientY }
-    translateStart.current = { ...translate }
-    isDragging.current = false
-    try {
-      ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
-    } catch(err) {}
-  }
-
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (!pointerDownFlag.current) return
-    
-    const dx = e.clientX - pointerStart.current.x
-    const dy = e.clientY - pointerStart.current.y
-    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
-      isDragging.current = true
-    }
-    if (isDragging.current) {
-      let newX = translateStart.current.x + dx
-      let newY = translateStart.current.y + dy
-      
-      const minX = -16
-      const maxX = window.innerWidth - 16 - 52
-      const maxY = 24
-      const minY = -(window.innerHeight - 24 - 52)
-      
-      newX = Math.max(minX, Math.min(newX, maxX))
-      newY = Math.max(minY, Math.min(newY, maxY))
-
-      setTranslate({
-        x: newX,
-        y: newY
-      })
-    }
-  }
-
-  const onPointerUp = (e: React.PointerEvent) => {
-    pointerDownFlag.current = false
-    try {
-      ;(e.target as HTMLElement).releasePointerCapture(e.pointerId)
-    } catch(err) {}
-    if (!isDragging.current) {
-      setIsOpen(!isOpen)
-    }
-    isDragging.current = false
-  }
-
-  const onPointerCancel = (e: React.PointerEvent) => {
-    pointerDownFlag.current = false
-    try {
-      ;(e.target as HTMLElement).releasePointerCapture(e.pointerId)
-    } catch(err) {}
-    isDragging.current = false
-  }
-
   return (
-    <div className="md:hidden fixed z-50 pointer-events-none" style={{ bottom: '24px', left: '16px' }}>
+    <div className="md:hidden fixed z-50 pointer-events-none" style={{ top: '16px', left: '16px' }}>
       <div 
         ref={menuRef}
         className={cn(
-          "relative pointer-events-auto flex flex-col items-center bg-white border border-border/50 shadow-xl overflow-visible transition-all duration-300 ease-out",
-          isOpen ? "rounded-[2rem] px-2 py-3 h-max max-h-[80vh]" : "rounded-full w-[52px] h-[52px] justify-center"
+          "relative pointer-events-auto flex flex-col items-center bg-white border border-border/50 shadow-xl overflow-hidden transition-all duration-300 ease-out cursor-pointer",
+          isOpen ? "rounded-[2rem] px-2 py-3 h-max max-h-[80vh]" : "rounded-full w-[44px] h-[44px] justify-center"
         )}
-        style={{ 
-          transform: `translate(${translate.x}px, ${translate.y}px)`,
-          touchAction: 'none' // Prevent scrolling while dragging
-        }}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerCancel}
+        onClick={() => setIsOpen(!isOpen)}
       >
         {!isOpen ? (
-          <Menu className="w-6 h-6 text-black" />
+          <Menu className="w-5 h-5 text-black" />
         ) : (
           <div className="flex flex-col items-center gap-2">
             {navItems.map((item) => {
@@ -230,30 +162,16 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
                     isActive ? "bg-black/5 text-black" : "text-black/60 hover:bg-black/5 hover:text-black"
                   )}
                 >
-                  <Icon className={cn("h-6 w-6 transition-transform", isActive && "stroke-[2.5px]")} />
-                  {item.badge ? (
-                    <Badge variant="destructive" className="absolute -top-1 -right-1 px-1 min-w-[16px] h-4 flex items-center justify-center text-[10px] border border-white">
-                      {item.badge}
-                    </Badge>
-                  ) : null}
+                  <Icon className="w-5 h-5" />
                 </Link>
               )
             })}
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center justify-center p-2.5 rounded-full transition-colors text-black/60 hover:bg-black/5 hover:text-black relative outline-none"
-              >
-                <Settings className="h-6 w-6" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" sideOffset={10} className="w-48 z-[60]">
-                <DropdownMenuItem onClick={handleLogout} className="text-red-500 font-bold cursor-pointer h-12 text-lg focus:bg-red-50 focus:text-red-600 outline-none">
-                  <LogOut className="mr-3 h-5 w-5" />
-                  <span>로그아웃</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <button
+              onClick={(e) => { e.stopPropagation(); setIsOpen(false); handleLogout() }}
+              className="flex items-center justify-center p-2.5 rounded-full text-red-500 hover:bg-red-50 transition-colors mt-2"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
           </div>
         )}
       </div>
