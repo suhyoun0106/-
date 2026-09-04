@@ -252,7 +252,7 @@ export default function FeedPost({
           <div 
             dangerouslySetInnerHTML={{ __html: post.content }} 
             className={cn(
-              "mt-1 prose prose-sm dark:prose-invert max-w-none [&_p]:my-1 [&_h1]:my-2 [&_h3]:my-1 [&_ul]:my-1",
+              "mt-1 prose prose-sm dark:prose-invert max-w-none [&_p]:my-1 [&_h1]:my-2 [&_h3]:my-1 [&_ul]:my-1 [&_*]:!bg-transparent",
               !isExpanded && "line-clamp-3"
             )}
           />
