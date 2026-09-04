@@ -40,7 +40,7 @@ import { Input } from "@/components/ui/input"
 import { cn } from '@/lib/utils'
 import { formatTimeAgo } from '@/lib/format-time'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
 function formatCount(count: number) {
   if (!count) return 0;
@@ -105,7 +105,8 @@ export default function FeedPost({
   
   const [isLiked, setIsLiked] = useState(initialLiked)
   const [likesCount, setLikesCount] = useState(post.likes?.length || 0)
-  const hasCommented = post.comments?.some((c: any) => c.user_id === currentUserId)
+  const [hasCommented, setHasCommented] = useState(post.comments?.some((c: any) => c.user_id === currentUserId) || false)
+  const [commentCount, setCommentCount] = useState(post.comments?.length || 0)
   
   const [isSaved, setIsSaved] = useState(false)
   const [isSavedLoading, setIsSavedLoading] = useState(true)
@@ -415,7 +416,7 @@ export default function FeedPost({
             className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors font-semibold text-sm"
           >
             <MessageCircle className={`h-5 w-5 ${hasCommented ? 'text-green-500' : 'text-foreground'}`} />
-            <span className={hasCommented ? 'text-green-500' : ''}>{formatCount(post.comments?.length || 0)}</span>
+            <span className={hasCommented ? 'text-green-500' : ''}>{formatCount(commentCount)}</span>
           </Link>
 
           {/* 리포스트 */}
