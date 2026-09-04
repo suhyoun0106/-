@@ -154,7 +154,7 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
             onClick={() => setIsOpen(!isOpen)}
           >
             {!isOpen ? (
-              <Menu className="w-5 h-5 text-black" />
+              <Home className="w-5 h-5 text-black" />
             ) : (
               <div className="flex flex-col items-center gap-2">
                 {navItems.map((item) => {
