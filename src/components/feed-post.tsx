@@ -340,7 +340,7 @@ export default function FeedPost({
           {/* 좋아요 */}
           <button 
             onClick={toggleLike} 
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-secondary/80 transition-colors font-semibold text-sm"
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors font-semibold text-sm"
           >
             <ThumbsUp className={`h-5 w-5 ${isLiked ? 'fill-foreground text-foreground' : 'text-foreground'}`} />
             <span>{formatCount(likesCount)}</span>
@@ -349,7 +349,7 @@ export default function FeedPost({
           {/* 댓글 */}
           <Link 
             href={`/post/${post.id}`}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-secondary/80 transition-colors font-semibold text-sm"
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors font-semibold text-sm"
           >
             <MessageCircle className="h-5 w-5" />
             <span>{formatCount(post.comments?.length || 0)}</span>
@@ -376,7 +376,7 @@ export default function FeedPost({
                 router.refresh();
               }
             }}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-secondary/80 transition-colors font-semibold text-sm"
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors font-semibold text-sm"
           >
             <Repeat className={`h-5 w-5 ${isReposted ? 'text-green-500' : 'text-foreground'}`} />
             <span className={isReposted ? 'text-green-500' : ''}>{formatCount(repostCount)}</span>
@@ -394,7 +394,7 @@ export default function FeedPost({
               e.stopPropagation();
               setIsShareOpen(true);
             }}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-secondary/80 transition-colors font-semibold text-sm"
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors font-semibold text-sm"
           >
             <Forward className="h-5 w-5" />
             <span>공유</span>
