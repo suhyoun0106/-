@@ -224,8 +224,17 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
     <div className="max-w-2xl mx-auto pb-4 flex flex-col w-full">
       
       {/* 상단 필터 및 검색 바 (스크롤 반응형) */}
-      <ScrollHideUI direction="top" className="sticky top-0 z-30 pt-4 pb-4 mb-2 pl-[68px] md:pl-4 pr-[68px] md:pr-4 bg-background/70 backdrop-blur-xl border-b border-border/50" style={{ WebkitBackdropFilter: "blur(24px)", backdropFilter: "blur(24px)" }}>
-        <div className="flex flex-col gap-4">
+      <ScrollHideUI direction="top" className="sticky top-0 z-30 pt-4 pb-4 mb-2 pl-[68px] md:pl-4 pr-[68px] md:pr-4">
+        <div 
+          className="absolute inset-0 pointer-events-none bg-white/50 dark:bg-black/50"
+          style={{
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            maskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)'
+          }}
+        />
+        <div className="flex flex-col gap-4 relative z-10">
           <div className="flex flex-row items-stretch gap-3">
             <FeedSearchBar />
           </div>
