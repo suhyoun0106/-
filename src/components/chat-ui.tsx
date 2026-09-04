@@ -181,28 +181,37 @@ export default function ChatUI({ currentUser }: { currentUser: any }) {
     <div className="flex w-full h-full border rounded-lg overflow-hidden bg-background">
       {/* Sidebar */}
       <div className={`w-full md:w-80 border-r flex-col bg-card ${selectedFriend ? 'hidden md:flex' : 'flex'}`}>
-        <div className="p-4 border-b flex items-center justify-between gap-3 bg-white/60 dark:bg-black/60 backdrop-blur-xl" style={{ WebkitBackdropFilter: "blur(20px) saturate(180%)", backdropFilter: "blur(20px) saturate(180%)" }}>
-          {/* 모바일 홈 버튼 */}
-          <Button variant="outline" size="icon" className="rounded-full shrink-0 md:hidden bg-white/80 dark:bg-black/80 backdrop-blur-xl border-border/50 shadow-sm" onClick={() => router.push('/')}>
-            <Home className="h-5 w-5" />
-          </Button>
-
-          <form onSubmit={addFriend} className="flex-1 flex gap-2">
-            <Input 
-              placeholder="유저 이름으로 친구 추가" 
-              value={searchUsername}
-              onChange={(e) => setSearchUsername(e.target.value)}
-              className="rounded-full bg-white/80 dark:bg-black/80 backdrop-blur-xl border-border/50 shadow-sm font-medium"
-            />
-            <Button type="submit" size="icon" variant="secondary" className="rounded-full shrink-0 bg-white/80 dark:bg-black/80 backdrop-blur-xl border border-border/50 shadow-sm">
-              <UserPlus className="h-4 w-4" />
+        <div className="relative pt-6 pb-3 px-4 md:pt-4 border-b-0 flex items-center justify-between gap-3">
+          {/* 그라데이션 블러 배경 */}
+          <div 
+            className="absolute inset-0 z-0 dark:bg-black/40 bg-white/40 pointer-events-none"
+            style={{
+              backdropFilter: 'blur(20px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)'
+            }}
+          />
+          
+          <div className="relative z-10 flex w-full items-center gap-3">
+            {/* 모바일 홈 버튼 */}
+            <Button variant="outline" size="icon" className="rounded-full shrink-0 md:hidden bg-white/80 dark:bg-black/80 backdrop-blur-xl border-border/50 shadow-sm outline-none w-11 h-11" onClick={() => router.push('/')}>
+              <Home className="h-5 w-5" />
             </Button>
-          </form>
 
-          {/* 모바일 프로필 버튼 */}
-          <Button variant="outline" size="icon" className="rounded-full shrink-0 md:hidden bg-white/80 dark:bg-black/80 backdrop-blur-xl border-border/50 shadow-sm" onClick={() => router.push('/profile')}>
-            <User className="h-5 w-5" />
-          </Button>
+            <form onSubmit={addFriend} className="flex-1 flex">
+              <Input 
+                placeholder="유저 이름으로 친구 추가" 
+                value={searchUsername}
+                onChange={(e) => setSearchUsername(e.target.value)}
+                className="rounded-full bg-white/80 dark:bg-black/80 backdrop-blur-xl border-border/50 shadow-sm font-medium h-11 px-5"
+              />
+            </form>
+
+            {/* 모바일 프로필 버튼 */}
+            <Button variant="outline" size="icon" className="rounded-full shrink-0 md:hidden bg-white/80 dark:bg-black/80 backdrop-blur-xl border-border/50 shadow-sm outline-none w-11 h-11" onClick={() => router.push('/profile')}>
+              <User className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
 
         <ScrollArea className="flex-1">
