@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { useRouter } from 'next/navigation'
 import ScrollHideUI from '@/components/scroll-hide-ui'
 import { createClient } from '@/utils/supabase/client'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -106,52 +106,122 @@ export default function Sidebar({ unreadCount }: { unreadCount: number }) {
       </div>
 
       {/* Mobile Floating Navigation */}
-      <div className="md:hidden fixed bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none">
-        <div className="relative pointer-events-auto">
-          {/* Expanded Menu (Radial / Rounded Layout) */}
-          <div 
-            className={cn(
-              "absolute bottom-[120%] left-1/2 -translate-x-1/2 bg-background/95 backdrop-blur-md shadow-2xl border border-border/50 transition-all duration-300 ease-out origin-bottom flex flex-wrap justify-center items-center gap-4 p-4",
-              mobileMenuOpen ? "opacity-100 scale-100 translate-y-0 rounded-[2rem]" : "opacity-0 scale-50 translate-y-8 pointer-events-none rounded-full"
-            )}
-            style={{ width: 'max-content', maxWidth: '90vw' }}
-          >
-            {navItems.map((item, index) => {
+      <MobileFloatingNav navItems={navItems} handleLogout={handleLogout} />
+    </>
+  )
+}
+
+function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handleLogout: () => void }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [translate, setTranslate] = useState({ x: 0, y: 0 })
+  const pointerStart = useRef({ x: 0, y: 0 })
+  const translateStart = useRef({ x: 0, y: 0 })
+  const isDragging = useRef(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const pathname = usePathname()
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isOpen) setIsOpen(false)
+    }
+    const handleClickOutside = (e: Event) => {
+      if (isOpen && menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('mousedown', handleClickOutside)
+    window.addEventListener('touchstart', handleClickOutside)
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('mousedown', handleClickOutside)
+      window.removeEventListener('touchstart', handleClickOutside)
+    }
+  }, [isOpen])
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    pointerStart.current = { x: e.clientX, y: e.clientY }
+    translateStart.current = { ...translate }
+    isDragging.current = false
+    ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+  }
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (e.buttons !== 1 && e.buttons !== 0) return // Handle touch/mouse properly
+    // for touch, buttons might be 0 but pointerId is captured
+    
+    const dx = e.clientX - pointerStart.current.x
+    const dy = e.clientY - pointerStart.current.y
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+      isDragging.current = true
+    }
+    if (isDragging.current) {
+      setTranslate({
+        x: translateStart.current.x + dx,
+        y: translateStart.current.y + dy
+      })
+    }
+  }
+
+  const onPointerUp = (e: React.PointerEvent) => {
+    ;(e.target as HTMLElement).releasePointerCapture(e.pointerId)
+    if (!isDragging.current) {
+      setIsOpen(!isOpen)
+    }
+    isDragging.current = false
+  }
+
+  return (
+    <div className="md:hidden fixed z-50 pointer-events-none" style={{ bottom: '24px', left: '16px' }}>
+      <div 
+        ref={menuRef}
+        className={cn(
+          "relative pointer-events-auto flex items-center bg-white border border-border/50 shadow-xl overflow-visible transition-all duration-300 ease-out",
+          isOpen ? "rounded-[2rem] px-2 py-2 w-max max-w-[90vw]" : "rounded-full w-[52px] h-[52px] justify-center"
+        )}
+        style={{ 
+          transform: `translate(${translate.x}px, ${translate.y}px)`,
+          touchAction: 'none' // Prevent scrolling while dragging
+        }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+      >
+        {!isOpen ? (
+          <Menu className="w-6 h-6 text-black" />
+        ) : (
+          <div className="flex items-center gap-1 sm:gap-2">
+            {navItems.map((item) => {
               const Icon = item.icon
               const isActive = pathname === item.href
-
               return (
                 <Link
                   key={item.name}
                   href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={(e) => { e.stopPropagation(); setIsOpen(false) }}
                   className={cn(
-                    "flex flex-col items-center justify-center p-3 rounded-full transition-colors relative",
-                    isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    "flex items-center justify-center p-2.5 rounded-full transition-colors relative",
+                    isActive ? "bg-black/5 text-black" : "text-black/60 hover:bg-black/5 hover:text-black"
                   )}
                 >
-                  <div className="relative flex items-center justify-center">
-                    <Icon className={cn("h-7 w-7 transition-transform", isActive && "stroke-[2.5px]")} />
-                    {item.badge ? (
-                      <Badge variant="destructive" className="absolute -top-2 -right-2 px-1.5 min-w-[20px] h-5 flex items-center justify-center text-xs border-2 border-background">
-                        {item.badge}
-                      </Badge>
-                    ) : null}
-                  </div>
+                  <Icon className={cn("h-6 w-6 transition-transform", isActive && "stroke-[2.5px]")} />
+                  {item.badge ? (
+                    <Badge variant="destructive" className="absolute -top-1 -right-1 px-1 min-w-[16px] h-4 flex items-center justify-center text-[10px] border border-white">
+                      {item.badge}
+                    </Badge>
+                  ) : null}
                 </Link>
               )
             })}
             
-            {/* Mobile Settings / Logout */}
             <DropdownMenu>
               <DropdownMenuTrigger
-                className="flex flex-col items-center justify-center p-3 rounded-full transition-colors text-muted-foreground hover:bg-secondary hover:text-foreground relative outline-none"
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center justify-center p-2.5 rounded-full transition-colors text-black/60 hover:bg-black/5 hover:text-black relative outline-none"
               >
-                <div className="relative flex items-center justify-center">
-                  <Settings className="h-7 w-7 transition-transform" />
-                </div>
+                <Settings className="h-6 w-6" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" sideOffset={20} className="w-48 z-[60]">
+              <DropdownMenuContent align="end" sideOffset={10} className="w-48 z-[60]">
                 <DropdownMenuItem onClick={handleLogout} className="text-red-500 font-bold cursor-pointer h-12 text-lg focus:bg-red-50 focus:text-red-600 outline-none">
                   <LogOut className="mr-3 h-5 w-5" />
                   <span>로그아웃</span>
@@ -159,20 +229,8 @@ export default function Sidebar({ unreadCount }: { unreadCount: number }) {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-
-          {/* Toggle FAB */}
-          <button 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="w-16 h-16 rounded-full bg-primary text-primary-foreground shadow-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-200 border-4 border-background"
-          >
-            {mobileMenuOpen ? (
-              <X className="w-8 h-8 transition-transform rotate-90 duration-300" />
-            ) : (
-              <Menu className="w-8 h-8 transition-transform rotate-0 duration-300" />
-            )}
-          </button>
-        </div>
+        )}
       </div>
-    </>
+    </div>
   )
 }
