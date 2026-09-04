@@ -156,6 +156,10 @@ export default function UserProfilePage() {
   const [posts, setPosts] = useState<any[]>([])
   const [top응원, setTop응원] = useState<any[]>([])
   const [isDonateOpen, setIsDonateOpen] = useState(false)
+  const [isPrivacySettingsOpen, setIsPrivacySettingsOpen] = useState(false)
+  const [editIsAlbumPublic, setEditIsAlbumPublic] = useState(false)
+  const [editIsDonationsPublic, setEditIsDonationsPublic] = useState(false)
+  const [isSavingPrivacy, setIsSavingPrivacy] = useState(false)
   const [donationAmount, setDonationAmount] = useState('10000')
   const [donationMessage, setDonationMessage] = useState('')
   const [currentUser, setCurrentUser] = useState<any>(null)
@@ -1040,8 +1044,8 @@ export default function UserProfilePage() {
                 >
                   {tabOrder.map(tabId => {
                      if (tabId === 'posts') return <SortableTabItem key="posts" id="posts" label="게시물" activeTab={activeTab} onClick={() => setActiveTab('posts')} />
-                     if (tabId === 'album' && isMe) return <SortableTabItem key="album" id="album" label="사진첩" activeTab={activeTab} onClick={() => setActiveTab('album')} />
-                     if (tabId === 'donors' && (currentMonthTotal > 0 || isMe)) return <SortableTabItem key="donors" id="donors" label="응원" activeTab={activeTab} onClick={() => setActiveTab('donors')} />
+                     if (tabId === 'album' && (isMe || profile?.is_album_public)) return <SortableTabItem key="album" id="album" label="사진첩" activeTab={activeTab} onClick={() => setActiveTab('album')} />
+                     if (tabId === 'donors' && (isMe || profile?.is_donations_public || currentMonthTotal > 0)) return <SortableTabItem key="donors" id="donors" label="응원" activeTab={activeTab} onClick={() => setActiveTab('donors')} />
                      if (tabId === 'hidden' && isMe) return <SortableTabItem key="hidden" id="hidden" label="숨긴 게시물" activeTab={activeTab} onClick={() => setActiveTab('hidden')} />
                      return null;
                   })}
@@ -1049,16 +1053,18 @@ export default function UserProfilePage() {
               </DndContext>
             </div>
             
+            {isMe && (
             <DropdownMenu>
               <DropdownMenuTrigger className="p-2 ml-2 text-muted-foreground hover:text-foreground shrink-0 outline-none rounded-full hover:bg-secondary/50 transition-colors">
                 <MoreHorizontal className="w-5 h-5" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40 z-[50]">
-                 <DropdownMenuItem onClick={() => toast('이 메뉴의 기능은 준비중입니다.')} className="font-medium cursor-pointer">
-                    설정 (준비중)
+                 <DropdownMenuItem onClick={() => setIsPrivacySettingsOpen(true)} className="font-bold cursor-pointer">
+                    공개 범위 설정
                  </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            )}
           </div>
           
           {activeTab === 'posts' && (
@@ -1172,6 +1178,56 @@ export default function UserProfilePage() {
         </div>
 
               </div>
+
+      
+      <Dialog open={isPrivacySettingsOpen} onOpenChange={setIsPrivacySettingsOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>공개 범위 설정</DialogTitle>
+            <DialogDescription>
+              사진첩과 응원 내역을 다른 사람에게 공개할지 설정합니다.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="font-bold">사진첩 공개</span>
+                <span className="text-xs text-muted-foreground">공개 시 누구나 내 사진첩을 볼 수 있습니다.</span>
+              </div>
+              <input type="checkbox" checked={editIsAlbumPublic} onChange={(e) => setEditIsAlbumPublic(e.target.checked)} className="w-5 h-5 rounded cursor-pointer accent-primary" />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="font-bold">응원 내역 공개</span>
+                <span className="text-xs text-muted-foreground">공개 시 누구나 내 응원 리더보드를 볼 수 있습니다.</span>
+              </div>
+              <input type="checkbox" checked={editIsDonationsPublic} onChange={(e) => setEditIsDonationsPublic(e.target.checked)} className="w-5 h-5 rounded cursor-pointer accent-primary" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={async () => {
+               try {
+                 setIsSavingPrivacy(true);
+                 const { error } = await supabase.from('profiles').update({
+                   is_album_public: editIsAlbumPublic,
+                   is_donations_public: editIsDonationsPublic
+                 }).eq('id', profile.id);
+                 if (error) {
+                    toast.error('설정을 저장하려면 Supabase profiles 테이블에 is_album_public, is_donations_public (boolean) 컬럼을 추가해주세요!');
+                    return;
+                 }
+                 setProfile({ ...profile, is_album_public: editIsAlbumPublic, is_donations_public: editIsDonationsPublic });
+                 toast.success('공개 범위가 설정되었습니다.');
+                 setIsPrivacySettingsOpen(false);
+               } finally {
+                 setIsSavingPrivacy(false);
+               }
+            }} disabled={isSavingPrivacy} className="w-full font-bold">
+              {isSavingPrivacy ? '저장 중...' : '저장하기'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Donate Modal */}
 
