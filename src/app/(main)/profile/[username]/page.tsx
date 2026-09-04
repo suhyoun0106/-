@@ -169,7 +169,7 @@ function AlbumMediaControls({ media, currentUser, isMe }: { media: any, currentU
   }
 
   return (
-    <div className="absolute top-16 right-4 flex items-center gap-4 z-50 pointer-events-auto" onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()}>
+    <div className="absolute top-24 right-4 flex items-center gap-4 z-50 pointer-events-auto" onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()}>
       <button onClick={(e) => { e.stopPropagation(); toggleLike(); }} className="flex items-center gap-1.5 group">
         <Heart className={`w-[22px] h-[22px] transition-colors drop-shadow ${isLiked ? 'fill-red-500 text-red-500' : 'text-white'}`} />
         <span className="text-white font-bold text-[15px] drop-shadow-md">{likes}</span>
@@ -1477,7 +1477,7 @@ export default function UserProfilePage() {
 
           {/* Center Image */}
           <div 
-            className="flex-1 flex items-center justify-center relative w-full h-full overflow-hidden pb-20 touch-pan-y select-none"
+            className="flex-1 flex items-center justify-center relative w-full h-full overflow-hidden pt-20 pb-32 touch-pan-y select-none"
             onPointerDown={(e) => {
               e.currentTarget.dataset.startX = e.clientX.toString();
               e.currentTarget.dataset.time = Date.now().toString();
