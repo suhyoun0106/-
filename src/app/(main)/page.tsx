@@ -226,10 +226,10 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
       {/* 상단 필터 및 검색 바 (스크롤 반응형) */}
       <ScrollHideUI direction="top" className="sticky top-0 z-30 pt-4 pb-4 mb-2 pl-[68px] md:pl-4 pr-[68px] md:pr-4">
         <div 
-          className="absolute inset-0 pointer-events-none bg-white/50 dark:bg-black/50"
+          className="absolute inset-0 pointer-events-none bg-white/30 dark:bg-black/30"
           style={{
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)',
+            backdropFilter: 'blur(5px)',
+            WebkitBackdropFilter: 'blur(5px)',
             maskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)',
             WebkitMaskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)'
           }}
