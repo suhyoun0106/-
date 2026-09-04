@@ -23,7 +23,7 @@ import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Heart, MessageSquare, ExternalLink, Trophy, Crown, Camera, LogOut, MoreVertical } from 'lucide-react'
+import { Heart, MessageSquare, ExternalLink, Trophy, Crown, Camera, LogOut, MoreVertical, Hash } from 'lucide-react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -165,6 +165,7 @@ export default function UserProfilePage() {
   const [isUploading, setIsUploading] = useState(false)
   
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
+  const [isTagAddOpen, setIsTagAddOpen] = useState(false)
   const [editBio, setEditBio] = useState('')
   const [editInstagramId, setEditInstagramId] = useState('')
   const [editIsDonationEnabled, setEditIsDonationEnabled] = useState(true)
@@ -688,6 +689,12 @@ export default function UserProfilePage() {
                         <MessageSquare className="w-5 h-5 mr-2 fill-current" />
                         메시지
                       </Button>
+                      {isUnclaimed && (
+                        <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={() => setIsTagAddOpen(true)}>
+                          <Hash className="w-5 h-5 mr-2" />
+                          태그 추가하기
+                        </Button>
+                      )}
                       {profile.instagram_id && profile.is_instagram_public ? (
                         <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={() => window.open(`https://instagram.com/${profile.instagram_id}`, '_blank')}>
                           Instagram: @{profile.instagram_id}
@@ -707,6 +714,12 @@ export default function UserProfilePage() {
                         <MessageSquare className="w-5 h-5 mr-2 fill-current" />
                         메시지
                       </Button>
+                      {isUnclaimed && (
+                        <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={() => setIsTagAddOpen(true)}>
+                          <Hash className="w-5 h-5 mr-2" />
+                          태그 추가하기
+                        </Button>
+                      )}
                     </>
                   )}
                 </>
@@ -1063,6 +1076,75 @@ export default function UserProfilePage() {
               </div>
 
       {/* Donate Modal */}
+
+      
+      <Dialog open={isTagAddOpen} onOpenChange={setIsTagAddOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>태그 관리</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="flex flex-col gap-2 mb-2">
+              <Label>태그 (최대 5개)</Label>
+              <div className="flex flex-wrap items-center gap-2">
+                {tags.map(t => (
+                  <div key={t.id} className="group flex items-center">
+                    {editingTagId === t.id ? (
+                      <div className="flex items-center gap-1">
+                        <input
+                          autoFocus
+                          maxLength={10}
+                          value={editingTagValue}
+                          onChange={e => setEditingTagValue(e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter') handleEditTag(t.id); if (e.key === 'Escape') setEditingTagId(null) }}
+                          className="border border-primary rounded-full px-3 py-0.5 text-sm font-medium outline-none w-28"
+                        />
+                        <button onClick={() => handleEditTag(t.id)} className="text-xs text-primary font-bold">✓</button>
+                        <button onClick={() => setEditingTagId(null)} className="text-xs text-muted-foreground">✕</button>
+                      </div>
+                    ) : (
+                      <span
+                        className="inline-flex items-center gap-1.5 bg-secondary/60 hover:bg-secondary text-foreground text-sm font-semibold px-3 py-1 rounded-full transition-colors cursor-pointer"
+                        onClick={() => { setEditingTagId(t.id); setEditingTagValue(t.tag) }}
+                      >
+                        #{t.tag}
+                        <button
+                          className="ml-0.5 text-muted-foreground hover:text-red-500 transition-colors text-xs leading-none"
+                          onClick={e => { e.stopPropagation(); handleDeleteTag(t.id) }}
+                        >✕</button>
+                      </span>
+                    )}
+                  </div>
+                ))}
+                {isAddingTag ? (
+                  <div className="flex items-center gap-1">
+                    <input
+                      autoFocus
+                      maxLength={10}
+                      value={newTagInput}
+                      onChange={e => setNewTagInput(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') handleAddTag(); if (e.key === 'Escape') { setIsAddingTag(false); setNewTagInput('') } }}
+                      placeholder="태그 입력..."
+                      className="border border-primary rounded-full px-3 py-0.5 text-sm font-medium outline-none w-28"
+                    />
+                    <button onClick={handleAddTag} className="text-xs text-primary font-bold">✓</button>
+                    <button onClick={() => { setIsAddingTag(false); setNewTagInput('') }} className="text-xs text-muted-foreground">✕</button>
+                  </div>
+                ) : (
+                  tags.length < 5 && (
+                    <button
+                      onClick={() => setIsAddingTag(true)}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-primary border border-primary/30 hover:border-primary hover:bg-primary/5 px-3 py-1 rounded-full transition-colors"
+                    >
+                      + 태그 추가
+                    </button>
+                  )
+                )}
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* 사진첩 미디어 전체화면 모달 */}
       <Dialog open={!!selectedAlbumMedia} onOpenChange={(open) => !open && setSelectedAlbumMedia(null)}>
