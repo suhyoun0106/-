@@ -9,7 +9,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Heart, MessageCircle, Send, Home, User } from 'lucide-react'
+import { Heart, MessageCircle, Send, Home, User, Repeat, Forward, Download } from 'lucide-react'
 import ScrollHideUI from '@/components/scroll-hide-ui'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -68,6 +68,12 @@ export default function NotificationsPage() {
         return { icon: <MessageCircle className="w-5 h-5 text-blue-500 fill-blue-500 shrink-0" />, text: <><NameSpan />님이 댓글을 남겼습니다.</> }
       case 'dm':
         return { icon: <Send className="w-5 h-5 text-green-500 fill-green-500 shrink-0" />, text: <><NameSpan />님이 메시지를 보냈습니다.</> }
+      case 'repost':
+        return { icon: <Repeat className="w-5 h-5 text-green-500 shrink-0" />, text: <><NameSpan />님이 회원님의 게시물을 리포스트했습니다.</> }
+      case 'share':
+        return { icon: <Forward className="w-5 h-5 text-zinc-500 shrink-0" />, text: <><NameSpan />님이 회원님의 게시물을 공유했습니다.</> }
+      case 'save':
+        return { icon: <Download className="w-5 h-5 text-zinc-500 shrink-0" />, text: <><NameSpan />님이 회원님의 게시물을 사진첩에 담았습니다.</> }
       default:
         return { icon: null, text: '새로운 알림이 있습니다.' }
     }

@@ -67,9 +67,7 @@ export default function Sidebar({ unreadCount }: { unreadCount: number }) {
                 <div className="relative flex items-center justify-center">
                   <Icon className={cn("h-6 w-6 transition-transform group-hover:scale-105", isActive && "stroke-[2.5px]")} />
                   {item.badge ? (
-                    <Badge variant="destructive" className="absolute -top-2 -right-2 px-1.5 min-w-[20px] h-5 flex items-center justify-center text-xs">
-                      {item.badge}
-                    </Badge>
+                    <div className="absolute top-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-background"></div>
                   ) : null}
                 </div>
                 {/* Tooltip */}
@@ -159,7 +157,12 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
             style={{ WebkitBackdropFilter: "blur(20px) saturate(180%)", backdropFilter: "blur(20px) saturate(180%)" }}
           >
             {!isOpen ? (
-              <Home className="w-5 h-5 text-black" />
+              <div className="relative">
+                <Home className="w-5 h-5 text-black" />
+                {navItems.find(i => i.name === '알림')?.badge ? (
+                  <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full border border-white"></div>
+                ) : null}
+              </div>
             ) : (
               <div className="flex flex-col items-center gap-2">
                 {navItems.map((item) => {
@@ -176,6 +179,9 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
                       )}
                     >
                       <Icon className="w-5 h-5" />
+                      {item.badge ? (
+                        <div className="absolute top-2 right-2 w-2 h-2 bg-green-500 rounded-full border border-white dark:border-black"></div>
+                      ) : null}
                     </Link>
                   )
                 })}

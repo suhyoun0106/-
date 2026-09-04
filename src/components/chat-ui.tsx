@@ -211,12 +211,33 @@ export default function ChatUI({ currentUser }: { currentUser: any }) {
     setMessages(prev => [...prev, { ...msg, id: Math.random().toString(), created_at: new Date().toISOString() }])
     setNewMessage('')
 
-    const { error } = await supabase
+    const { error, data: insertedMsg } = await supabase
       .from('messages')
       .insert(msg)
+      .select()
+      .single()
 
     if (error) {
       toast.error('메시지 전송 실패')
+    } else if (insertedMsg) {
+      // 메시지를 여러 번 보내도 알림은 1개만 (안 읽은 알림이 없을 때만 생성)
+      const { data: existingNotif } = await supabase
+        .from('notifications')
+        .select('id')
+        .eq('user_id', selectedFriend.id)
+        .eq('actor_id', currentUser.id)
+        .eq('type', 'dm')
+        .eq('is_read', false)
+        .maybeSingle()
+        
+      if (!existingNotif) {
+        await supabase.from('notifications').insert({
+          user_id: selectedFriend.id,
+          actor_id: currentUser.id,
+          type: 'dm',
+          reference_id: insertedMsg.id
+        })
+      }
     }
   }
 

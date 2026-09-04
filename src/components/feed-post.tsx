@@ -137,10 +137,19 @@ export default function FeedPost({
       setIsSaved(true)
       const { data } = await supabase.from('posts').insert({
         user_id: currentUserId,
-        community_id: null, // intentionally null to hide from main feeds
+        community_id: null,
         content: `[SAVED:${post.id}]`
       }).select().single()
       
+      if (post.user_id !== currentUserId) {
+        await supabase.from('notifications').insert({
+          user_id: post.user_id,
+          actor_id: currentUserId,
+          type: 'save',
+          reference_id: post.id
+        })
+      }
+
       if (data && post.post_images && post.post_images.length > 0) {
         const newImages = post.post_images.map((img: any) => ({
           post_id: data.id,
@@ -421,6 +430,9 @@ export default function FeedPost({
               if (newIsReposted) {
                 await supabase.from('shares').insert({ post_id: post.id, user_id: currentUserId });
                 await supabase.from('posts').insert({ user_id: currentUserId, community_id: currentUserId, content: `[REPOST:${post.id}]` });
+                if (post.user_id !== currentUserId) {
+                  await supabase.from('notifications').insert({ user_id: post.user_id, actor_id: currentUserId, type: 'repost', reference_id: post.id })
+                }
                 toast.success('게시물을 리포스트했습니다.');
                 router.refresh();
               } else {
@@ -478,9 +490,13 @@ export default function FeedPost({
                 className="flex-1 bg-secondary text-secondary-foreground font-medium" 
               />
               <Button 
-                onClick={() => {
+                onClick={async () => {
                   const url = `${window.location.origin}/post/${post.id}`;
                   navigator.clipboard.writeText(url);
+                  if (post.user_id !== currentUserId) {
+                    const supabase = createClient()
+                    await supabase.from('notifications').insert({ user_id: post.user_id, actor_id: currentUserId, type: 'share', reference_id: post.id })
+                  }
                   toast.success('링크가 복사되었습니다!');
                   setIsShareOpen(false);
                 }}
