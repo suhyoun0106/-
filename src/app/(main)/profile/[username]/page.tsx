@@ -1514,6 +1514,20 @@ export default function UserProfilePage() {
               e.currentTarget.dataset.mouseStartX = e.clientX.toString();
               e.currentTarget.dataset.mouseTime = Date.now().toString();
             }}
+            onWheel={(e) => {
+              if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && Math.abs(e.deltaX) > 20) {
+                 const now = Date.now();
+                 if (!e.currentTarget.dataset.lastSwipe || now - parseInt(e.currentTarget.dataset.lastSwipe) > 500) {
+                    e.currentTarget.dataset.lastSwipe = now.toString();
+                    const idx = orderedAlbumImages.findIndex(i => i.album_unique_id === selectedAlbumMedia?.album_unique_id);
+                    if (e.deltaX > 0) {
+                       if (idx !== -1 && idx < orderedAlbumImages.length - 1) setSelectedAlbumMedia(orderedAlbumImages[idx + 1]);
+                    } else {
+                       if (idx > 0) setSelectedAlbumMedia(orderedAlbumImages[idx - 1]);
+                    }
+                 }
+              }
+            }}
             onMouseUp={(e) => {
               const startX = parseFloat(e.currentTarget.dataset.mouseStartX || '0');
               const startTime = parseInt(e.currentTarget.dataset.mouseTime || '0');
