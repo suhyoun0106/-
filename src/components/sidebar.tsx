@@ -45,13 +45,12 @@ export default function Sidebar({ unreadNotifCount, unreadMsgCount }: { unreadNo
 
   useEffect(() => {
     let sub: any = null
-    let pollInterval: any = null
     
     const setupRealtime = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      // Supabase Realtime (만약 Dashboard에서 활성화되어 있다면 동작)
+      // Supabase Realtime 연동
       sub = supabase.channel('realtime:notifications')
         .on(
           'postgres_changes',
@@ -67,35 +66,11 @@ export default function Sidebar({ unreadNotifCount, unreadMsgCount }: { unreadNo
           }
         )
         .subscribe()
-        
-      // Fallback Polling (Realtime이 비활성화되어 있을 경우를 대비하여 3초마다 체크)
-      pollInterval = setInterval(async () => {
-        const { count: unreadNotifCount } = await supabase
-          .from('notifications')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', user.id)
-          .eq('is_read', false)
-          
-        const { count: unreadMsgCount } = await supabase
-          .from('notifications')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', user.id)
-          .eq('type', 'dm')
-          .eq('is_read', false)
-          
-        if (pathname !== '/notifications' && unreadNotifCount !== null) {
-          setLocalNotifCount(unreadNotifCount)
-        }
-        if (pathname !== '/messages' && unreadMsgCount !== null) {
-          setLocalMsgCount(unreadMsgCount)
-        }
-      }, 3000)
     }
     setupRealtime()
 
     return () => {
       if (sub) supabase.removeChannel(sub)
-      if (pollInterval) clearInterval(pollInterval)
     }
   }, [pathname])
 
