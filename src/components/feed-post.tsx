@@ -403,7 +403,7 @@ export default function FeedPost({
               onClick={toggleLike} 
               className="flex items-center gap-1.5 group transition-colors relative"
             >
-              <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-md">좋아요</span>
+              <span className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-md">좋아요</span>
               <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
                 <Heart className={`h-[18px] w-[18px] sm:h-[20px] sm:w-[20px] ${isLiked ? 'text-zinc-700 fill-zinc-700 dark:text-zinc-300 dark:fill-zinc-300' : ''}`} />
               </div>
@@ -415,7 +415,7 @@ export default function FeedPost({
               href={`/post/${post.id}`}
               className="flex items-center gap-1.5 group transition-colors relative"
             >
-              <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-md">댓글</span>
+              <span className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-md">댓글</span>
               <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
                 <MessageCircle className={`h-[18px] w-[18px] sm:h-[20px] sm:w-[20px] ${hasCommented ? 'text-zinc-700 fill-zinc-700 dark:text-zinc-300 dark:fill-zinc-300' : ''}`} />
               </div>
@@ -448,7 +448,7 @@ export default function FeedPost({
               }}
               className="flex items-center gap-1.5 group transition-colors relative"
             >
-              <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-md">리포스트</span>
+              <span className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-md">리포스트</span>
               <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
                 <Repeat className={`h-[18px] w-[18px] sm:h-[20px] sm:w-[20px] ${isReposted ? 'text-zinc-700 dark:text-zinc-300' : ''}`} />
               </div>
@@ -461,7 +461,7 @@ export default function FeedPost({
               disabled={isSavedLoading}
               className="flex items-center gap-1.5 group transition-colors relative"
             >
-              <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-md">사진첩에 저장하기</span>
+              <span className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-md">사진첩에 저장하기</span>
               <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
                 <Download className={`h-[18px] w-[18px] sm:h-[20px] sm:w-[20px] ${isSaved ? 'text-zinc-700 fill-zinc-700 dark:text-zinc-300 dark:fill-zinc-300' : ''}`} />
               </div>
@@ -471,7 +471,7 @@ export default function FeedPost({
           <div className="flex items-center gap-3 sm:gap-4">
             {/* 뷰 카운트 */}
             <div className="flex items-center gap-1.5 group transition-colors cursor-default relative">
-              <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-md">조회수</span>
+              <span className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-md">조회수</span>
               <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
                 <BarChart2 className="h-[18px] w-[18px] sm:h-[20px] sm:w-[20px]" />
               </div>
@@ -486,7 +486,7 @@ export default function FeedPost({
               }}
               className="p-2 rounded-full hover:bg-zinc-500/10 hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors group relative"
             >
-              <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-md">공유하기</span>
+              <span className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-md">공유하기</span>
               <Forward className="h-[18px] w-[18px] sm:h-[20px] sm:w-[20px]" />
             </button>
           </div>
