@@ -139,16 +139,19 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
     }
   }, [isOpen])
 
+  const pointerDownFlag = useRef(false)
   const onPointerDown = (e: React.PointerEvent) => {
+    pointerDownFlag.current = true
     pointerStart.current = { x: e.clientX, y: e.clientY }
     translateStart.current = { ...translate }
     isDragging.current = false
-    ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+    try {
+      ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+    } catch(err) {}
   }
 
   const onPointerMove = (e: React.PointerEvent) => {
-    if (e.buttons !== 1 && e.buttons !== 0) return // Handle touch/mouse properly
-    // for touch, buttons might be 0 but pointerId is captured
+    if (!pointerDownFlag.current) return
     
     const dx = e.clientX - pointerStart.current.x
     const dy = e.clientY - pointerStart.current.y
@@ -164,10 +167,21 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
   }
 
   const onPointerUp = (e: React.PointerEvent) => {
-    ;(e.target as HTMLElement).releasePointerCapture(e.pointerId)
+    pointerDownFlag.current = false
+    try {
+      ;(e.target as HTMLElement).releasePointerCapture(e.pointerId)
+    } catch(err) {}
     if (!isDragging.current) {
       setIsOpen(!isOpen)
     }
+    isDragging.current = false
+  }
+
+  const onPointerCancel = (e: React.PointerEvent) => {
+    pointerDownFlag.current = false
+    try {
+      ;(e.target as HTMLElement).releasePointerCapture(e.pointerId)
+    } catch(err) {}
     isDragging.current = false
   }
 
@@ -186,6 +200,7 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
+        onPointerCancel={onPointerCancel}
       >
         {!isOpen ? (
           <Menu className="w-6 h-6 text-black" />
