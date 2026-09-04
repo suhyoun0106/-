@@ -121,6 +121,8 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
   const pathname = usePathname()
   const router = useRouter()
 
+  if (pathname.startsWith('/post/')) return null;
+
   useEffect(() => {
     const handleScroll = () => {
       if (isOpen) setIsOpen(false)
