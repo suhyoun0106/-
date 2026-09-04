@@ -142,9 +142,9 @@ export default function FeedPost({
         content: `[SAVED:${post.id}]`
       }).select().single()
       
-      if (true) {
-                  const { error: err3 } = await supabase.from('notifications').insert({ user_id: post.user_id, actor_id: currentUserId, type: 'save', reference_id: post.id }); if (err3) toast.error("저장 알림 실패: " + err3.message);
-      }
+      if (post.user_id !== currentUserId) {
+          const { error: err3 } = await supabase.from('notifications').insert({ user_id: post.user_id, actor_id: currentUserId, type: 'save', reference_id: post.id }); if (err3) toast.error("저장 알림 실패: " + err3.message);
+        }
 
       if (data && post.post_images && post.post_images.length > 0) {
         const newImages = post.post_images.map((img: any) => ({
@@ -217,13 +217,14 @@ export default function FeedPost({
       // 좋아요 추가
       await supabase.from('likes').insert({ post_id: post.id, user_id: currentUserId })
       // 알림 전송 로직 (내 게시물이 아니면 알림 발송)
-      if (true) {
-                  await supabase.from('notifications').insert({
+      if (post.user_id !== currentUserId) {
+        const { error: notifError } = await supabase.from('notifications').insert({
           user_id: post.user_id, // 게시물 주인
           actor_id: currentUserId, // 좋아요 누른 사람
           type: 'like',
           reference_id: post.id
         })
+        if (notifError) toast.error("좋아요 알림 실패: " + notifError.message);
       }
     } else {
       // 좋아요 취소
@@ -431,8 +432,8 @@ export default function FeedPost({
                 if (newIsReposted) {
                   await supabase.from('shares').insert({ post_id: post.id, user_id: currentUserId });
                   await supabase.from('posts').insert({ user_id: currentUserId, community_id: currentUserId, content: `[REPOST:${post.id}]` });
-                  if (true) {
-                  const { error: err1 } = await supabase.from('notifications').insert({ user_id: post.user_id, actor_id: currentUserId, type: 'repost', reference_id: post.id }); if (err1) toast.error("리포스트 알림 실패: " + err1.message);
+                  if (post.user_id !== currentUserId) {
+                    const { error: err1 } = await supabase.from('notifications').insert({ user_id: post.user_id, actor_id: currentUserId, type: 'repost', reference_id: post.id }); if (err1) toast.error("리포스트 알림 실패: " + err1.message);
                   }
                   toast.success('게시물을 리포스트했습니다.');
                   router.refresh();
@@ -507,8 +508,8 @@ export default function FeedPost({
                   // 공유 수도 증가시키기 위해 shares 테이블에 기록
                   await supabase.from('shares').insert({ post_id: post.id, user_id: currentUserId });
                   
-                  if (true) {
-                  const { error: err2 } = await supabase.from('notifications').insert({ user_id: post.user_id, actor_id: currentUserId, type: 'share', reference_id: post.id }); if (err2) toast.error("공유 알림 실패: " + err2.message);
+                  if (post.user_id !== currentUserId) {
+                    const { error: err2 } = await supabase.from('notifications').insert({ user_id: post.user_id, actor_id: currentUserId, type: 'share', reference_id: post.id }); if (err2) toast.error("공유 알림 실패: " + err2.message);
                   }
                   toast.success('링크가 복사되었습니다!');
                   setIsShareOpen(false);
