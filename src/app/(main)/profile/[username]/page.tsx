@@ -1412,7 +1412,8 @@ export default function UserProfilePage() {
       <Dialog open={!!selectedAlbumMedia} onOpenChange={(open) => !open && setSelectedAlbumMedia(null)}>
         <DialogContent 
           showCloseButton={false} 
-          className="!max-w-none !w-screen !h-screen !p-0 !m-0 !border-0 !bg-black !rounded-none flex flex-col overflow-hidden z-[100]"
+          className="!max-w-none !w-screen !h-screen !p-0 !m-0 !border-0 !bg-black/60 backdrop-blur-2xl !rounded-none flex flex-col overflow-hidden z-[100]"
+          style={{ WebkitBackdropFilter: "blur(30px) saturate(180%)", backdropFilter: "blur(30px) saturate(180%)" }}
         >
           {/* Top Bar */}
           <div className="flex items-center justify-between p-4 z-50 bg-gradient-to-b from-black/50 to-transparent absolute top-0 w-full">
@@ -1522,7 +1523,7 @@ export default function UserProfilePage() {
           </div>
 
                     {/* Bottom Thumbnails Strip */}
-          <div className="w-full h-24 bg-black/90 absolute bottom-0 flex items-center px-4 overflow-x-auto snap-x scrollbar-hide gap-1.5 z-50">
+          <div className="w-full h-28 bg-gradient-to-t from-black/70 to-transparent absolute bottom-0 flex items-center px-4 overflow-x-auto snap-x scrollbar-hide gap-1.5 z-50 pb-4">
             {orderedAlbumImages.map((img, idx) => {
               const isSelected = selectedAlbumMedia?.album_unique_id === img.album_unique_id;
               // Preload the next 3 images and previous 3 images for smooth transition
