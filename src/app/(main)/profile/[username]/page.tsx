@@ -275,7 +275,19 @@ export default function UserProfilePage() {
   const [donationMessage, setDonationMessage] = useState('')
   const [currentUser, setCurrentUser] = useState<any>(null)
   
-    const [selectedAlbumMedia, setSelectedAlbumMedia] = useState<any | null>(null)
+      const [selectedAlbumMedia, setSelectedAlbumMedia] = useState<any | null>(null)
+  
+  useEffect(() => {
+    if (selectedAlbumMedia) {
+      // Need a small timeout to ensure the modal and strip are fully rendered if it was just opened
+      setTimeout(() => {
+        const el = document.getElementById(`thumb-${selectedAlbumMedia.album_unique_id}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+      }, 50);
+    }
+  }, [selectedAlbumMedia?.album_unique_id]);
   const [orderedAlbumImages, setOrderedAlbumImages] = useState<any[]>([])
 
   // Setup sensors for drag and drop
@@ -1552,6 +1564,7 @@ export default function UserProfilePage() {
               return (
                 <button 
                   key={img.id}
+                  id={`thumb-${img.album_unique_id}`}
                   onClick={() => setSelectedAlbumMedia(img)}
                   className={`shrink-0 h-[70px] w-[50px] relative overflow-hidden transition-all duration-200 snap-center ${isSelected ? 'opacity-100 scale-100 z-10 rounded border-[1.5px] border-white ring-2 ring-black' : 'opacity-40 hover:opacity-100 scale-95'}`}
                 >
