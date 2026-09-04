@@ -131,6 +131,28 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
   let { data: rawPosts, error } = await query.order('created_at', { ascending: false })
   rawPosts = (rawPosts || []).filter(p => !p.content?.startsWith('<!--HIDDEN-->') && !p.content?.startsWith('[SAVED:'))
 
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase()
+    rawPosts.forEach((p: any) => {
+      let score = 0
+      if (p.profiles?.username?.toLowerCase().includes(q) || p.profiles?.instagram_id?.toLowerCase().includes(q)) {
+        score = 3
+      } else if (p.title?.toLowerCase().includes(q)) {
+        score = 2
+      } else {
+        score = 1
+      }
+      p._searchScore = score
+    })
+    
+    rawPosts.sort((a: any, b: any) => {
+      if (a._searchScore !== b._searchScore) {
+        return b._searchScore - a._searchScore
+      }
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
+  }
+
   // ── 7:3 Tag-based related content (no communityId, logged in, has sponsored creators) ──
   let relatedPosts: any[] = []
   if (!communityId && user && sponsoredIds.length > 0 && !searchQuery) {
