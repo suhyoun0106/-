@@ -124,7 +124,7 @@ export default function NotificationsPage() {
           <p className="text-muted-foreground text-center py-10">새로운 알림이 없습니다.</p>
         ) : (
           notifications.map(notif => {
-            const { icon, text } = getNotificationContent(notif.type, notif.actor?.username)
+            const { icon, text } = getNotificationContent(notif)
             const linkHref = notif.type === 'dm' ? '/messages' : `/post/${notif.reference_id}`
 
             return (
