@@ -42,7 +42,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
   
   const [profile, setProfile] = useState<any>(null)
   const [posts, setPosts] = useState<any[]>([])
-  const [topDonors, setTopDonors] = useState<any[]>([])
+  const [top응원, setTop응원] = useState<any[]>([])
   const [isDonateOpen, setIsDonateOpen] = useState(false)
   const [donationAmount, setDonationAmount] = useState('10000')
   const [donationMessage, setDonationMessage] = useState('')
@@ -205,7 +205,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
         donorMap.set(donor.id, existing)
       })
       const sorted = Array.from(donorMap.values()).sort((a, b) => b.total - a.total)
-      setTopDonors(sorted)
+      setTop응원(sorted)
       setCurrentMonthTotal(total)
       setCurrentMonthBackers(donorMap.size)
     }
@@ -788,7 +788,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                 onClick={() => setActiveTab('donors')}
                 className={`shrink-0 px-4 py-2 rounded-full font-bold text-sm transition-colors ${activeTab === 'donors' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/50'}`}
               >
-                Donors
+                응원
               </button>
             )}
           </div>
@@ -835,13 +835,13 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
               </div>
               <p className="text-muted-foreground mb-8">이 크리에이터를 응원하는 사람들</p>
               
-              {topDonors.length === 0 ? (
+              {top응원.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   아직 응원 내역이 없습니다.
                 </div>
               ) : (
                 <div className="space-y-6 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-secondary">
-                  {topDonors.map((donor, idx) => (
+                  {top응원.map((donor, idx) => (
                     <div key={donor.id} className="flex flex-col p-3 hover:bg-secondary/10 rounded-xl transition-colors border border-transparent hover:border-border">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 cursor-pointer hover:underline" onClick={() => router.push(`/profile/${donor.username}`)}>

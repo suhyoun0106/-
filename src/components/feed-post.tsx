@@ -337,10 +337,12 @@ export default function FeedPost({
                 await supabase.from('shares').insert({ post_id: post.id, user_id: currentUserId });
                 await supabase.from('posts').insert({ user_id: currentUserId, community_id: currentUserId, content: `[REPOST:${post.id}]` });
                 toast.success('게시물을 리포스트했습니다.');
+                router.refresh();
               } else {
                 await supabase.from('shares').delete().match({ post_id: post.id, user_id: currentUserId });
                 await supabase.from('posts').delete().match({ user_id: currentUserId, community_id: currentUserId, content: `[REPOST:${post.id}]` });
                 toast.success('리포스트를 취소했습니다.');
+                router.refresh();
               }
             }}
             className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-secondary/80 transition-colors font-semibold text-sm"

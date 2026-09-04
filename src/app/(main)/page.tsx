@@ -182,7 +182,13 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
       const views = post.view_count || 0
       const points = views * 1 + likes * 5 + comments * 10 + shares * 20
       const hoursSince = (Date.now() - new Date(post.created_at).getTime()) / (1000 * 60 * 60)
-      const score = (points - 1) / Math.pow(hoursSince + 2, gravity)
+      let score = (points - 1) / Math.pow(hoursSince + 2, gravity)
+      
+      // 방금 내가 올린 게시물은 최상단 노출 (5분 이내)
+      if (user && post.user_id === user.id && hoursSince < (5 / 60)) {
+        score = Infinity;
+      }
+      
       return { ...post, score }
     }).sort((a, b) => b.score - a.score)
   }
