@@ -1478,24 +1478,42 @@ export default function UserProfilePage() {
           {/* Center Image */}
           <div 
             className="flex-1 flex items-center justify-center relative w-full h-full overflow-hidden pb-32 touch-pan-y select-none"
-            onPointerDown={(e) => {
-              e.currentTarget.dataset.startX = e.clientX.toString();
+            onTouchStart={(e) => {
+              e.currentTarget.dataset.startX = e.touches[0].clientX.toString();
               e.currentTarget.dataset.time = Date.now().toString();
             }}
-            onPointerUp={(e) => {
+            onTouchEnd={(e) => {
               const startX = parseFloat(e.currentTarget.dataset.startX || '0');
               const startTime = parseInt(e.currentTarget.dataset.time || '0');
+              const endX = e.changedTouches[0].clientX;
+              const diff = startX - endX;
+              const timeDiff = Date.now() - startTime;
+              
+              if (Math.abs(diff) > 40 && timeDiff < 800) {
+                 const idx = orderedAlbumImages.findIndex(i => i.album_unique_id === selectedAlbumMedia?.album_unique_id);
+                 if (diff > 0) {
+                    if (idx !== -1 && idx < orderedAlbumImages.length - 1) setSelectedAlbumMedia(orderedAlbumImages[idx + 1]);
+                 } else {
+                    if (idx > 0) setSelectedAlbumMedia(orderedAlbumImages[idx - 1]);
+                 }
+              }
+            }}
+            onMouseDown={(e) => {
+              e.currentTarget.dataset.mouseStartX = e.clientX.toString();
+              e.currentTarget.dataset.mouseTime = Date.now().toString();
+            }}
+            onMouseUp={(e) => {
+              const startX = parseFloat(e.currentTarget.dataset.mouseStartX || '0');
+              const startTime = parseInt(e.currentTarget.dataset.mouseTime || '0');
               const endX = e.clientX;
               const diff = startX - endX;
               const timeDiff = Date.now() - startTime;
               
-              if (Math.abs(diff) > 50 && timeDiff < 500) {
+              if (Math.abs(diff) > 40 && timeDiff < 800) {
                  const idx = orderedAlbumImages.findIndex(i => i.album_unique_id === selectedAlbumMedia?.album_unique_id);
                  if (diff > 0) {
-                    // Swiped left, next
                     if (idx !== -1 && idx < orderedAlbumImages.length - 1) setSelectedAlbumMedia(orderedAlbumImages[idx + 1]);
                  } else {
-                    // Swiped right, prev
                     if (idx > 0) setSelectedAlbumMedia(orderedAlbumImages[idx - 1]);
                  }
               }
@@ -1516,7 +1534,7 @@ export default function UserProfilePage() {
                    key={selectedAlbumMedia.id}
                    src={selectedAlbumMedia.image_url} 
                    alt="Fullscreen media" 
-                   className="w-full h-full object-contain animate-in fade-in zoom-in-95 duration-200"
+                   className="w-full h-full object-contain animate-in fade-in zoom-in-95 duration-200" draggable={false}
                  />
                )
              )}
