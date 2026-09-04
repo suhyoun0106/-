@@ -1427,7 +1427,7 @@ export default function UserProfilePage() {
       <Dialog open={!!selectedAlbumMedia} onOpenChange={(open) => !open && setSelectedAlbumMedia(null)}>
         <DialogContent 
           showCloseButton={false} 
-          className="!max-w-none !w-screen !h-[100dvh] !p-0 !m-0 !border-0 !bg-black/60 backdrop-blur-2xl !rounded-none flex flex-col overflow-hidden z-[100]"
+          className="!max-w-none !w-screen !h-[100dvh] !p-0 !m-0 !border-0 !bg-black/60 backdrop-blur-2xl !rounded-none flex flex-col overflow-hidden z-50"
           style={{ WebkitBackdropFilter: "blur(30px) saturate(180%)", backdropFilter: "blur(30px) saturate(180%)" }}
         >
           {/* Top Bar */}
@@ -1453,7 +1453,7 @@ export default function UserProfilePage() {
                   <DropdownMenuTrigger className="p-2 rounded-full bg-zinc-800/80 text-white hover:bg-zinc-700 transition-colors outline-none cursor-pointer">
                     <MoreHorizontal className="w-6 h-6" />
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-32 z-[100]">
+                  <DropdownMenuContent align="end" className="w-32 z-50">
                     <DropdownMenuItem 
                       onClick={() => toast('편집 기능은 준비 중입니다.')} 
                       className="font-bold cursor-pointer"
