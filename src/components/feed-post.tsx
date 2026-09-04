@@ -392,80 +392,39 @@ export default function FeedPost({
           <button 
             onClick={(e) => {
               e.stopPropagation();
-              const url = `${window.location.origin}/post/${post.id}`;
-              navigator.clipboard.writeText(url);
-              toast.success('게시물 링크가 복사되었습니다.');
+              setIsShareOpen(true);
             }}
             className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-secondary/80 transition-colors font-semibold text-sm"
           >
-            <Share2 className="h-5 w-5" />
+            <Forward className="h-5 w-5" />
+            <span>공유</span>
           </button>
         </div>
       </div>
 
       <Dialog open={isShareOpen} onOpenChange={setIsShareOpen}>
-        <DialogContent className="sm:max-w-md bg-zinc-900 text-white border-zinc-800 rounded-xl p-0 overflow-hidden">
-          <DialogHeader className="p-4 pb-0">
-            <DialogTitle className="text-left font-semibold text-lg text-white flex justify-between items-center">
-              Share in a post
-            </DialogTitle>
+        <DialogContent className="sm:max-w-md bg-background border-border rounded-xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">게시물 공유하기</DialogTitle>
           </DialogHeader>
-          
-          <div className="flex justify-center mb-2">
-            <Button variant="secondary" className="rounded-full bg-zinc-100 text-black hover:bg-zinc-200 h-10 px-6 font-bold">
-              Create post
-            </Button>
-          </div>
-          <div className="text-center text-zinc-400 text-sm mb-6">
-            No subscribers
-          </div>
-
-          <div className="px-4 pb-6">
-            <div className="text-white text-base mb-4 font-medium">Share</div>
-            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x">
-              <div className="flex flex-col items-center gap-2 min-w-[72px] snap-start">
-                <button onClick={handleCopyLink} className="w-16 h-16 rounded-full bg-white flex items-center justify-center hover:opacity-90 transition-opacity">
-                  <div className="w-8 h-8 flex items-center justify-center">
-                    <span className="text-xl font-medium text-black">{"<>"}</span>
-                  </div>
-                </button>
-                <span className="text-xs text-zinc-300">Embed</span>
-              </div>
-              <div className="flex flex-col items-center gap-2 min-w-[72px] snap-start">
-                <button onClick={handleCopyLink} className="w-16 h-16 rounded-full bg-[#FF4500] flex items-center justify-center hover:opacity-90 transition-opacity">
-                  <span className="font-bold text-white text-xl">Reddit</span>
-                </button>
-                <span className="text-xs text-zinc-300">Reddit</span>
-              </div>
-              <div className="flex flex-col items-center gap-2 min-w-[72px] snap-start">
-                <button onClick={handleCopyLink} className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center hover:opacity-90 transition-opacity">
-                  <MessageCircle className="w-8 h-8 fill-white text-blue-500" />
-                </button>
-                <span className="text-xs text-zinc-300">Messages</span>
-              </div>
-              <div className="flex flex-col items-center gap-2 min-w-[72px] snap-start">
-                <button onClick={handleCopyLink} className="w-16 h-16 rounded-full bg-[#25D366] flex items-center justify-center hover:opacity-90 transition-opacity">
-                  <MessageCircle className="w-8 h-8 fill-white text-[#25D366]" />
-                </button>
-                <span className="text-xs text-zinc-300">WhatsApp</span>
-              </div>
-              <div className="flex flex-col items-center gap-2 min-w-[72px] snap-start">
-                <button onClick={handleCopyLink} className="w-16 h-16 rounded-full bg-[#1877F2] flex items-center justify-center hover:opacity-90 transition-opacity">
-                  <span className="font-bold text-3xl text-white">f</span>
-                </button>
-                <span className="text-xs text-zinc-300">Facebook</span>
-              </div>
-            </div>
-            
-            <div className="mt-4 flex items-center gap-2 p-2 bg-transparent rounded-full border border-zinc-700 h-14 relative overflow-hidden">
-              <input 
-                type="text" 
+          <div className="flex flex-col gap-4 py-4">
+            <p className="text-sm text-muted-foreground">아래 링크를 복사하여 친구들에게 공유해보세요!</p>
+            <div className="flex items-center gap-2">
+              <Input 
                 readOnly 
                 value={`${typeof window !== 'undefined' ? window.location.origin : ''}/post/${post.id}`} 
-                className="flex-1 bg-transparent border-none text-sm text-zinc-200 focus:outline-none px-4 truncate pr-24"
+                className="flex-1 bg-secondary text-secondary-foreground font-medium" 
               />
-              <Button onClick={handleCopyLink} className="absolute right-1 top-1 bottom-1 bg-zinc-800 hover:bg-zinc-700 text-white rounded-full px-6 border border-zinc-700 font-semibold">
-                Copy
+              <Button 
+                onClick={() => {
+                  const url = `${window.location.origin}/post/${post.id}`;
+                  navigator.clipboard.writeText(url);
+                  toast.success('링크가 복사되었습니다!');
+                  setIsShareOpen(false);
+                }}
+                className="font-bold shrink-0"
+              >
+                복사
               </Button>
             </div>
           </div>
