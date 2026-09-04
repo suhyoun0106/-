@@ -381,7 +381,7 @@ export default function FeedPost({
           <div 
             dangerouslySetInnerHTML={{ __html: post.content }} 
             className={cn(
-              "mt-1 text-[15px] leading-[1.6] text-foreground prose prose-sm dark:prose-invert max-w-none [&_p]:my-1 [&_h1]:my-2 [&_h3]:my-1 [&_ul]:my-1 [&_*]:!bg-transparent [&_*]:!text-[15px] [&_*]:!leading-[1.6] [&_*]:!font-normal [&_strong]:!font-bold [&_b]:!font-bold",
+              "mt-1 text-[18px] leading-[1.6] text-foreground prose prose-sm dark:prose-invert max-w-none [&_p]:my-1 [&_h1]:my-2 [&_h3]:my-1 [&_ul]:my-1 [&_*]:!bg-transparent [&_*]:!text-[18px] [&_*]:!leading-[1.6] [&_*]:!font-normal [&_strong]:!font-bold [&_b]:!font-bold",
               !isExpanded && "line-clamp-3"
             )}
           />
