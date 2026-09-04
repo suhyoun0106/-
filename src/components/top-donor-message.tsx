@@ -77,7 +77,7 @@ export default function TopDonorMessage({
   return (
     <div className="w-full bg-primary/10 border border-primary/20 rounded-xl p-4 mb-4 relative flex items-center justify-between">
       <div className="flex-1 mr-8">
-        <h4 className="text-xs font-bold text-primary mb-1">👑 이달의 최고 후원자 메시지</h4>
+        <h4 className="text-xs font-bold text-primary mb-1">👑 이달의 최고 응원자 메시지</h4>
         
         {isEditing ? (
           <div className="flex flex-col gap-2 mt-2">

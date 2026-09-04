@@ -264,7 +264,7 @@ export default function SearchPage() {
             </div>
             <div>
               <h2 className="text-xl font-bold">Hot Trend</h2>
-              <p className="text-sm text-muted-foreground">내가 후원한 크리에이터와 비슷한 태그를 가진 인기 크리에이터</p>
+              <p className="text-sm text-muted-foreground">내가 응원한 크리에이터와 비슷한 태그를 가진 인기 크리에이터</p>
             </div>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">

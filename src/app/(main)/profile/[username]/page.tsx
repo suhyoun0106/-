@@ -306,12 +306,12 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
     })
 
     if (error) {
-      toast.error('후원에 실패했습니다.')
+      toast.error('응원에 실패했습니다.')
     } else {
       const newTotal = (profile.total_donations || 0) + amount
       await supabase.from('profiles').update({ total_donations: newTotal }).eq('id', profile.id)
       
-      toast.success('가상 후원이 완료되었습니다! 🎉')
+      toast.success('응원이 완료되었습니다! 🎉')
       setIsDonateOpen(false)
       setDonationMessage('')
       loadProfileAndData()
@@ -478,7 +478,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                   소개글을 작성해주세요.
                 </p>
               ) : isUnclaimed ? (
-                <p className="text-muted-foreground">본인인증이 안된 계정입니다. 후원을 통해 해당 페이지 본인인증을 유도해 보세요!</p>
+                <p className="text-muted-foreground">본인인증이 안된 계정입니다. 응원을 통해 해당 페이지 본인인증을 유도해 보세요!</p>
               ) : null}
             </div>
 
@@ -531,7 +531,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                     <>
                       <Button className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground font-extrabold rounded-xl h-11 px-6 shadow-md shadow-primary/20 border-0" onClick={() => setIsDonateOpen(true)}>
                         <Heart className="w-5 h-5 mr-2 fill-zinc-900 text-zinc-900" />
-                        Virtual Donate
+                        응원하기
                       </Button>
                       <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={startDM}>
                         <MessageSquare className="w-5 h-5 mr-2 fill-current" />
@@ -550,7 +550,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                   ) : (
                     <>
                       <Button disabled className="shrink-0 bg-secondary/80 text-muted-foreground font-bold rounded-xl h-11 px-6 border-0">
-                        🔒 인스타그램 및 후원 비공개
+                        🔒 인스타그램 및 응원 비공개
                       </Button>
                       <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={startDM}>
                         <MessageSquare className="w-5 h-5 mr-2 fill-current" />
@@ -741,10 +741,10 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                   className="w-5 h-5 accent-primary cursor-pointer"
                 />
                 <Label htmlFor="donation-mode" className="flex-1 cursor-pointer flex flex-col gap-1">
-                  <div className="font-bold text-sm">가상 후원받기</div>
-                  <div className="text-xs text-muted-foreground font-normal">체크 시 가상 후원을 받을 수 있습니다.</div>
+                  <div className="font-bold text-sm">응원받기</div>
+                  <div className="text-xs text-muted-foreground font-normal">체크 시 응원을 받을 수 있습니다.</div>
                   {!editIsDonationEnabled && (
-                    <div className="text-xs text-red-500 font-bold">* 인스타그램 ID를 공개해야 후원을 받을 수 있습니다.</div>
+                    <div className="text-xs text-red-500 font-bold">* 인스타그램 ID를 공개해야 응원을 받을 수 있습니다.</div>
                   )}
                 </Label>
               </div>
@@ -824,7 +824,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
           {activeTab === 'donors' && (
             <div className="bg-white rounded-2xl border p-8 shadow-sm">
               <div className="flex items-end justify-between mb-1">
-                <h3 className="text-2xl font-bold">Top Donors</h3>
+                <h3 className="text-2xl font-bold">응원</h3>
                 {currentMonthTotal > 0 && (
                   <div className="text-sm font-medium text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full flex items-center gap-2">
                     <span>총 <span className="font-bold text-foreground">{currentMonthTotal.toLocaleString()}₩</span></span>
@@ -833,11 +833,11 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                   </div>
                 )}
               </div>
-              <p className="text-muted-foreground mb-8">Top backers supporting this creator</p>
+              <p className="text-muted-foreground mb-8">이 크리에이터를 응원하는 사람들</p>
               
               {topDonors.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
-                  아직 후원자가 없습니다.
+                  아직 응원 내역이 없습니다.
                 </div>
               ) : (
                 <div className="space-y-6 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-secondary">
@@ -880,12 +880,12 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-center">@{profile.username}님을 응원하세요!</DialogTitle>
             <DialogDescription className="text-center">
-              가상 후원금을 보내면 리더보드에 이름이 올라갑니다.
+              응원금을 보내면 리더보드에 이름이 올라갑니다.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleDonate} className="space-y-4 mt-4">
             <div className="space-y-2">
-              <Label htmlFor="amount" className="font-bold">후원 금액 (가상 W)</Label>
+              <Label htmlFor="amount" className="font-bold">응원 금액 (가상 W)</Label>
               <Input
                 id="amount"
                 type="number"
@@ -905,7 +905,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
             </div>
             <DialogFooter className="mt-6">
               <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg h-12 rounded-xl">
-                가상 후원하기 🚀
+                응원하기 🚀
               </Button>
             </DialogFooter>
           </form>
