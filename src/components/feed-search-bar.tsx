@@ -77,7 +77,7 @@ export default function FeedSearchBar() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}
-          className="absolute inset-0 w-full h-full pl-11 pr-4 rounded-full border-2 border-border bg-background hover:bg-secondary/20 focus:bg-background focus:border-primary focus:outline-none transition-all font-medium"
+          className="absolute inset-0 w-full h-full pl-11 pr-4 rounded-full border border-border/50 bg-background/80 backdrop-blur-md shadow-sm hover:bg-background/90 focus:bg-background focus:border-primary focus:outline-none transition-all font-medium"
         />
       </form>
       
