@@ -402,6 +402,7 @@ export default function FeedPost({
             <button 
               onClick={toggleLike} 
               className="flex items-center gap-1.5 group transition-colors"
+              title="좋아요"
             >
               <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
                 <Heart className={`h-[18px] w-[18px] sm:h-[20px] sm:w-[20px] ${isLiked ? 'text-zinc-700 fill-zinc-700 dark:text-zinc-300 dark:fill-zinc-300' : ''}`} />
@@ -413,6 +414,7 @@ export default function FeedPost({
             <Link 
               href={`/post/${post.id}`}
               className="flex items-center gap-1.5 group transition-colors"
+              title="댓글"
             >
               <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
                 <MessageCircle className={`h-[18px] w-[18px] sm:h-[20px] sm:w-[20px] ${hasCommented ? 'text-zinc-700 fill-zinc-700 dark:text-zinc-300 dark:fill-zinc-300' : ''}`} />
@@ -445,6 +447,7 @@ export default function FeedPost({
                 }
               }}
               className="flex items-center gap-1.5 group transition-colors"
+              title="리포스트"
             >
               <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
                 <Repeat className={`h-[18px] w-[18px] sm:h-[20px] sm:w-[20px] ${isReposted ? 'text-zinc-700 dark:text-zinc-300' : ''}`} />
@@ -457,6 +460,7 @@ export default function FeedPost({
               onClick={toggleSave}
               disabled={isSavedLoading}
               className="flex items-center gap-1.5 group transition-colors"
+              title="사진첩에 저장하기"
             >
               <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
                 <Download className={`h-[18px] w-[18px] sm:h-[20px] sm:w-[20px] ${isSaved ? 'text-zinc-700 fill-zinc-700 dark:text-zinc-300 dark:fill-zinc-300' : ''}`} />
@@ -466,7 +470,7 @@ export default function FeedPost({
 
           <div className="flex items-center gap-3 sm:gap-4">
             {/* 뷰 카운트 */}
-            <div className="flex items-center gap-1.5 group transition-colors cursor-default">
+            <div className="flex items-center gap-1.5 group transition-colors cursor-default" title="조회수">
               <div className="p-2 -ml-2 rounded-full group-hover:bg-zinc-500/10 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
                 <BarChart2 className="h-[18px] w-[18px] sm:h-[20px] sm:w-[20px]" />
               </div>
@@ -480,6 +484,7 @@ export default function FeedPost({
                 setIsShareOpen(true);
               }}
               className="p-2 rounded-full hover:bg-zinc-500/10 hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors"
+              title="공유하기"
             >
               <Forward className="h-[18px] w-[18px] sm:h-[20px] sm:w-[20px]" />
             </button>
