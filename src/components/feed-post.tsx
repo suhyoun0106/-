@@ -12,7 +12,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
-import { ThumbsUp, MessageCircle, Forward, Bookmark, Share2, MoreHorizontal, Edit2, Trash2, ArrowLeft, Eye, EyeOff, BarChart2, Repeat, User } from 'lucide-react'
+import { ThumbsUp, MessageCircle, Forward, Download, Share2, MoreHorizontal, Edit2, Trash2, ArrowLeft, Eye, EyeOff, BarChart2, Repeat, User } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -441,7 +441,7 @@ export default function FeedPost({
             disabled={isSavedLoading}
             className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors font-semibold text-sm"
           >
-            <Bookmark className={`h-5 w-5 ${isSaved ? 'fill-foreground text-foreground' : 'text-foreground'}`} />
+            <Download className={`h-5 w-5 ${isSaved ? 'text-green-500' : 'text-foreground'}`} />
           </button>
 
           {/* 공유 */}
