@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
-import { ImagePlus, X, ChevronDown, ChevronLeft, ChevronRight, Trash2, Link2, Bold, Italic, Strikethrough, Image as ImageIcon, List, ListOrdered, Underline, Edit2 } from 'lucide-react'
+import { ImagePlus, X, ChevronDown, ArrowLeft, ChevronLeft, ChevronRight, Trash2, Link2, Bold, Italic, Strikethrough, Image as ImageIcon, List, ListOrdered, Underline, Edit2 } from 'lucide-react'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog'
@@ -537,7 +537,14 @@ export default function CreatePostPage() {
       
       {/* Top Navigation / Toolbar */}
       <div className="flex items-center justify-between mb-8">
-        <DropdownMenu>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => router.back()}
+            className="w-11 h-11 flex items-center justify-center rounded-full border border-border bg-background hover:bg-secondary/50 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <DropdownMenu>
           <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-full h-11 px-6 font-bold border border-border bg-background flex gap-2 cursor-pointer hover:bg-secondary/50">
             {selectedCommunity ? (
               <>
@@ -548,7 +555,7 @@ export default function CreatePostPage() {
                 {selectedCommunity.username}
               </>
             ) : (
-              '인물 커뮤니티 선택'
+              '커뮤니티 선택'
             )}
             <ChevronDown className="w-4 h-4 ml-1 text-muted-foreground" />
           </DropdownMenuTrigger>
@@ -568,6 +575,7 @@ export default function CreatePostPage() {
             )}
           </DropdownMenuContent>
         </DropdownMenu>
+        </div>
 
         {drafts.length > 0 ? (
           <DropdownMenu>

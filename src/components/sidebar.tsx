@@ -121,7 +121,7 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
   const pathname = usePathname()
   const router = useRouter()
 
-  if (pathname.startsWith('/post/')) return null;
+  if (pathname.startsWith('/post/') || pathname.startsWith('/create')) return null;
 
   useEffect(() => {
     const handleScroll = () => {
