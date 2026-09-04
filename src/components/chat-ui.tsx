@@ -15,6 +15,28 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { usePresence } from '@/components/presence-provider'
 
+
+function formatRelativeTime(dateString: string) {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+  
+  if (diffInSeconds < 60) return '방금'
+  const diffInMinutes = Math.floor(diffInSeconds / 60)
+  if (diffInMinutes < 60) return `${diffInMinutes}분`
+  const diffInHours = Math.floor(diffInMinutes / 60)
+  if (diffInHours < 24) return `${diffInHours}시간`
+  const diffInDays = Math.floor(diffInHours / 24)
+  if (diffInDays < 7) return `${diffInDays}일`
+  const diffInWeeks = Math.floor(diffInDays / 7)
+  if (diffInWeeks < 4) return `${diffInWeeks}주`
+  const diffInMonths = Math.floor(diffInDays / 30)
+  if (diffInMonths < 12) return `${diffInMonths}개월`
+  const diffInYears = Math.floor(diffInDays / 365)
+  return `${diffInYears}년`
+}
+
 export default function ChatUI({ currentUser }: { currentUser: any }) {
   const [friends, setFriends] = useState<any[]>([])
   const [selectedFriend, setSelectedFriend] = useState<any>(null)
@@ -74,23 +96,48 @@ export default function ChatUI({ currentUser }: { currentUser: any }) {
   }, [messages])
 
   async function fetchFriends() {
-    // Fetch friends where I am user_id or friend_id
-    const { data, error } = await supabase
+    // 1. Fetch friends
+    const { data: friendsData } = await supabase
       .from('friends')
       .select('*, user:user_id(id, username, avatar_url), friend:friend_id(id, username, avatar_url)')
       .or(`user_id.eq.${currentUser.id},friend_id.eq.${currentUser.id}`)
-    
-    if (data) {
-      const formattedFriends = data.map(f => {
-        if (f.user_id === currentUser.id) {
-          return { id: f.friend.id, username: f.friend.username, avatar_url: f.friend.avatar_url }
-        } else {
-          return { id: f.user.id, username: f.user.username, avatar_url: f.user.avatar_url }
+
+    // 2. Fetch recent messages for current user
+    const { data: messagesData } = await supabase
+      .from('messages')
+      .select('*')
+      .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`)
+      .order('created_at', { ascending: false })
+      .limit(1000)
+
+    if (friendsData) {
+      const formattedFriends = friendsData.map((f: any) => {
+        let friendObj = f.user_id === currentUser.id 
+          ? { id: f.friend.id, username: f.friend.username, avatar_url: f.friend.avatar_url }
+          : { id: f.user.id, username: f.user.username, avatar_url: f.user.avatar_url }
+        
+        // Find latest message for this friend
+        const latestMsg = messagesData?.find((m: any) => 
+          (m.sender_id === currentUser.id && m.receiver_id === friendObj.id) ||
+          (m.sender_id === friendObj.id && m.receiver_id === currentUser.id)
+        )
+
+        return {
+          ...friendObj,
+          lastMessage: latestMsg || null
         }
       })
       
-      // Remove duplicates just in case
-      const uniqueFriends = Array.from(new Map(formattedFriends.map(item => [item.id, item])).values())
+      // Remove duplicates
+      const uniqueFriends = Array.from(new Map(formattedFriends.map((item: any) => [item.id, item])).values())
+      
+      // Sort by latest message date (newest first), friends with no messages go to bottom
+      uniqueFriends.sort((a: any, b: any) => {
+        const timeA = a.lastMessage ? new Date(a.lastMessage.created_at).getTime() : 0
+        const timeB = b.lastMessage ? new Date(b.lastMessage.created_at).getTime() : 0
+        return timeB - timeA
+      })
+
       setFriends(uniqueFriends)
     }
   }
@@ -226,7 +273,7 @@ export default function ChatUI({ currentUser }: { currentUser: any }) {
                     selectedFriend?.id === friend.id ? 'bg-secondary' : 'hover:bg-secondary/50'
                   }`}
                 >
-                  <div className="relative">
+                  <div className="relative shrink-0">
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={friend.avatar_url || ''} />
                       <AvatarFallback>{friend.username.charAt(0).toUpperCase()}</AvatarFallback>
@@ -235,7 +282,17 @@ export default function ChatUI({ currentUser }: { currentUser: any }) {
                       <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-background rounded-full"></div>
                     )}
                   </div>
-                  <span className="font-medium">{friend.username}</span>
+                  <div className="flex flex-col items-start overflow-hidden w-full">
+                    <span className="font-medium text-sm md:text-base whitespace-nowrap overflow-hidden text-ellipsis w-full text-left">{friend.username}</span>
+                    {friend.lastMessage && (
+                      <span className="text-xs text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis w-full text-left mt-0.5">
+                        {friend.lastMessage.sender_id === currentUser.id ? '회원님: ' : ''}
+                        {friend.lastMessage.content || '메시지'}
+                        {' · '}
+                        {formatRelativeTime(friend.lastMessage.created_at)}
+                      </span>
+                    )}
+                  </div>
                 </button>
               ))
             )}
