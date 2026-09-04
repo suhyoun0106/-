@@ -77,7 +77,8 @@ export default function FeedSearchBar() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}
-          className="absolute inset-0 w-full h-full pl-11 pr-4 rounded-full border border-border/50 bg-background shadow-sm hover:bg-accent focus:bg-background focus:border-primary focus:outline-none transition-all font-medium"
+          className="absolute inset-0 w-full h-full pl-11 pr-4 rounded-full border border-border/50 bg-white/70 dark:bg-black/70 backdrop-blur-xl shadow-sm hover:bg-white/80 dark:hover:bg-black/80 focus:bg-background focus:border-primary focus:outline-none transition-all font-medium"
+          style={{ WebkitBackdropFilter: "blur(16px)" }}
         />
       </form>
       
