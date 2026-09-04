@@ -1042,7 +1042,7 @@ export default function UserProfilePage() {
                      if (tabId === 'posts') return <SortableTabItem key="posts" id="posts" label="게시물" activeTab={activeTab} onClick={() => setActiveTab('posts')} />
                      if (tabId === 'album' && isMe) return <SortableTabItem key="album" id="album" label="사진첩" activeTab={activeTab} onClick={() => setActiveTab('album')} />
                      if (tabId === 'donors' && (currentMonthTotal > 0 || isMe)) return <SortableTabItem key="donors" id="donors" label="응원" activeTab={activeTab} onClick={() => setActiveTab('donors')} />
-                     if (tabId === 'hidden' && isMe) return <SortableTabItem key="hidden" id="hidden" label="숨겨짐" activeTab={activeTab} onClick={() => setActiveTab('hidden')} />
+                     if (tabId === 'hidden' && isMe) return <SortableTabItem key="hidden" id="hidden" label="숨긴 게시물" activeTab={activeTab} onClick={() => setActiveTab('hidden')} />
                      return null;
                   })}
                 </SortableContext>
