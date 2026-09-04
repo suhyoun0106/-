@@ -254,10 +254,12 @@ export default function FeedPost({
               <ArrowLeft className="w-5 h-5" />
             </button>
           )}
-          <div onClick={(e) => e.stopPropagation()}><Avatar className="h-10 w-10">
-            <AvatarImage src={post.profiles?.avatar_url || ''} />
-            <AvatarFallback>{post.profiles?.username?.charAt(0).toUpperCase()}</AvatarFallback>
-          </Avatar></div>
+          <Link href={`/profile/${post.profiles?.username}`} onClick={(e) => e.stopPropagation()}>
+            <Avatar className="h-10 w-10 hover:opacity-80 transition-opacity">
+              <AvatarImage src={post.profiles?.avatar_url || ''} />
+              <AvatarFallback>{post.profiles?.username?.charAt(0).toUpperCase()}</AvatarFallback>
+            </Avatar>
+          </Link>
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
               <Link href={`/profile/${post.profiles?.username}`} className="font-bold text-base hover:underline" onClick={(e) => e.stopPropagation()}>

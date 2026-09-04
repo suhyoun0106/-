@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, use } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -37,9 +37,9 @@ function DonationMessage({ text }: { text: string }) {
   )
 }
 
-export default function UserProfilePage({ params }: { params: Promise<{ username: string }> }) {
-  const unwrappedParams = use(params)
-  const username = decodeURIComponent(unwrappedParams.username)
+export default function UserProfilePage() {
+  const params = useParams()
+  const username = params?.username ? decodeURIComponent(params.username as string) : ''
   
   const [profile, setProfile] = useState<any>(null)
   const [posts, setPosts] = useState<any[]>([])
