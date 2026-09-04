@@ -437,7 +437,7 @@ export default function UserProfilePage() {
           <div className="relative group shrink-0 self-start md:row-span-2">
             <Avatar className="h-20 w-20 md:h-36 md:w-36 border border-border shadow-sm">
               <AvatarImage src={profile.avatar_url || ''} />
-              <AvatarFallback>{profile.username.charAt(0).toUpperCase()}</AvatarFallback>
+              <AvatarFallback>{profile?.username ? profile.username.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
             </Avatar>
             {isMe && (
               <div 
@@ -881,7 +881,7 @@ export default function UserProfilePage() {
                           <div className="relative">
                             <Avatar className="h-12 w-12 border">
                               <AvatarImage src={donor.avatar_url || ''} />
-                              <AvatarFallback>{donor.username.charAt(0).toUpperCase()}</AvatarFallback>
+                              <AvatarFallback>{donor?.username ? donor.username.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
                             </Avatar>
                             {idx === 0 && <Crown className="w-5 h-5 text-yellow-500 absolute -top-2 -right-1" />}
                             {idx === 1 && <Crown className="w-5 h-5 text-gray-400 absolute -top-2 -right-1" />}

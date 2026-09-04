@@ -48,7 +48,7 @@ function formatCount(count: number) {
 }
 
 export default function FeedPost({ 
-  post, 
+  post: rawPost, 
   currentUserId,
   showBackButton = false
 }: { 
@@ -56,6 +56,10 @@ export default function FeedPost({
   currentUserId?: string,
   showBackButton?: boolean
 }) {
+  const post = {
+    ...rawPost,
+    profiles: Array.isArray(rawPost?.profiles) ? rawPost.profiles[0] : rawPost?.profiles
+  };
   const isRepostMatch = post.content?.match(/^\[REPOST:([0-9a-fA-F-]+)\]/);
   const isRepost = !!isRepostMatch;
   const originalPostId = isRepost ? isRepostMatch[1] : null;
@@ -257,7 +261,7 @@ export default function FeedPost({
           <Link href={`/profile/${post.profiles?.username}`} onClick={(e) => e.stopPropagation()}>
             <Avatar className="h-10 w-10 hover:opacity-80 transition-opacity">
               <AvatarImage src={post.profiles?.avatar_url || ''} />
-              <AvatarFallback>{post.profiles?.username?.charAt(0).toUpperCase()}</AvatarFallback>
+              <AvatarFallback>{post.profiles?.username ? post.profiles.username.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
             </Avatar>
           </Link>
           <div className="flex flex-col">
