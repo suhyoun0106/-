@@ -777,15 +777,13 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
             >
               게시물
             </button>
+
             {isMe && (
               <button 
-                onClick={() => {
-                  setActiveTab('liked')
-                  if (!hasFetchedLiked) fetchLikedPosts()
-                }}
-                className={`shrink-0 px-4 py-2 rounded-full font-bold text-sm transition-colors ${activeTab === 'liked' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/50'}`}
+                onClick={() => setActiveTab('album')}
+                className={`shrink-0 px-4 py-2 rounded-full font-bold text-sm transition-colors ${activeTab === 'album' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/50'}`}
               >
-                좋아요 누른 게시물
+                사진첩
               </button>
             )}
             {(currentMonthTotal > 0 || isMe) && (
@@ -794,14 +792,6 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                 className={`shrink-0 px-4 py-2 rounded-full font-bold text-sm transition-colors ${activeTab === 'donors' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/50'}`}
               >
                 응원
-              </button>
-            )}
-            {isMe && (
-              <button 
-                onClick={() => setActiveTab('album')}
-                className={`shrink-0 px-4 py-2 rounded-full font-bold text-sm transition-colors ${activeTab === 'album' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/50'}`}
-              >
-                사진첩
               </button>
             )}
             {isMe && (
@@ -863,19 +853,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
             )
           )}
           
-          {activeTab === 'liked' && isMe && (
-            likedPosts.length === 0 ? (
-              <div className="bg-white rounded-2xl border p-12 text-center text-muted-foreground">
-                좋아요를 누른 게시물이 없습니다.
-              </div>
-            ) : (
-              <div className="flex flex-col w-full max-w-2xl mx-auto">
-                {likedPosts.map(post => (
-                  <FeedPost key={post.id} post={post} currentUserId={currentUser?.id} />
-                ))}
-              </div>
-            )
-          )}
+
 
           {activeTab === 'donors' && (
             <div className="bg-white rounded-2xl border p-8 shadow-sm">
