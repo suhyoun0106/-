@@ -12,7 +12,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
-import { ThumbsUp, MessageCircle, Forward, MoreHorizontal, Edit2, Trash2, ArrowLeft, BarChart2, Repeat, User } from 'lucide-react'
+import { ThumbsUp, MessageCircle, Forward, MoreHorizontal, Edit2, Trash2, ArrowLeft, Eye, EyeOff, BarChart2, Repeat, User } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -124,6 +124,25 @@ export default function FeedPost({
   }
 
   // 좋아요 버튼 클릭 핸들러
+  
+  const isHidden = post.content?.startsWith('<!--HIDDEN-->')
+
+  async function toggleHide() {
+    if (!currentUserId || post.user_id !== currentUserId) return
+    const supabase = createClient()
+    
+    if (isHidden) {
+      const newContent = post.content.replace('<!--HIDDEN-->', '')
+      await supabase.from('posts').update({ content: newContent }).eq('id', post.id)
+      toast.success('숨기기가 해제되었습니다.')
+    } else {
+      const newContent = `<!--HIDDEN-->${post.content || ''}`
+      await supabase.from('posts').update({ content: newContent }).eq('id', post.id)
+      toast.success('게시물이 숨겨졌습니다.')
+    }
+    router.refresh()
+  }
+
   async function toggleLike() {
     if (!currentUserId) return
 
@@ -208,6 +227,14 @@ export default function FeedPost({
               <MoreHorizontal className="h-5 w-5" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              
+              <DropdownMenuItem onClick={toggleHide} className="cursor-pointer text-muted-foreground">
+                {isHidden ? (
+                  <><Eye className="w-4 h-4 mr-2" /> 숨기기 취소</>
+                ) : (
+                  <><EyeOff className="w-4 h-4 mr-2" /> 숨기기</>
+                )}
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => router.push(`/create?edit=${post.id}`)} className="cursor-pointer">
                 <Edit2 className="w-4 h-4 mr-2" />
                 수정하기

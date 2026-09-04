@@ -65,7 +65,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
   const [currentMonthTotal, setCurrentMonthTotal] = useState(0)
   const [currentMonthBackers, setCurrentMonthBackers] = useState(0)
   
-  const [activeTab, setActiveTab] = useState<'posts' | 'liked' | 'donors'>('posts')
+  const [activeTab, setActiveTab] = useState<'posts' | 'liked' | 'donors' | 'hidden'>('posts')
   const [likedPosts, setLikedPosts] = useState<any[]>([])
   const [hasFetchedLiked, setHasFetchedLiked] = useState(false)
 
@@ -410,6 +410,9 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
   const isMe = currentUser?.id === profile.id
   // Tags can be edited: unclaimed profiles = anyone logged in; claimed profiles = owner only
   const canEditTags = !!currentUser && (isUnclaimed || isMe)
+
+  const visiblePosts = posts.filter(p => !p.content?.startsWith('<!--HIDDEN-->'))
+  const hiddenPosts = posts.filter(p => p.content?.startsWith('<!--HIDDEN-->'))
 
   return (
     <div className="w-full max-w-4xl mx-auto min-h-screen bg-background pb-8">
@@ -791,16 +794,38 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
                 응원
               </button>
             )}
+            {isMe && (
+              <button 
+                onClick={() => setActiveTab('hidden')}
+                className={`shrink-0 px-4 py-2 rounded-full font-bold text-sm transition-colors ${activeTab === 'hidden' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/50'}`}
+              >
+                숨겨짐
+              </button>
+            )}
           </div>
           
           {activeTab === 'posts' && (
-            posts.length === 0 ? (
+            visiblePosts.length === 0 ? (
               <div className="bg-white rounded-2xl border p-12 text-center text-muted-foreground">
                 작성된 게시물이 없습니다.
               </div>
             ) : (
               <div className="flex flex-col w-full max-w-2xl mx-auto">
-                {posts.map(post => (
+                {visiblePosts.map(post => (
+                  <FeedPost key={post.id} post={post} currentUserId={currentUser?.id} />
+                ))}
+              </div>
+            )
+          )}
+          
+          {activeTab === 'hidden' && isMe && (
+            hiddenPosts.length === 0 ? (
+              <div className="bg-white rounded-2xl border p-12 text-center text-muted-foreground">
+                숨긴 게시물이 없습니다.
+              </div>
+            ) : (
+              <div className="flex flex-col w-full max-w-2xl mx-auto">
+                {hiddenPosts.map(post => (
                   <FeedPost key={post.id} post={post} currentUserId={currentUser?.id} />
                 ))}
               </div>
