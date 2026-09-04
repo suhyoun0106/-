@@ -26,6 +26,22 @@ export default function Sidebar({ unreadNotifCount, unreadMsgCount }: { unreadNo
   const router = useRouter()
   const supabase = createClient()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  
+  const [localNotifCount, setLocalNotifCount] = useState(unreadNotifCount)
+  const [localMsgCount, setLocalMsgCount] = useState(unreadMsgCount)
+  
+  useEffect(() => {
+    setLocalNotifCount(unreadNotifCount)
+  }, [unreadNotifCount])
+  
+  useEffect(() => {
+    setLocalMsgCount(unreadMsgCount)
+  }, [unreadMsgCount])
+  
+  useEffect(() => {
+    if (pathname === '/notifications') setLocalNotifCount(0)
+    if (pathname === '/messages') setLocalMsgCount(0)
+  }, [pathname])
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -36,8 +52,8 @@ export default function Sidebar({ unreadNotifCount, unreadMsgCount }: { unreadNo
     { name: '홈', href: '/', icon: Home },
     { name: '인기', href: '/search', icon: Flame },
     { name: '만들기', href: '/create', icon: SquarePen },
-    { name: '메시지', href: '/messages', icon: MessageCircle, badge: unreadMsgCount },
-    { name: '알림', href: '/notifications', icon: Bell, badge: unreadNotifCount },
+    { name: '메시지', href: '/messages', icon: MessageCircle, badge: localMsgCount },
+    { name: '알림', href: '/notifications', icon: Bell, badge: localNotifCount },
     { name: '프로필', href: '/profile', icon: User },
   ]
 

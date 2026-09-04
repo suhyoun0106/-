@@ -230,7 +230,12 @@ export default function ChatUI({ currentUser }: { currentUser: any }) {
         .eq('is_read', false)
         .maybeSingle()
         
-      if (!existingNotif) {
+      if (existingNotif) {
+        // 읽지 않은 기존 알림이 있다면, 최근 메시지 ID와 시간으로 업데이트
+        await supabase.from('notifications')
+          .update({ reference_id: insertedMsg.id, created_at: new Date().toISOString() })
+          .eq('id', existingNotif.id)
+      } else {
         await supabase.from('notifications').insert({
           user_id: selectedFriend.id,
           actor_id: currentUser.id,

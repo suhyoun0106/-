@@ -39,7 +39,21 @@ export default function NotificationsPage() {
       .order('created_at', { ascending: false })
 
     if (data) {
-      setNotifications(data)
+      const dmRefs = data.filter((n: any) => n.type === 'dm' && n.reference_id).map((n: any) => n.reference_id)
+      let messagesMap: Record<string, string> = {}
+      
+      if (dmRefs.length > 0) {
+        const { data: msgs } = await supabase.from('messages').select('id, content').in('id', dmRefs)
+        if (msgs) {
+          msgs.forEach((m: any) => { messagesMap[m.id] = m.content })
+        }
+      }
+      
+      const enrichedData = data.map((n: any) => ({
+        ...n,
+        messageContent: n.type === 'dm' && n.reference_id ? messagesMap[n.reference_id] : null
+      }))
+      setNotifications(enrichedData)
     }
 
     // 2. 안 읽은 알림을 모두 읽음(is_read: true) 처리
@@ -51,7 +65,8 @@ export default function NotificationsPage() {
   }
 
   // 알림 종류에 따른 아이콘 및 텍스트 렌더링
-  function getNotificationContent(type: string, actorName: string) {
+  function getNotificationContent(notification: any) {
+    const actorName = notification.actor?.username || '알 수 없는 사용자'
     const NameSpan = () => (
       <span 
         className="font-bold hover:underline cursor-pointer" 
@@ -61,13 +76,13 @@ export default function NotificationsPage() {
       </span>
     )
 
-    switch(type) {
+    switch(notification.type) {
       case 'like':
         return { icon: <Heart className="w-5 h-5 text-red-500 fill-red-500 shrink-0" />, text: <><NameSpan />님이 회원님의 게시물을 좋아합니다.</> }
       case 'comment':
         return { icon: <MessageCircle className="w-5 h-5 text-blue-500 fill-blue-500 shrink-0" />, text: <><NameSpan />님이 댓글을 남겼습니다.</> }
       case 'dm':
-        return { icon: <Send className="w-5 h-5 text-green-500 fill-green-500 shrink-0" />, text: <><NameSpan />님이 메시지를 보냈습니다.</> }
+        return { icon: <Send className="w-5 h-5 text-green-500 fill-green-500 shrink-0" />, text: <><NameSpan />님이 메시지를 보냈습니다: <span className="text-muted-foreground font-normal overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px] md:max-w-xs inline-block align-bottom">{notification.messageContent || ''}</span></> }
       case 'repost':
         return { icon: <Repeat className="w-5 h-5 text-green-500 shrink-0" />, text: <><NameSpan />님이 회원님의 게시물을 리포스트했습니다.</> }
       case 'share':
