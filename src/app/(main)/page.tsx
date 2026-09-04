@@ -3,7 +3,6 @@ import FeedPost from '@/components/feed-post'
 import Link from 'next/link'
 
 
-import CommunityDropdown from '@/components/community-dropdown'
 import ScrollHideUI from '@/components/scroll-hide-ui'
 import TopDonorMessage from '@/components/top-donor-message'
 import FeedSearchBar from '@/components/feed-search-bar'
@@ -228,9 +227,6 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
       <ScrollHideUI direction="top" className="sticky top-0 z-30 pt-4 pb-2 mb-2 pl-[68px] md:pl-4 pr-4">
         <div className="flex flex-col gap-4">
           <div className="flex flex-row items-stretch gap-3">
-            {user && sponsoredCommunities.length > 0 && (
-              <CommunityDropdown communities={sponsoredCommunities} currentCommunityId={communityId} />
-            )}
             <FeedSearchBar />
           </div>
           
