@@ -48,6 +48,8 @@ export default function UserProfilePage() {
   const [donationAmount, setDonationAmount] = useState('10000')
   const [donationMessage, setDonationMessage] = useState('')
   const [currentUser, setCurrentUser] = useState<any>(null)
+  
+  const [selectedAlbumMedia, setSelectedAlbumMedia] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
@@ -829,10 +831,14 @@ export default function UserProfilePage() {
             ) : (
               <div className="grid grid-cols-3 gap-1">
                 {albumImages.map((img: any) => (
-                  <Link href={`/post/${img.originalPostId}`} key={img.id} className="aspect-square relative cursor-pointer group bg-zinc-100 block">
+                  <div 
+                    key={img.id} 
+                    onClick={() => setSelectedAlbumMedia(img.image_url)}
+                    className="aspect-square relative cursor-pointer group bg-zinc-100 block"
+                  >
                     <img src={img.image_url} alt="saved" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                  </Link>
+                  </div>
                 ))}
               </div>
             )
@@ -908,6 +914,34 @@ export default function UserProfilePage() {
               </div>
 
       {/* Donate Modal */}
+
+      {/* 사진첩 미디어 전체화면 모달 */}
+      <Dialog open={!!selectedAlbumMedia} onOpenChange={(open) => !open && setSelectedAlbumMedia(null)}>
+        <DialogContent className="max-w-[100vw] max-h-[100vh] w-screen h-screen p-0 m-0 border-0 bg-black rounded-none flex items-center justify-center">
+          <div className="absolute top-4 right-4 z-50">
+            <button onClick={() => setSelectedAlbumMedia(null)} className="w-10 h-10 flex items-center justify-center bg-black/50 hover:bg-black/80 rounded-full text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+          </div>
+          {selectedAlbumMedia && (
+            (selectedAlbumMedia.includes('youtube.com/embed') || selectedAlbumMedia.includes('tiktok.com/embed') || selectedAlbumMedia.includes('instagram.com/')) ? (
+              <iframe 
+                src={selectedAlbumMedia} 
+                className="w-full h-full max-w-4xl max-h-screen object-contain"
+                frameBorder="0"
+                allowFullScreen
+              />
+            ) : (
+              <img 
+                src={selectedAlbumMedia} 
+                alt="Fullscreen media" 
+                className="w-full h-full object-contain"
+              />
+            )
+          )}
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={isDonateOpen} onOpenChange={setIsDonateOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
