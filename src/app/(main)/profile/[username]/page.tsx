@@ -574,9 +574,9 @@ export default function UserProfilePage() {
           const newOrdered = [...albumImages].sort((a, b) => {
             const indexA = savedOrderIds.indexOf(a.id);
             const indexB = savedOrderIds.indexOf(b.id);
-            if (indexA === -1 && indexB === -1) return 0;
-            if (indexA === -1) return 1;
-            if (indexB === -1) return -1;
+            if (indexA === -1 && indexB === -1) return b.albumSortKey - a.albumSortKey;
+            if (indexA === -1) return -1;
+            if (indexB === -1) return 1;
             return indexA - indexB;
           });
           setOrderedAlbumImages(newOrdered);
