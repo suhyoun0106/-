@@ -480,7 +480,7 @@ export default function FeedPost({
               }}
               className="p-2 rounded-full hover:bg-zinc-500/10 hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors"
             >
-              <Share className="h-[18px] w-[18px] sm:h-[20px] sm:w-[20px]" />
+              <Forward className="h-[18px] w-[18px] sm:h-[20px] sm:w-[20px]" />
             </button>
           </div>
         </div>
