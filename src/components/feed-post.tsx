@@ -131,7 +131,7 @@ export default function FeedPost({
 
   return (
     <div 
-      className={`border-b border-border bg-background overflow-hidden ${showBackButton ? '' : 'py-4 hover:bg-secondary/30 active:bg-secondary/50 cursor-pointer transition-colors'}`}
+      className={`border-b border-border bg-background overflow-hidden ${showBackButton ? '' : 'py-4 hover:bg-secondary/50 active:bg-secondary/70 cursor-pointer transition-colors'}`}
       onClick={() => { if (!showBackButton) router.push(`/post/${post.id}`) }}
     >
       {/* 1. 작성자 헤더 */}
