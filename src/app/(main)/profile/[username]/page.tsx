@@ -88,7 +88,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
           post_images (id, image_url, position),
           likes (id, user_id),
           shares (id, user_id),
-          comments (id)
+          comments (id, user_id)
         `)
         .in('id', postIds)
       
@@ -164,7 +164,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
         post_images (id, image_url, position),
         likes (id, user_id),
         shares (id, user_id),
-        comments (id)
+        comments (id, user_id)
       `)
       .eq('user_id', p.id)
       .order('created_at', { ascending: false })

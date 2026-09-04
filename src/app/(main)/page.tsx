@@ -92,7 +92,7 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
       post_images (id, image_url, position),
       likes (id, user_id),
       shares (id, user_id),
-      comments (id)
+      comments (id, user_id)
     `)
 
   // The IDs the current user sponsors (directly)
@@ -162,7 +162,7 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
             post_images (id, image_url, position),
             likes (id, user_id),
             shares (id, user_id),
-            comments (id)
+            comments (id, user_id)
           `)
           .in('community_id', relatedCreatorIds)
           .order('created_at', { ascending: false })

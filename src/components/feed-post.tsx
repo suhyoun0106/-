@@ -101,6 +101,7 @@ export default function FeedPost({
   
   const [isLiked, setIsLiked] = useState(initialLiked)
   const [likesCount, setLikesCount] = useState(post.likes?.length || 0)
+  const hasCommented = post.comments?.some((c: any) => c.user_id === currentUserId)
   
   const [isSaved, setIsSaved] = useState(false)
   const [isSavedLoading, setIsSavedLoading] = useState(true)
@@ -389,8 +390,8 @@ export default function FeedPost({
             onClick={toggleLike} 
             className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors font-semibold text-sm"
           >
-            <ThumbsUp className={`h-5 w-5 ${isLiked ? 'fill-foreground text-foreground' : 'text-foreground'}`} />
-            <span>{formatCount(likesCount)}</span>
+            <ThumbsUp className={`h-5 w-5 ${isLiked ? 'text-green-500 fill-green-500' : 'text-foreground'}`} />
+            <span className={isLiked ? 'text-green-500' : ''}>{formatCount(likesCount)}</span>
           </button>
           
           {/* 댓글 */}
@@ -398,8 +399,8 @@ export default function FeedPost({
             href={`/post/${post.id}`}
             className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors font-semibold text-sm"
           >
-            <MessageCircle className="h-5 w-5" />
-            <span>{formatCount(post.comments?.length || 0)}</span>
+            <MessageCircle className={`h-5 w-5 ${hasCommented ? 'text-green-500' : 'text-foreground'}`} />
+            <span className={hasCommented ? 'text-green-500' : ''}>{formatCount(post.comments?.length || 0)}</span>
           </Link>
 
           {/* 리포스트 */}
@@ -429,14 +430,11 @@ export default function FeedPost({
             <span className={isReposted ? 'text-green-500' : ''}>{formatCount(repostCount)}</span>
           </button>
 
-          {/* 저장하기 */}
-          <button 
-            onClick={toggleSave}
-            disabled={isSavedLoading}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors font-semibold text-sm"
-          >
-            <Download className={`h-5 w-5 ${isSaved ? 'text-green-500' : 'text-foreground'}`} />
-          </button>
+          {/* 뷰 카운트 */}
+          <div className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full font-semibold text-sm">
+            <BarChart2 className="h-5 w-5" />
+            <span>{formatCount(post.view_count || 0)}</span>
+          </div>
 
           {/* 공유 */}
           <button 
@@ -450,12 +448,14 @@ export default function FeedPost({
             <span>공유</span>
           </button>
 
-          {/* 뷰 카운트 */}
-          <div className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full font-semibold text-sm">
-            <BarChart2 className="h-5 w-5" />
-            <span>{formatCount(post.view_count || 0)}</span>
-          </div>
-        </div>
+          {/* 다운로드 (저장하기) */}
+          <button 
+            onClick={toggleSave}
+            disabled={isSavedLoading}
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-secondary text-secondary-foreground rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors font-semibold text-sm"
+          >
+            <Download className={`h-5 w-5 ${isSaved ? 'text-green-500' : 'text-foreground'}`} />
+          </button></div>
       </div>
 
       <Dialog open={isShareOpen} onOpenChange={setIsShareOpen}>
