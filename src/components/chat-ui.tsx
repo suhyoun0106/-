@@ -182,10 +182,17 @@ export default function ChatUI({ currentUser }: { currentUser: any }) {
     <div className="flex w-full h-full border rounded-lg overflow-hidden bg-background">
       {/* Sidebar */}
       <div className={`w-full md:w-80 border-r flex-col bg-card ${selectedFriend ? 'hidden md:flex' : 'flex'}`}>
-        <ScrollHideUI direction="top" className="sticky top-0 z-40 px-4 pt-8 md:pt-4 pb-3">
-          {/* 그라데이션 블러 배경 */}
+        {/* 모바일 고정 프로필 버튼 */}
+        <div className="md:hidden fixed top-[16px] right-[16px] z-50">
+          <Button variant="outline" size="icon" className="rounded-full bg-white/60 dark:bg-black/60 backdrop-blur-xl border-border/50 shadow-sm outline-none w-[44px] h-[44px] text-black dark:text-white" onClick={() => router.push('/profile')} style={{ WebkitBackdropFilter: "blur(20px) saturate(180%)", backdropFilter: "blur(20px) saturate(180%)" }}>
+            <User className="h-5 w-5" />
+          </Button>
+        </div>
+
+        <ScrollHideUI direction="top" className="sticky top-0 z-40 px-4 pt-[16px] md:pt-4 pb-3">
+          {/* 모바일 화면용 그라데이션 블러 배경 */}
           <div 
-            className="absolute inset-0 z-0 dark:bg-black/40 bg-white/40 pointer-events-none"
+            className="absolute inset-0 z-0 dark:bg-black/40 bg-white/40 pointer-events-none md:hidden"
             style={{
               backdropFilter: 'blur(20px) saturate(180%)',
               WebkitBackdropFilter: 'blur(20px) saturate(180%)',
@@ -193,25 +200,16 @@ export default function ChatUI({ currentUser }: { currentUser: any }) {
             }}
           />
           
-          <div className="relative z-10 flex w-full items-center gap-3 h-[44px]">
-            {/* 모바일 홈 버튼 */}
-            <Button variant="outline" size="icon" className="rounded-full shrink-0 md:hidden bg-white/80 dark:bg-black/80 backdrop-blur-xl border-border/50 shadow-sm outline-none w-11 h-11" onClick={() => router.push('/')}>
-              <Home className="h-5 w-5" />
-            </Button>
-
-            <form onSubmit={addFriend} className="flex-1 flex">
+          <div className="relative z-10 flex w-full items-center justify-center h-[44px]">
+            <form onSubmit={addFriend} className="flex-1 flex max-w-full md:px-0 px-[52px]">
               <Input 
                 placeholder="유저 이름으로 친구 추가" 
                 value={searchUsername}
                 onChange={(e) => setSearchUsername(e.target.value)}
-                className="rounded-full bg-white/80 dark:bg-black/80 backdrop-blur-xl border-border/50 shadow-sm font-medium h-11 px-5"
+                className="rounded-full bg-white/60 dark:bg-black/60 backdrop-blur-xl border-border/50 shadow-sm font-medium h-[44px] px-5 w-full text-center md:text-left"
+                style={{ WebkitBackdropFilter: "blur(20px) saturate(180%)", backdropFilter: "blur(20px) saturate(180%)" }}
               />
             </form>
-
-            {/* 모바일 프로필 버튼 */}
-            <Button variant="outline" size="icon" className="rounded-full shrink-0 md:hidden bg-white/80 dark:bg-black/80 backdrop-blur-xl border-border/50 shadow-sm outline-none w-11 h-11" onClick={() => router.push('/profile')}>
-              <User className="h-5 w-5" />
-            </Button>
           </div>
         </ScrollHideUI>
 

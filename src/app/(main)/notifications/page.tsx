@@ -75,10 +75,17 @@ export default function NotificationsPage() {
 
   return (
     <div className="max-w-xl mx-auto pb-8">
-      <ScrollHideUI direction="top" className="sticky top-0 z-40 px-4 pt-8 md:pt-8 pb-3">
-        {/* 모바일 화면용 그라데이션 블러 배경 (데스크탑에서도 적용) */}
+      {/* 모바일 고정 프로필 버튼 */}
+      <div className="md:hidden fixed top-[16px] right-[16px] z-50">
+        <Button variant="outline" size="icon" className="rounded-full bg-white/60 dark:bg-black/60 backdrop-blur-xl border-border/50 shadow-sm outline-none w-[44px] h-[44px] text-black dark:text-white" onClick={() => router.push('/profile')} style={{ WebkitBackdropFilter: "blur(20px) saturate(180%)", backdropFilter: "blur(20px) saturate(180%)" }}>
+          <User className="h-5 w-5" />
+        </Button>
+      </div>
+
+      <ScrollHideUI direction="top" className="sticky top-0 z-40 px-4 pt-[16px] md:pt-8 pb-3">
+        {/* 모바일 화면용 그라데이션 블러 배경 */}
         <div 
-          className="absolute inset-0 z-0 dark:bg-black/40 bg-white/40"
+          className="absolute inset-0 z-0 dark:bg-black/40 bg-white/40 pointer-events-none md:hidden"
           style={{
             backdropFilter: 'blur(20px) saturate(180%)',
             WebkitBackdropFilter: 'blur(20px) saturate(180%)',
@@ -86,19 +93,8 @@ export default function NotificationsPage() {
           }}
         />
         
-        <div className="flex flex-row items-center justify-between gap-3 relative z-10 h-[44px]">
-          {/* 모바일 홈 버튼 */}
-          <Button variant="outline" size="icon" className="rounded-full shrink-0 md:hidden bg-white/80 dark:bg-black/80 backdrop-blur-xl border-border/50 shadow-sm outline-none" onClick={() => router.push('/')}>
-            <Home className="h-5 w-5" />
-          </Button>
-
-          {/* 데스크탑에서는 왼쪽 정렬, 모바일에서는 가운데 정렬처럼 보이게 */}
-          <h1 className="text-2xl font-bold flex-1 text-center md:text-left">알림</h1>
-
-          {/* 모바일 프로필 버튼 */}
-          <Button variant="outline" size="icon" className="rounded-full shrink-0 md:hidden bg-white/80 dark:bg-black/80 backdrop-blur-xl border-border/50 shadow-sm outline-none" onClick={() => router.push('/profile')}>
-            <User className="h-5 w-5" />
-          </Button>
+        <div className="relative z-10 flex w-full items-center justify-center h-[44px]">
+          <h1 className="text-xl md:text-2xl font-bold text-center md:text-left w-full">알림</h1>
         </div>
       </ScrollHideUI>
       
