@@ -129,10 +129,11 @@ export default function CommentsSection({
       toast.error('답글 작성 실패')
     } else {
       fetchComments()
-      // 알림 전송
-      if (currentTargetUserId && currentTargetUserId !== currentUserId) {
+      // 알림 전송 (대댓글인 경우 대상에게, 아니면 게시물 작성자에게)
+      const notifyUserId = currentTargetUserId || postOwnerId;
+      if (notifyUserId && notifyUserId !== currentUserId) {
         await supabase.from('notifications').insert({
-          user_id: currentTargetUserId,
+          user_id: notifyUserId,
           actor_id: currentUserId,
           type: 'comment',
           reference_id: postId

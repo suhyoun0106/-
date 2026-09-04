@@ -431,6 +431,9 @@ export default function FeedPost({
               if (newIsReposted) {
                 await supabase.from('shares').insert({ post_id: post.id, user_id: currentUserId });
                 await supabase.from('posts').insert({ user_id: currentUserId, community_id: currentUserId, content: `[REPOST:${post.id}]` });
+                // 리포스트 수도 증가시키기 위해 shares 테이블에 기록
+                await supabase.from('shares').insert({ post_id: post.id, user_id: currentUserId });
+                
                 if (post.user_id !== currentUserId) {
                   await supabase.from('notifications').insert({ user_id: post.user_id, actor_id: currentUserId, type: 'repost', reference_id: post.id })
                 }
@@ -494,8 +497,11 @@ export default function FeedPost({
                 onClick={async () => {
                   const url = `${window.location.origin}/post/${post.id}`;
                   navigator.clipboard.writeText(url);
+                  const supabase = createClient()
+                  // 공유 수도 증가시키기 위해 shares 테이블에 기록
+                  await supabase.from('shares').insert({ post_id: post.id, user_id: currentUserId });
+                  
                   if (post.user_id !== currentUserId) {
-                    const supabase = createClient()
                     await supabase.from('notifications').insert({ user_id: post.user_id, actor_id: currentUserId, type: 'share', reference_id: post.id })
                   }
                   toast.success('링크가 복사되었습니다!');
