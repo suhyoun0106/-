@@ -8,7 +8,7 @@
  * - 본문 내용 및 댓글 목록(일부)
  */
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
@@ -56,10 +56,10 @@ export default function FeedPost({
   currentUserId?: string,
   showBackButton?: boolean
 }) {
-  const post = {
+  const post = React.useMemo(() => ({
     ...rawPost,
     profiles: Array.isArray(rawPost?.profiles) ? rawPost.profiles[0] : rawPost?.profiles
-  };
+  }), [rawPost]);
   const isRepostMatch = post.content?.match(/^\[REPOST:([0-9a-fA-F-]+)\]/);
   const isRepost = !!isRepostMatch;
   const originalPostId = isRepost ? isRepostMatch[1] : null;
