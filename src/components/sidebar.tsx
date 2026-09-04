@@ -7,7 +7,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, MessageCircle, Bell, User, PlusSquare, Search, Settings, LogOut, Menu, X } from 'lucide-react'
+import { Home, MessageCircle, Bell, User, PlusSquare, Search, Settings, LogOut, Menu, X, Receipt } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ScrollHideUI from '@/components/scroll-hide-ui'
 import { Badge } from '@/components/ui/badge'
@@ -94,8 +94,12 @@ export default function Sidebar({ unreadCount }: { unreadCount: number }) {
                   <div className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-2 bg-zinc-900 dark:bg-zinc-100 rotate-45"></div>
                 </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" sideOffset={10} className="w-48 ml-4 mb-2 z-[60]">
-                <DropdownMenuItem onClick={handleLogout} className="text-red-500 font-bold cursor-pointer h-12 text-lg focus:bg-red-50 focus:text-red-600 outline-none">
+              <DropdownMenuContent align="start" sideOffset={10} className="w-48 ml-4 mb-2 z-[60] rounded-2xl p-2">
+                <DropdownMenuItem onClick={() => router.push('/donations')} className="font-bold cursor-pointer h-12 text-base rounded-xl focus:bg-secondary outline-none mb-1">
+                  <Receipt className="mr-3 h-5 w-5" />
+                  <span>후원 기록</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout} className="text-red-500 font-bold cursor-pointer h-12 text-base rounded-xl focus:bg-red-50 focus:text-red-600 outline-none">
                   <LogOut className="mr-3 h-5 w-5" />
                   <span>로그아웃</span>
                 </DropdownMenuItem>
@@ -169,12 +173,24 @@ function MobileFloatingNav({ navItems, handleLogout }: { navItems: any[], handle
                     </Link>
                   )
                 })}
-                <button
-                  onClick={(e) => { e.stopPropagation(); setIsOpen(false); handleLogout() }}
-                  className="flex items-center justify-center p-2.5 rounded-full text-red-500 hover:bg-red-50 transition-colors mt-2"
-                >
-                  <LogOut className="w-5 h-5" />
-                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                      onClick={(e) => { e.stopPropagation(); }}
+                      className="flex items-center justify-center p-2.5 rounded-full text-muted-foreground hover:bg-black/5 hover:text-black transition-colors mt-2 outline-none"
+                    >
+                      <Settings className="w-5 h-5" />
+                    </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" side="right" sideOffset={16} className="w-48 rounded-2xl p-2 z-[70]">
+                    <DropdownMenuItem onClick={() => { setIsOpen(false); router.push('/donations') }} className="font-bold cursor-pointer h-12 text-base rounded-xl focus:bg-secondary outline-none mb-1">
+                      <Receipt className="mr-3 h-5 w-5" />
+                      <span>후원 기록</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => { setIsOpen(false); handleLogout() }} className="text-red-500 font-bold cursor-pointer h-12 text-base rounded-xl focus:bg-red-50 focus:text-red-600 outline-none">
+                      <LogOut className="mr-3 h-5 w-5" />
+                      <span>로그아웃</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             )}
           </div>
