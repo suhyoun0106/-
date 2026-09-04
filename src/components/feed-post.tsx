@@ -335,11 +335,11 @@ export default function FeedPost({
               const supabase = createClient();
               if (newIsReposted) {
                 await supabase.from('shares').insert({ post_id: post.id, user_id: currentUserId });
-                await supabase.from('posts').insert({ user_id: currentUserId, content: `[REPOST:${post.id}]` });
+                await supabase.from('posts').insert({ user_id: currentUserId, community_id: currentUserId, content: `[REPOST:${post.id}]` });
                 toast.success('게시물을 리포스트했습니다.');
               } else {
                 await supabase.from('shares').delete().match({ post_id: post.id, user_id: currentUserId });
-                await supabase.from('posts').delete().match({ user_id: currentUserId, content: `[REPOST:${post.id}]` });
+                await supabase.from('posts').delete().match({ user_id: currentUserId, community_id: currentUserId, content: `[REPOST:${post.id}]` });
                 toast.success('리포스트를 취소했습니다.');
               }
             }}
