@@ -871,7 +871,7 @@ export default function UserProfilePage() {
             </div>
 
             {/* Tag / Category Section - Read Only */}
-            <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-4">
+            <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-2">
               {tags.map(t => (
                 <span key={t.id} className="text-blue-600 font-medium text-sm md:text-base">
                   #{t.tag}
@@ -1119,7 +1119,7 @@ export default function UserProfilePage() {
       
 
       {/* Content Area */}
-      <div className="w-full max-w-3xl mx-auto mt-4">
+      <div className="w-full max-w-3xl mx-auto mt-1">
         <div>
           <div className="flex items-center justify-between mb-2 border-b pb-4">
             <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide flex-1">
