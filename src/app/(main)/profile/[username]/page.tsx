@@ -879,52 +879,44 @@ export default function UserProfilePage() {
               ))}
             </div>
 
-<div className="flex flex-nowrap gap-2 md:gap-3 items-center w-full overflow-x-auto pb-2 scrollbar-hide">
-              {isMe ? (
-                <>
-
-                  
-                  
-                </>
-              ) : (
-                <>
-                  {profile.is_donation_enabled !== false ? (
-                    <>
-                      <Button className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground font-extrabold rounded-xl h-11 px-6 shadow-md shadow-primary/20 border-0" onClick={() => setIsDonateOpen(true)}>
-                        <Heart className="w-5 h-5 mr-2 fill-zinc-900 text-zinc-900" />
-                        응원하기
-                      </Button>
-                      <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={startDM}>
-                        <MessageSquare className="w-5 h-5 mr-2 fill-current" />
-                        메시지
-                      </Button>
-                      {isUnclaimed && (
-                        <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={() => setIsTagAddOpen(true)}>
-                          <Hash className="w-5 h-5 mr-2" />
-                          태그 추가하기
-                        </Button>
-                      )}
-                      
-                    </>
-                  ) : (
-                    <>
-                      <Button disabled className="shrink-0 bg-secondary/80 text-muted-foreground font-bold rounded-xl h-11 px-6 border-0">
-                        🔒 인스타그램 및 응원 비공개
-                      </Button>
-                      <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={startDM}>
-                        <MessageSquare className="w-5 h-5 mr-2 fill-current" />
-                        메시지
-                      </Button>
-                      {isUnclaimed && (
-                        <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={() => setIsTagAddOpen(true)}>
-                          <Hash className="w-5 h-5 mr-2" />
-                          태그 추가하기
-                        </Button>
-                      )}
-                    </>
-                  )}
-            </div>
-          )}
+{!isMe && (
+  <div className="flex flex-nowrap gap-2 md:gap-3 items-center w-full overflow-x-auto pb-2 scrollbar-hide">
+    {profile.is_donation_enabled !== false ? (
+      <>
+        <Button className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground font-extrabold rounded-xl h-11 px-6 shadow-md shadow-primary/20 border-0" onClick={() => setIsDonateOpen(true)}>
+          <Heart className="w-5 h-5 mr-2 fill-zinc-900 text-zinc-900" />
+          응원하기
+        </Button>
+        <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={startDM}>
+          <MessageSquare className="w-5 h-5 mr-2 fill-current" />
+          메시지
+        </Button>
+        {isUnclaimed && (
+          <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={() => setIsTagAddOpen(true)}>
+            <Hash className="w-5 h-5 mr-2" />
+            태그 추가하기
+          </Button>
+        )}
+      </>
+    ) : (
+      <>
+        <Button disabled className="shrink-0 bg-secondary/80 text-muted-foreground font-bold rounded-xl h-11 px-6 border-0">
+          🔒 인스타그램 및 응원 비공개
+        </Button>
+        <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={startDM}>
+          <MessageSquare className="w-5 h-5 mr-2 fill-current" />
+          메시지
+        </Button>
+        {isUnclaimed && (
+          <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={() => setIsTagAddOpen(true)}>
+            <Hash className="w-5 h-5 mr-2" />
+            태그 추가하기
+          </Button>
+        )}
+      </>
+    )}
+  </div>
+)}
           </div>
 
 
