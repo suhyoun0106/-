@@ -1119,7 +1119,7 @@ export default function UserProfilePage() {
       
 
       {/* Content Area */}
-      <div className="w-full max-w-3xl mx-auto mt-8">
+      <div className="w-full max-w-3xl mx-auto mt-4">
         <div>
           <div className="flex items-center justify-between mb-2 border-b pb-4">
             <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide flex-1">
