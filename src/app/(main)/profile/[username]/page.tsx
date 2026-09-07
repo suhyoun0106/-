@@ -835,9 +835,9 @@ export default function UserProfilePage() {
               <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight">{profile.username}</h1>
               <div className="flex items-center gap-2">
                 {profile.instagram_id && profile.is_instagram_public ? (
-                  <span className="text-muted-foreground font-medium text-sm md:text-base">@{profile.instagram_id}</span>
+                  <a href={`https://instagram.com/${profile.instagram_id}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground font-medium text-sm md:text-base hover:underline">@{profile.instagram_id}</a>
                 ) : isUnclaimed ? (
-                  <span className="text-muted-foreground font-medium text-sm md:text-base">@{profile.username}</span>
+                  <a href={`https://instagram.com/${profile.username}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground font-medium text-sm md:text-base hover:underline">@{profile.username}</a>
                 ) : null}
                 {isUnclaimed && (
                   <span className="bg-secondary text-secondary-foreground text-[10px] px-2 py-0.5 rounded-full font-bold">
@@ -886,21 +886,7 @@ export default function UserProfilePage() {
                   <Button variant="secondary" className="shrink-0 rounded-full font-bold h-11 px-5" onClick={() => router.push('/create')}>
                     게시물 작성하기
                   </Button>
-                  {profile.instagram_id ? (
-                    profile.is_instagram_public ? (
-                      <Button variant="secondary" className="shrink-0 rounded-full font-bold h-11 px-5" onClick={() => window.open(`https://instagram.com/${profile.instagram_id}`, '_blank')}>
-                        Instagram: @{profile.instagram_id}
-                      </Button>
-                    ) : (
-                      <Button disabled variant="secondary" className="shrink-0 rounded-full font-bold h-11 px-5 opacity-70">
-                        Instagram: 비공개
-                      </Button>
-                    )
-                  ) : (
-                    <Button variant="secondary" className="shrink-0 rounded-full font-bold h-11 px-5" onClick={() => setIsEditProfileOpen(true)}>
-                      Instagram 연동하기
-                    </Button>
-                  )}
+                  
                 </>
               ) : (
                 <>
@@ -920,15 +906,7 @@ export default function UserProfilePage() {
                           태그 추가하기
                         </Button>
                       )}
-                      {profile.instagram_id && profile.is_instagram_public ? (
-                        <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={() => window.open(`https://instagram.com/${profile.instagram_id}`, '_blank')}>
-                          Instagram: @{profile.instagram_id}
-                        </Button>
-                      ) : isUnclaimed ? (
-                        <Button variant="secondary" className="shrink-0 rounded-xl font-bold h-11 px-6 bg-secondary/80 hover:bg-secondary" onClick={() => window.open(`https://instagram.com/${profile.username}`, '_blank')}>
-                          Instagram: @{profile.username}
-                        </Button>
-                      ) : null}
+                      
                     </>
                   ) : (
                     <>
