@@ -883,9 +883,7 @@ export default function UserProfilePage() {
               {isMe ? (
                 <>
 
-                  <Button variant="secondary" className="shrink-0 rounded-full font-bold h-11 px-5" onClick={() => router.push('/create')}>
-                    게시물 작성하기
-                  </Button>
+                  
                   
                 </>
               ) : (
@@ -925,9 +923,8 @@ export default function UserProfilePage() {
                       )}
                     </>
                   )}
-                </>
-              )}
             </div>
+          )}
           </div>
 
 
@@ -1144,7 +1141,18 @@ export default function UserProfilePage() {
                   strategy={horizontalListSortingStrategy}
                 >
                   {tabOrder.map(tabId => {
-                     if (tabId === 'posts') return <SortableTabItem key="posts" id="posts" label="게시물" activeTab={activeTab} onClick={() => setActiveTab('posts')} />
+                     if (tabId === 'posts') {
+                       const isPostsActive = activeTab === 'posts';
+                       const label = (isMe && isPostsActive) ? "게시물 작성하기" : "게시물";
+                       const handleClick = () => {
+                         if (isMe && isPostsActive) {
+                           router.push('/create');
+                         } else {
+                           setActiveTab('posts');
+                         }
+                       };
+                       return <SortableTabItem key="posts" id="posts" label={label} activeTab={activeTab} onClick={handleClick} />;
+                     }
                      if (tabId === 'album' && (isMe || profile?.is_album_public)) return <SortableTabItem key="album" id="album" label="사진첩" activeTab={activeTab} onClick={() => setActiveTab('album')} />
                      if (tabId === 'donors' && (isMe || profile?.is_donations_public || currentMonthTotal > 0)) return <SortableTabItem key="donors" id="donors" label="응원" activeTab={activeTab} onClick={() => setActiveTab('donors')} />
                      if (tabId === 'hidden' && isMe) return <SortableTabItem key="hidden" id="hidden" label="숨긴 게시물" activeTab={activeTab} onClick={() => setActiveTab('hidden')} />
